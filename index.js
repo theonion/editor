@@ -1,0 +1,86 @@
+var express = require('express');
+var app = express();
+var tidy = require('htmltidy').tidy;
+var querystring = require('querystring');
+var $ = require('jquery');
+
+app.engine('.html', require('ejs').__express);
+
+app.set('views', __dirname + '/views');
+app.set('static dir', __dirname + '/static');
+app.use(express.static( app.set('static dir') ));
+app.use(express.bodyParser());
+
+// This avoids having to provide the 
+// extension to res.render()
+app.set('view engine', 'html');
+
+var documents = {
+  'american-apparel': { title: 'Death by sexy: a middle-aged man in an Eat Pray Love promotional T-shirt auditions to be an American Apparel model', file: '/test/american-apparel.html' },
+  'test-document-2': { name: 'Test Document 2', message: '/test/american-apparel.html' },
+};
+
+
+
+
+
+
+app.get('/', function(req, res){
+  res.render('index.html', {
+    documents: documents
+  });
+});
+
+
+
+app.get("/doc/:slug.json", function (req, res) {
+    var slug =  req.param('slug');
+    fs = require('fs')
+    var contents ="<p></p>";
+    content = fs.readFileSync(__dirname + documents[slug].file, 'utf8');
+    
+    var data = JSON.stringify({
+        slug: slug,
+        title: documents[slug].title,
+        content: content
+    })
+
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Length', data.length);
+
+    res.write(data);
+
+});
+
+app.get('/doc/:slug', function(req, res){
+    res.render('document.html', {
+        slug: req.param('slug'),
+
+    });
+});
+
+app.post('/save', function(req, res) {
+
+    console.log("saving");
+    console.log(querystring.unescape(req.body.content));
+    tidy(querystring.unescape(req.body.content), 
+        {
+            "output-encoding": "ascii"
+        },
+        function(err, html) {
+            console.log(err);
+            console.log(html);
+
+
+        }
+    );
+    var data = JSON.stringify({'status': 'ok'});
+    res.setHeader('Content-Type', 'application/json');
+    res.setHeader('Content-Length', data.length);
+
+    res.write(data);
+
+});
+
+app.listen(3000);
+console.log('Listening on port 3000');

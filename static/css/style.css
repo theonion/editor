@@ -1,0 +1,121 @@
+* {
+    margin:0px;
+    padding:0px;
+}
+body {
+
+	background-color: #EBEBEB;
+}
+
+h1.title {
+    width: 870px; 
+    margin: 0px auto 0px;
+    padding: 20px 0 10px;
+    font-size: 24px;
+}
+
+.editor-wrapper {
+    width: 100%;
+}
+
+.editor {
+	font-family: 'Source Code Pro', Courier, sans-serif;
+    font-size:18px;
+
+	background-color: white;
+	width: 670px;
+	margin: 00px auto;
+    height:auto;
+    min-height: 400px;
+    padding:100px;
+    border: 1px #DADADA solid
+}
+
+.editor:focus {
+    outline: none;
+}
+
+.editor p,
+.editor div { 
+    background-color: rgba(252,242,120, .0);
+    margin-bottom:27px;
+    min-height:23px;
+}
+.editor p.focus,
+.editor div.focus { 
+    background-color: rgba(252,242,120, .1)
+
+}
+
+
+#toolbar-wrapper {
+        margin: 0px auto 10px;
+        border-top: 1px #E5E5E5 solid;
+        border-bottom: 1px #E5E5E5 solid;
+        width:100%;
+        background-color: #f5f5f5;
+}
+
+#toolbar {
+    width: 870px;
+    margin: 5px auto;
+    font-family: Helvetica, Arial, sans-serif;
+    font-size: 11px;
+    line-height:14px;
+    color:#4A4A4A;
+}
+
+.fixed #toolbar-wrapper  {
+    position:fixed;
+    top:0px;
+}
+
+.fixed .title {
+    margin-bottom: 25px; /* height of toolbar */
+}
+
+#toolbar button {
+    border:1px transparent solid;
+    color: #4A4A4A;
+    background-clip: padding-box;
+    background-color:transparent;
+    width:25px;
+    height:25px;
+    border-radius:2px;
+    text-align:center;
+    display:inline-block;
+    line-height:25px;
+    font-size:14px
+
+}
+#autosave-icon {
+    font-size:14px;
+}
+#autosave-icon.icon-ok {
+    color: #138F15;
+} 
+
+#autosave-icon.icon-refresh {
+
+}
+
+#toolbar button:hover,
+#toolbar button.pressed {
+    background-color: rgba(0,0,0,.2);
+    background-color: #ddd;
+    background-image: -webkit-linear-gradient(top,#eee,#e0e0e0);
+    border:1px #e0e0e0 solid;
+    }
+#toolbar .spacer {
+    padding-left: 20px;
+    border-left: 1px #eee solid;
+    margin-left: 20px;
+}
+
+
+.auto-replacement {
+    border-bottom:1px #47B2FD dotted;
+}
+.auto-replacement:hover {
+ border-bottom:1px #47B2FD solid;   
+}

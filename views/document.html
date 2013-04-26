@@ -1,0 +1,48 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Editor</title>
+        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+        <link href='/css/style.css' rel='stylesheet' type='text/css'>
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+    </head>
+
+    <body>
+    
+        <h1 class="title">Document</h1>
+        
+        <div id="toolbar-wrapper">
+        <div id="toolbar">
+            <button class="icon-bold" data-nodetype="B" title="Bold"></button>
+            <button class="icon-italic" data-nodetype="I" title="Italic"></button>
+            <button class="icon-underline" data-nodetype="U" title="Underline"></button>
+
+            <button class="icon-link" data-nodetype="A" title="Link"></button>
+            <button class="icon-reply" title="Undo"></button><!--undo-->
+            <button class="icon-share-alt" title="Redo"></button><!--redo-->
+            <span class="spacer"></span>
+            <button class="icon-th" title="Characters"></button><!--redo-->
+            <span class="spacer"></span>
+
+            <span id="autosave">
+                <span id="autosave-icon" class="icon-ok"></span> 
+                <span id="autosave-message">All changes saved</span>
+            </span>
+
+
+        </div>
+    </div>
+        <div class="editor-wrapper">
+            <div id="editable" contenteditable="true" class="editor" spellcheck="true" data-content-id="<%=slug%>">
+            </div>
+            <div style="display:none" id="paragraph tools">
+                paragraph tools
+            </div>
+        </div>
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="/js/keymaster.js"></script>
+        <script src="/js/editor.js"></script>
+    </body>
+
+</html>

@@ -1,0 +1,24 @@
+<!doctype html>
+<html>
+    <head>
+        <meta charset="UTF-8">
+        <title>Editor Test</title>
+        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+        <link href='/css/style.css' rel='stylesheet' type='text/css'>
+        <link href='/fontawesome/css/font-awesome.css' rel='stylesheet' type='text/css'>
+    </head>
+
+    <body>
+        <h1>Doucments</h1>
+
+        <ul>
+            <% for(var slug in documents) { %>
+            <li><a href="/doc/<%= slug %>"><%= documents[slug].title %></a></li>
+            <% } %>
+
+        </ul>
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+    </body>
+
+</html>
