@@ -3,8 +3,8 @@
     padding:0px;
 }
 body {
-
 	background-color: #EBEBEB;
+    font-family: Helvetica, Arial, sans-serif;
 }
 
 h1.title {
@@ -15,20 +15,24 @@ h1.title {
 }
 
 .editor-wrapper {
-    width: 100%;
+    width: 870px;
+    margin: 0px auto;
+    position:relative;
+    background-color: #ffffff;
 }
 
 .editor {
 	font-family: 'Source Code Pro', Courier, sans-serif;
     font-size:18px;
 
-	background-color: white;
+	background-color: transparent;
 	width: 670px;
-	margin: 00px auto;
     height:auto;
     min-height: 400px;
     padding:100px;
-    border: 1px #DADADA solid
+    border: 1px #DADADA solid;
+    position:relative;
+    z-index:20;
 }
 
 .editor:focus {
@@ -59,7 +63,6 @@ h1.title {
 #toolbar {
     width: 870px;
     margin: 5px auto;
-    font-family: Helvetica, Arial, sans-serif;
     font-size: 11px;
     line-height:14px;
     color:#4A4A4A;
@@ -68,6 +71,7 @@ h1.title {
 .fixed #toolbar-wrapper  {
     position:fixed;
     top:0px;
+    z-index:100;
 }
 
 .fixed .title {
@@ -87,6 +91,9 @@ h1.title {
     line-height:25px;
     font-size:14px
 
+}
+#toolbar .insertable {
+    color: #3B5998;
 }
 #autosave-icon {
     font-size:14px;
@@ -117,5 +124,124 @@ h1.title {
     border-bottom:1px #47B2FD dotted;
 }
 .auto-replacement:hover {
- border-bottom:1px #47B2FD solid;   
+    border-bottom:1px #47B2FD solid;   
+}
+
+#insertable-indicator>span {
+    transition-property: color;
+    transition-duration: .15s;
+    color: #DADADA;
+    line-height:19px;
+}
+#insertable-indicator.active>span {
+    color:#3B5998;
+}
+
+#insertable-indicator {
+    position:absolute;
+    left:85px;
+    top:0px;
+    transition-property: margin-top;
+    transition-duration: .15s;
+    transition-timing-function: ease-in-out;
+    height:19px;
+    width:685px;
+    transition-delay:.15s;
+}
+
+#insertable-indicator.active
+{
+    transition-delay:0s;
+    margin-top:-25px;
+    color:#3B5998;
+}
+
+
+
+#ii-message {
+    background-image:url(http://placehold.it/1x1/3B5998/3B5998);
+    background-repeat:repeat-x;
+    background-position:center center;
+    opacity:0; 
+    margin-left: 0px;
+    text-align: center;
+    margin-top: -19px;
+    display:block;
+    transition-property: opacity;
+    transition-duration: .075s;
+    transition-delay: 0s;
+    transition-timing-function: ease-in-out;
+}
+#insertable-indicator.active #ii-message {
+    transition-delay: .075s;
+    opacity: 1.0;
+}
+
+#ii-message>span {
+    background-color: rgba(255,255,255,.8);
+    color:#3B5998;
+    font-size: 15px;
+    text-transform:uppercase;
+}
+
+
+
+
+/* images in articles */
+
+.inline {
+    margin-bottom: 30px;
+    background-color:white;
+    cursor:pointer;
+}
+.inline:hover {
+    opacity:.8;
+}
+
+.inline .caption {
+    color:#ccc;
+    display:block;
+    padding: 0 15px;
+    font-size:14px;
+}
+
+.inline.full .caption {
+    margin-left:100px;
+    padding:0px;
+
+}
+
+.inline.left {
+    float: left;
+    margin-right: 30px;
+    margin-left: -100px;
+}
+.inline.right {
+    margin-right:-100px;
+    float: right;
+    margin-left: 30px;
+}
+
+.image.left {
+    width: 400px;
+}
+
+.image.right {
+    width: 400px;
+}
+.image.full  {
+    margin-left: -100px;
+}
+
+
+.video {
+    width: 240px;
+}
+
+#inline-tools {
+    display:none;
+    position:absolute;
+    z-index: 80;
+    width: 100px;
+    height: 100px;
 }

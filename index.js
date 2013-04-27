@@ -2,7 +2,6 @@ var express = require('express');
 var app = express();
 var tidy = require('htmltidy').tidy;
 var querystring = require('querystring');
-var $ = require('jquery');
 
 app.engine('.html', require('ejs').__express);
 
@@ -17,7 +16,7 @@ app.set('view engine', 'html');
 
 var documents = {
   'american-apparel': { title: 'Death by sexy: a middle-aged man in an Eat Pray Love promotional T-shirt auditions to be an American Apparel model', file: '/test/american-apparel.html' },
-  'test-document-2': { name: 'Test Document 2', message: '/test/american-apparel.html' },
+  'american-apparel-ascii': { name: 'ASCII Am Appy', file: '/test/american-apparel-ascii.html' },
 };
 
 
@@ -63,15 +62,17 @@ app.post('/save', function(req, res) {
 
     console.log("saving");
     console.log(querystring.unescape(req.body.content));
+    console.log(querystring.unescape(req.body.slug));
     tidy(querystring.unescape(req.body.content), 
         {
-            "output-encoding": "ascii"
+            "output-encoding": "ascii",
+            "show-body-only": true
         },
         function(err, html) {
-            console.log(err);
+            fs = require('fs')
             console.log(html);
-
-
+            
+            //fs.writeFileSync(__dirname + documents[req.body.slug].file, html,{encoding:'utf8'});
         }
     );
     var data = JSON.stringify({'status': 'ok'});

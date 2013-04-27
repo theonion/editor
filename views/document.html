@@ -14,18 +14,31 @@
         
         <div id="toolbar-wrapper">
         <div id="toolbar">
-            <button class="icon-bold" data-nodetype="B" title="Bold"></button>
-            <button class="icon-italic" data-nodetype="I" title="Italic"></button>
-            <button class="icon-underline" data-nodetype="U" title="Underline"></button>
+            <button class="textstyle icon-bold" data-nodetype="B" title="Bold"></button>
+            <button class="textstyle icon-italic" data-nodetype="I" title="Italic"></button>
+            <button class="textstyle icon-underline" data-nodetype="U" title="Underline"></button>
 
-            <button class="icon-link" data-nodetype="A" title="Link"></button>
+            <!--<button class="icon-strikethrough" data-nodetype="S" title="Strikethrough"></button>-->
+
+            <button class="textstyle icon-link" data-nodetype="A" title="Link"></button>
             <button class="icon-reply" title="Undo"></button><!--undo-->
             <button class="icon-share-alt" title="Redo"></button><!--redo-->
-            <span class="spacer"></span>
             <button class="icon-th" title="Characters"></button><!--redo-->
             <span class="spacer"></span>
+            
+            <button class="insertable icon-camera-retro" data-icon="icon-camera-retro" title="Image"></button><!--redo-->
+            <button class="insertable icon-music"  data-icon="icon-music" title="Audio"></button><!--redo-->
+            <button class="insertable icon-film" data-icon="icon-film"title="Video"></button><!--redo-->
+            <button class="insertable icon-cog" data-icon="icon-cog" title="Code"></button><!--redo-->
+            
 
+            <span class="spacer"></span>
+            <button class="icon-desktop pressed" title="Desktop"></button><!--redo-->
+            <button class="icon-tablet"  title="Tablet"></button><!--redo-->
+            <button class="icon-mobile-phone" title="Mobile Phone"></button><!--redo-->
+            <span class="spacer"></span>
             <span id="autosave">
+
                 <span id="autosave-icon" class="icon-ok"></span> 
                 <span id="autosave-message">All changes saved</span>
             </span>
@@ -36,8 +49,16 @@
         <div class="editor-wrapper">
             <div id="editable" contenteditable="true" class="editor" spellcheck="true" data-content-id="<%=slug%>">
             </div>
-            <div style="display:none" id="paragraph tools">
-                paragraph tools
+            <div id="insertable-indicator" style="display:none">
+                <span class="icon-caret-right"></span>
+                <div id="ii-message"><span class="icon-picture"></span></div>
+            </div>
+            <div id="inline-tools">
+                <span id="inline-up" class="icon-arrow-up"></span>
+                <span id="inline-down" class="icon-arrow-down"></span>
+                <span id="inline-left" class="icon-arrow-left"></span>
+                <span id="inline-right" class="icon-arrow-right"></span>
+                <span id="inline-full" class="icon-fullscreen"></span>
             </div>
         </div>
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
