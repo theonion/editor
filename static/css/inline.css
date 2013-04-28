@@ -43,6 +43,10 @@
     margin-left: -100px;
 }
 
+.video.centered  {
+    margin-left: 15px;
+}
+
 .video {
     width: 240px;
 }

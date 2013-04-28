@@ -14,6 +14,7 @@ var Editor = function(id) {
             success: function(data) {
                 $(".title").html(data.title);
                 editarea.html(data.content);
+                $(".editor>div,.editor>p").eq(0).addClass("focus");
                 /* disable contenteditalbe on inline items */
                 $(".inline").attr("contenteditable", "false");
             },
@@ -42,8 +43,8 @@ var Editor = function(id) {
     
     $(".insertable").bind("mouseover", function(e) {
         var type = $(e.target).data("type")
-        var template = $("#media-templates ." + type)[0].outerHTML;
-
+        console.log(type);
+        var template = $("#media-templates " + type)[0].outerHTML;
         $(".focus").before(template);
     });
 
@@ -60,19 +61,16 @@ var Editor = function(id) {
     function _inlinetoolsShow(e) {
         //position inline tools
         var inlineElement = $($("img")[0]).parents(".inline");
-
         if (inlineElement.length == 1) {
             console.log(inlineElement[0]);
         }
     }
 
     $(window).bind("scroll", function() {
-        if (window.scrollY > $(".title").outerHeight()) {
+        if (window.scrollY > $(".title").outerHeight())
             $("body").addClass("fixed");
-        }
-        else {
+        else
             $("body").removeClass("fixed");
-        }
     });
 
     //handle focus stuff.
@@ -94,17 +92,15 @@ var Editor = function(id) {
                 if ($(".focus").length > 0)
                     $("#focus-cursor").css({top:$(".focus").position().top+5}).show();
 
-                // get list of parents
-                self.currentNode = node;
-                var parents = $(range.commonAncestorContainer).parents();
                 //set button states
                 var linkNode;
+                
+                var parents = $(range.commonAncestorContainer).parents();
                 $("#toolbar button.textstyle").removeClass("pressed");
                 for (var i=0; i<parents.length; i++) {
                     $("button.textstyle[data-nodetype=" + parents[i].nodeName +"]").addClass("pressed");
-                    if (parents[i].nodeName == "A") {
+                    if (parents[i].nodeName == "A")
                         linkNode = parents[i];
-                    }
                 }
 
                 if (linkNode) {
@@ -112,9 +108,9 @@ var Editor = function(id) {
                     var position = $(linkNode).position();
                     var width = $(linkNode).width();
                     var url = linkNode.href
-                    if (url.indexOf("replaceme") > 0) {
+                    if (url.indexOf("replaceme") > 0)
                         url = "";
-                    }
+                    $(linkNode).addClass("url-editing");
                     $("#url-input>textarea")
                         .unbind()
                         .val(url)
@@ -127,6 +123,7 @@ var Editor = function(id) {
                         .show();
                 }
                 else {
+                    $(".url-editing").removeClass("url-editing");
                     $("#url-input").hide();
                 }
             }

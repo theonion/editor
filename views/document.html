@@ -27,17 +27,42 @@
             <button class="icon-share-alt" title="Redo"></button><!--redo-->
             <button class="icon-th" title="Characters"></button><!--redo-->
             <span class="spacer"></span>
+            <span class="expandable">
+                <button class="icon-camera-retro"></button>
+                <span class="expanded">
+                    <button class="insertable icon-align-left" data-type=".image.left" title="Left"></button>
+                    <button class="insertable icon-align-center" data-type=".image.centered" title="Centered"></button>
+                    <button class="insertable icon-align-right" data-type=".image.right" title="Right"></button>
+                    <button class="insertable icon-fullscreen" data-type=".image.full" title="Full"></button>
+                </span>
+            </span>
             
-            <button class="insertable icon-camera-retro" data-type="image" data-icon="icon-camera-retro" title="Image"></button><!--redo-->
-            <button class="insertable icon-music"  data-type="audio" data-icon="icon-music" title="Audio"></button><!--redo-->
-            <button class="insertable icon-film" data-type="video" data-icon="icon-film"title="Video"></button><!--redo-->
-            <button class="insertable icon-cog" data-type="code" data-icon="icon-cog" title="Code"></button><!--redo-->
             
+            <span class="expandable" title="audio">
+                <button class="icon-music"></button>
+                <span class="expanded">
+                    <button class="insertable icon-align-left" data-type=".audio.left" title="Left"></button>
+                    <button class="insertable icon-align-right" data-type=".audio.right" title="Right"></button>
+                </span>
+            </span>
+
+            <span class="expandable" title="Video">
+                <button class="icon-film"></button>
+
+                <span class="expanded">
+                    <button class="insertable icon-align-left" data-type=".video.left" title="Left"></button>
+                    <button class="insertable icon-align-right" data-type=".video.right" title="Right"></button>
+                    <button class="insertable icon-align-center" data-type=".video.centered" title="Centered"></button>
+                </span>
+            </span>
+            <!--<button class="insertable icon-cog" data-type="code" data-icon="icon-cog" title="Code"></button>-->
+        
+            </span>
 
             <span class="spacer"></span>
-            <button class="icon-desktop pressed" title="Desktop"></button><!--redo-->
-            <button class="icon-tablet"  title="Tablet"></button><!--redo-->
-            <button class="icon-mobile-phone" title="Mobile Phone"></button><!--redo-->
+            <button class="icon-desktop pressed" title="Desktop"></button>
+            <button class="icon-tablet"  title="Tablet"></button>
+            <button class="icon-mobile-phone" title="Mobile Phone"></button>
             <span class="spacer"></span>
             <span id="autosave">
 
@@ -75,14 +100,38 @@
                 <img src="http://placehold.it/870x300/C0392B/F39C12">
                 <span class="caption">A delightful image</span>
             </div>
-
-            <div class="inline audio right template" >
-                <img src="http://placehold.it/180x180/C0392B/F39C12">
-                <span class="caption">A pleasant song</span>
+            <div class="inline image left template">
+                <img src="http://placehold.it/400x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+            <div class="inline image right template">
+                <img src="http://placehold.it/400x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+            <div class="inline image centered template">
+                <img src="http://placehold.it/670x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
             </div>
 
+            <div class="inline audio right template" >
+                <img src="http://placehold.it/180x180/0E7AC3/ffffff">
+                <span class="caption">A pleasant song</span>
+            </div>
+            <div class="inline audio left template" >
+                <img src="http://placehold.it/180x180/0E7AC3/ffffff">
+                <span class="caption">A pleasant song</span>
+            </div>
+            
             <div class="inline left video template">
                 <img src="http://placehold.it/240x135/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
+            </div>
+            <div class="inline right video template">
+                <img src="http://placehold.it/240x135/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
+            </div>
+            <div class="inline centered video template">
+                <img src="http://placehold.it/640x360/27AE60/ffffff">
                 <span class="caption">An enjoyable video</span>
             </div>
 

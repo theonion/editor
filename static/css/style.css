@@ -92,7 +92,7 @@ input,textarea,
     font-size:14px
 
 }
-#toolbar .insertable {
+#toolbar .expandable {
     color: #3B5998;
 }
 #autosave-icon {
@@ -112,7 +112,7 @@ input,textarea,
     background-color: #ddd;
     background-image: -webkit-linear-gradient(top,#eee,#e0e0e0);
     border:1px #e0e0e0 solid;
-    }
+}
 #toolbar .spacer {
     padding-left: 20px;
     border-left: 1px #eee solid;
@@ -167,4 +167,25 @@ input,textarea,
     border:1px #DADADA solid;
     background-color: #EBEBEB;
     padding: 8px;
+}
+
+.url-editing {
+    background-color: #dADADA;
+}
+
+.expandable .expanded {
+    display:none;
+}
+.expandable:hover .expanded {
+    display:inline;
+}
+.expandable {
+
+    transition-property: width;
+    transition-timing-function: ease-in;
+    transition-duration:.2s;
+    transition-delay:.5s;
+}
+.expandable:hover {
+    transition-delay:0s;
 }
