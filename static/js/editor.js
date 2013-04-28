@@ -65,12 +65,15 @@ var Editor = function(id) {
     
 
     $(".insertable").bind("mouseover", function(e) {
-        $("#insertable-indicator").addClass("active");
-        $("#ii-message>span").attr("class", $(e.target).data("icon"));            
+        $("#focus-cursor").addClass("active");
+        $("#media-placeholder>span").attr("class", $(e.target).data("icon"));
+        $(".focus").addClass("media-placeholder");        
     });
     $(".insertable").bind("mouseout", function() {
-        $("#insertable-indicator").removeClass("active");
+        $("#focus-cursor").removeClass("active");
+        $(".focus").removeClass("media-placeholder");
     });
+    $(".insertable").click(_insertMedia);
 
 
 
@@ -85,19 +88,12 @@ var Editor = function(id) {
         if (inlineElement.length == 1) {
             console.log(inlineElement[0]);
         }
-        
     }
-
-    function _inlinetoolsHide(e) {
-        //hide tools
-    }
-
 
 
     /* IN */
 
     $(window).bind("scroll", function() {
-
         if (window.scrollY > $(".title").outerHeight()) {
             $("body").addClass("fixed");
         }
@@ -124,7 +120,7 @@ var Editor = function(id) {
                 }
                 //move the little focus indicator 
                 if ($(".focus").length > 0)
-                    $("#insertable-indicator").css({top:$(".focus").position().top + 3}).show();
+                    $("#focus-cursor").css({top:$(".focus").position().top + 3}).show();
 
                 // get list of parents
                 self.currentNode = node;
@@ -252,6 +248,12 @@ var Editor = function(id) {
             document.execCommand("createLink", true, url);
         }
     }
+
+
+    function _insertMedia(e) {
+        
+    }
+
 
     function autosave() {
         //dump copy in localstorage

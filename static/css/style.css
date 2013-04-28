@@ -47,7 +47,7 @@ h1.title {
 }
 .editor p.focus,
 .editor div.focus { 
-    background-color: rgba(252,242,120, .1)
+    background-color: rgba(252,242,120, .0)
 
 }
 
@@ -127,63 +127,65 @@ h1.title {
     border-bottom:1px #47B2FD solid;   
 }
 
-#insertable-indicator>span {
+
+/* insertable media stuff */
+#focus-cursor>span {
     transition-property: color;
     transition-duration: .15s;
     color: #DADADA;
     line-height:19px;
 }
-#insertable-indicator.active>span {
-    color:#3B5998;
+#focus-cursor.active>span {
+    color:#DADADA;
 }
 
-#insertable-indicator {
+#focus-cursor {
     position:absolute;
     left:85px;
     top:0px;
+}
+
+.focus {
     transition-property: margin-top;
     transition-duration: .15s;
+    transition-delay:.3s;
     transition-timing-function: ease-in-out;
-    height:19px;
-    width:685px;
+}
+
+.focus.media-placeholder {
+    margin-top: 200px;
     transition-delay:.15s;
 }
 
-#insertable-indicator.active
-{
-    transition-delay:0s;
-    margin-top:-25px;
-    color:#3B5998;
-}
+#media-placeholder {
+    opacity: 0;
 
-
-
-#ii-message {
-    background-image:url(http://placehold.it/1x1/3B5998/3B5998);
-    background-repeat:repeat-x;
-    background-position:center center;
-    opacity:0; 
-    margin-left: 0px;
+    border: 4px #DADADA dashed;
+    margin-left: 15px;
+    margin-top: -12px;
+    width: 670px;
+    box-sizing: border-box;
+    height: 160px;
     text-align: center;
-    margin-top: -19px;
-    display:block;
+
     transition-property: opacity;
-    transition-duration: .075s;
-    transition-delay: 0s;
-    transition-timing-function: ease-in-out;
+    transition-delay:.;
+    transition-duration: .15s;
+    transition-timing-function: ease-in-out;  
 }
-#insertable-indicator.active #ii-message {
-    transition-delay: .075s;
-    opacity: 1.0;
-}
-
-#ii-message>span {
-    background-color: rgba(255,255,255,.8);
-    color:#3B5998;
-    font-size: 15px;
-    text-transform:uppercase;
+#focus-cursor.active  #media-placeholder {
+    
+    opacity: 1;
+    transition-delay: .15s;
 }
 
+
+#media-placeholder>span {
+    font-size: 64px;
+    text-align: center;
+    line-height: 145px;
+    color: #DADADA;
+}
 
 
 

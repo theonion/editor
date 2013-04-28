@@ -26,10 +26,10 @@
             <button class="icon-th" title="Characters"></button><!--redo-->
             <span class="spacer"></span>
             
-            <button class="insertable icon-camera-retro" data-icon="icon-camera-retro" title="Image"></button><!--redo-->
-            <button class="insertable icon-music"  data-icon="icon-music" title="Audio"></button><!--redo-->
-            <button class="insertable icon-film" data-icon="icon-film"title="Video"></button><!--redo-->
-            <button class="insertable icon-cog" data-icon="icon-cog" title="Code"></button><!--redo-->
+            <button class="insertable icon-camera-retro" data-type="image" data-icon="icon-camera-retro" title="Image"></button><!--redo-->
+            <button class="insertable icon-music"  data-type="audio" data-icon="icon-music" title="Audio"></button><!--redo-->
+            <button class="insertable icon-film" data-type="video" data-icon="icon-film"title="Video"></button><!--redo-->
+            <button class="insertable icon-cog" data-type="code" data-icon="icon-cog" title="Code"></button><!--redo-->
             
 
             <span class="spacer"></span>
@@ -49,9 +49,11 @@
         <div class="editor-wrapper">
             <div id="editable" contenteditable="true" class="editor" spellcheck="true" data-content-id="<%=slug%>">
             </div>
-            <div id="insertable-indicator" style="display:none">
+            <div id="focus-cursor" style="display:none">
                 <span class="icon-caret-right"></span>
-                <div id="ii-message"><span class="icon-picture"></span></div>
+
+                <div id="media-placeholder"><span class="icon-picture"></span></div>
+
             </div>
             <div id="inline-tools">
                 <span id="inline-up" class="icon-arrow-up"></span>
@@ -61,6 +63,31 @@
                 <span id="inline-full" class="icon-fullscreen"></span>
             </div>
         </div>
+
+        <!-- Media Templates 
+            This should all be pluggable.
+        --> 
+        <div id="media-templates" style="display:none">
+            <div class="image">
+
+            </div>
+
+            <div class="audio">
+
+            </div>
+
+            <div class="video">
+
+            </div>
+
+            <div class="code">
+
+
+            </div>
+
+        </div>
+
+
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="/js/keymaster.js"></script>
         <script src="/js/editor.js"></script>

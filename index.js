@@ -23,7 +23,6 @@ var documents = {
 
 
 
-
 app.get('/', function(req, res){
   res.render('index.html', {
     documents: documents
@@ -71,7 +70,7 @@ app.post('/save', function(req, res) {
         function(err, html) {
             fs = require('fs')
             console.log(html);
-            
+
             //fs.writeFileSync(__dirname + documents[req.body.slug].file, html,{encoding:'utf8'});
         }
     );
