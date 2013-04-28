@@ -1,23 +1,7 @@
-/*
-    Let's do this. This editor takes advantage of HTML5's contenteditable and makes no effort
-    to work in browsers that don't support this.
-
-    The underlying storgage mechanism of the content is markdown.
-
-    For writers to work in straight markdown will clutter the workspace with links images, etc, making writing distracting.
-
-    The difficult part will be to ensure the HTML 
-
-
-*/
-
-
 var Editor = function(id) {
     self = {};
 
-
-    var editarea = $("#" + id);
-    
+    var editarea = $("#" + id);    
 
     /* Load Data */
     contentID  = editarea.data("content-id");
@@ -41,17 +25,10 @@ var Editor = function(id) {
     else {
         contentID = prompt("Enter a slug");
     }
-
     
-    /*  key bindings. These are global to anything contentEditable=true, 
-        because of the nature of document.execCommand. May need to ensure they happen
-        in the context of the instance so weird things don't happen
-        */
-
     key('⌘+b, ctrl+b', _bold);
     key('⌘+i, ctrl+i', _italic);
     key('⌘+u, ctrl+u', _underline);
-
 
     $("#toolbar .icon-bold").click(_bold);
     $("#toolbar .icon-italic").click(_italic);
@@ -63,23 +40,22 @@ var Editor = function(id) {
     $("#toolbar .icon-undo").click(_undo);
     $("#toolbar .icon-redo").click(_redo);
     
-
     $(".insertable").bind("mouseover", function(e) {
-        $("#focus-cursor").addClass("active");
-        $("#media-placeholder>span").attr("class", $(e.target).data("icon"));
-        $(".focus").addClass("media-placeholder");        
+        var type = $(e.target).data("type")
+        var template = $("#media-templates ." + type)[0].outerHTML;
+
+        $(".focus").before(template);
     });
+
     $(".insertable").bind("mouseout", function() {
-        $("#focus-cursor").removeClass("active");
-        $(".focus").removeClass("media-placeholder");
+        $("#" + id + " .template").remove();
     });
-    $(".insertable").click(_insertMedia);
 
-
+    $(".insertable").click(function(e) {
+        $("#" + id + " .template").removeClass("template");
+    });
 
     editarea.bind("click", _inlinetoolsShow);
-
-
 
     function _inlinetoolsShow(e) {
         //position inline tools
@@ -90,9 +66,6 @@ var Editor = function(id) {
         }
     }
 
-
-    /* IN */
-
     $(window).bind("scroll", function() {
         if (window.scrollY > $(".title").outerHeight()) {
             $("body").addClass("fixed");
@@ -101,7 +74,6 @@ var Editor = function(id) {
             $("body").removeClass("fixed");
         }
     });
-
 
     //handle focus stuff.
     editarea.bind("keyup mousedown", function() {
@@ -120,16 +92,42 @@ var Editor = function(id) {
                 }
                 //move the little focus indicator 
                 if ($(".focus").length > 0)
-                    $("#focus-cursor").css({top:$(".focus").position().top + 3}).show();
+                    $("#focus-cursor").css({top:$(".focus").position().top+5}).show();
 
                 // get list of parents
                 self.currentNode = node;
                 var parents = $(range.commonAncestorContainer).parents();
                 //set button states
+                var linkNode;
                 $("#toolbar button.textstyle").removeClass("pressed");
                 for (var i=0; i<parents.length; i++) {
                     $("button.textstyle[data-nodetype=" + parents[i].nodeName +"]").addClass("pressed");
+                    if (parents[i].nodeName == "A") {
+                        linkNode = parents[i];
+                    }
+                }
 
+                if (linkNode) {
+                    //position over url;
+                    var position = $(linkNode).position();
+                    var width = $(linkNode).width();
+                    var url = linkNode.href
+                    if (url.indexOf("replaceme") > 0) {
+                        url = "";
+                    }
+                    $("#url-input>textarea")
+                        .unbind()
+                        .val(url)
+                        .bind("change", function(e) {
+                            linkNode.href= $(this).val()
+
+                        })
+                    $("#url-input")
+                        .css({top: position.top-60, left: 100})
+                        .show();
+                }
+                else {
+                    $("#url-input").hide();
                 }
             }
         }, 20)
@@ -216,16 +214,13 @@ var Editor = function(id) {
         autosaveTimeout = setTimeout(autosave, 5000);
     });
 
-
     /* Editing commands */
     function _bold() {
         document.execCommand("BOLD");
     }
-
     function _italic() {
         document.execCommand("ITALIC");
     }
-
     function _underline(){ 
         document.execCommand("UNDERLINE");
     }
@@ -238,22 +233,12 @@ var Editor = function(id) {
     function _undo(){ 
         document.execCommand("UNDO");
     }
-
     function _redo(){ 
         document.execCommand("REDO");
     }
     function _link() {
-        url = prompt("URL:");
-        if (url) {
-            document.execCommand("createLink", true, url);
-        }
+        document.execCommand("createLink", true, "#replaceme");
     }
-
-
-    function _insertMedia(e) {
-        
-    }
-
 
     function autosave() {
         //dump copy in localstorage
@@ -278,8 +263,8 @@ var Editor = function(id) {
                 }
             })
         }
-
     }
+
     function _setAutoSaveStatus(status, message) {
         var icon = $("#autosave-icon").attr("class", "");
         var message = $("#autosave-message");
@@ -302,8 +287,6 @@ var Editor = function(id) {
 
         }  
     }
-    self.status = _setAutoSaveStatus;
-    
 
     function _stats() {
         var text = $(editor)[0].innerText;
@@ -312,26 +295,9 @@ var Editor = function(id) {
             wordcount: wordcount,
             characters: text.length,
             readingtime: wordcount / 225
-
         }
-
     }
-
     return self;
 };
 
-
 var editor = Editor("editable");
-
-
-
-jQuery.extend( jQuery.fn, {
-    // Name of our method & one argument (the parent selector)
-    hasParent: function( p ) {
-        // Returns a subset of items using jQuery.filter
-        return this.filter(function () {
-            // Return truthy/falsey based on presence in parent
-            return $(p).find(this).length;
-        });
-    }
-});

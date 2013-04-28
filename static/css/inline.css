@@ -1,0 +1,48 @@
+
+.inline {
+    margin-bottom: 30px;
+    background-color:white;
+    cursor:pointer;
+}
+.inline:hover {
+    opacity:.8;
+}
+
+.inline .caption {
+    color:#ccc;
+    display:block;
+    padding: 0 15px;
+    font-size:14px;
+}
+
+.inline.full .caption {
+    margin-left:100px;
+    padding:0px;
+
+}
+
+.inline.left {
+    float: left;
+    margin-right: 30px;
+    margin-left: -100px;
+}
+.inline.right {
+    margin-right:-100px;
+    float: right;
+    margin-left: 30px;
+}
+
+.image.left {
+    width: 400px;
+}
+
+.image.right {
+    width: 400px;
+}
+.image.full  {
+    margin-left: -100px;
+}
+
+.video {
+    width: 240px;
+}

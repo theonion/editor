@@ -5,6 +5,8 @@
         <title>Editor</title>
         <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
         <link href='/css/style.css' rel='stylesheet' type='text/css'>
+        <link href='/css/inline.css' rel='stylesheet' type='text/css'>
+
         <link href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
     </head>
 
@@ -49,12 +51,13 @@
         <div class="editor-wrapper">
             <div id="editable" contenteditable="true" class="editor" spellcheck="true" data-content-id="<%=slug%>">
             </div>
-            <div id="focus-cursor" style="display:none">
-                <span class="icon-caret-right"></span>
+            <div id="focus-cursor" class="icon-caret-right" style="display:none"></div>
 
-                <div id="media-placeholder"><span class="icon-picture"></span></div>
 
+            <div id="url-input">
+                <textarea name="url"></textarea>
             </div>
+
             <div id="inline-tools">
                 <span id="inline-up" class="icon-arrow-up"></span>
                 <span id="inline-down" class="icon-arrow-down"></span>
@@ -68,24 +71,28 @@
             This should all be pluggable.
         --> 
         <div id="media-templates" style="display:none">
-            <div class="image">
-
+            <div class="inline image full template">
+                <img src="http://placehold.it/870x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
             </div>
 
-            <div class="audio">
-
+            <div class="inline audio right template" >
+                <img src="http://placehold.it/180x180/C0392B/F39C12">
+                <span class="caption">A pleasant song</span>
             </div>
 
-            <div class="video">
-
+            <div class="inline left video template">
+                <img src="http://placehold.it/240x135/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
             </div>
 
-            <div class="code">
+            <div class="inline left code template">
 
 
             </div>
 
         </div>
+
 
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>

@@ -34,7 +34,7 @@ h1.title {
     position:relative;
     z-index:20;
 }
-
+input,textarea,
 .editor:focus {
     outline: none;
 }
@@ -129,116 +129,20 @@ h1.title {
 
 
 /* insertable media stuff */
-#focus-cursor>span {
-    transition-property: color;
-    transition-duration: .15s;
-    color: #DADADA;
-    line-height:19px;
-}
-#focus-cursor.active>span {
-    color:#DADADA;
-}
-
 #focus-cursor {
     position:absolute;
-    left:85px;
+    left:-15px;
     top:0px;
+    color: #666;
 }
-
-.focus {
-    transition-property: margin-top;
-    transition-duration: .15s;
-    transition-delay:.3s;
-    transition-timing-function: ease-in-out;
-}
-
-.focus.media-placeholder {
-    margin-top: 200px;
-    transition-delay:.15s;
-}
-
-#media-placeholder {
-    opacity: 0;
-
-    border: 4px #DADADA dashed;
-    margin-left: 15px;
-    margin-top: -12px;
-    width: 670px;
-    box-sizing: border-box;
-    height: 160px;
-    text-align: center;
-
-    transition-property: opacity;
-    transition-delay:.;
-    transition-duration: .15s;
-    transition-timing-function: ease-in-out;  
-}
-#focus-cursor.active  #media-placeholder {
-    
-    opacity: 1;
-    transition-delay: .15s;
-}
-
-
-#media-placeholder>span {
-    font-size: 64px;
-    text-align: center;
-    line-height: 145px;
-    color: #DADADA;
-}
-
 
 
 /* images in articles */
 
-.inline {
-    margin-bottom: 30px;
-    background-color:white;
-    cursor:pointer;
-}
-.inline:hover {
-    opacity:.8;
+.inline.template {
+    opacity:.6;
 }
 
-.inline .caption {
-    color:#ccc;
-    display:block;
-    padding: 0 15px;
-    font-size:14px;
-}
-
-.inline.full .caption {
-    margin-left:100px;
-    padding:0px;
-
-}
-
-.inline.left {
-    float: left;
-    margin-right: 30px;
-    margin-left: -100px;
-}
-.inline.right {
-    margin-right:-100px;
-    float: right;
-    margin-left: 30px;
-}
-
-.image.left {
-    width: 400px;
-}
-
-.image.right {
-    width: 400px;
-}
-.image.full  {
-    margin-left: -100px;
-}
-
-
-.video {
-    width: 240px;
-}
 
 #inline-tools {
     display:none;
@@ -246,4 +150,21 @@ h1.title {
     z-index: 80;
     width: 100px;
     height: 100px;
+}
+
+#url-input textarea {
+    font-size: 12px;
+    padding: 4px;
+    font-family: Source Code Pro, Courier, sans-serif;
+    word-wrap: break-word;
+    box-sizing:border-box;
+    width:100%;
+}
+#url-input {
+    position:absolute;
+    z-index:90;
+    width: 500px;
+    border:1px #DADADA solid;
+    background-color: #EBEBEB;
+    padding: 8px;
 }
