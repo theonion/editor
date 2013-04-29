@@ -43,7 +43,6 @@ var Editor = function(id) {
     
     $(".insertable").bind("mouseover", function(e) {
         var type = $(e.target).data("type")
-        console.log(type);
         var template = $("#media-templates " + type)[0].outerHTML;
         $(".focus").before(template);
     });
@@ -56,14 +55,55 @@ var Editor = function(id) {
         $("#" + id + " .template").removeClass("template");
     });
 
-    editarea.bind("click", _inlinetoolsShow);
-
-    function _inlinetoolsShow(e) {
-        //position inline tools
-        var inlineElement = $($("img")[0]).parents(".inline");
-        if (inlineElement.length == 1) {
-            console.log(inlineElement[0]);
+    var _inlinePositionY;
+    editarea.bind("mouseover", function (e) {
+        var el = $(e.target).parents(".inline")
+        if (el.length == 1) {
+            _inlinetoolsShow(el) 
         }
+        else {
+            $("#inline-tools").hide();
+            $(".inline.editing").removeClass("editing");
+        }
+    });
+
+    $("#inline-up").click(_inlineMoveUp);
+    $("#inline-down").click(_inlineMoveDown);
+
+    $("#inline-edit").click(_inlineEdit);
+    $("#inline-remove").click(_inlineRemove);
+
+    function _inlineMoveUp(e) {
+        tmp = _inlinePositionY;
+        $(".editing").after($(".editing").prev())
+        _inlinetoolsShow($(".editing"))
+        window.scrollBy(0, _inlinePositionY - tmp)
+    }
+    function _inlineMoveDown(e) {
+        tmp = _inlinePositionY;
+        $(".editing").before($(".editing").next())
+        _inlinetoolsShow($(".editing"))
+        window.scrollBy(0,_inlinePositionY - tmp)
+    }
+    
+    function _inlineRemove(e) {
+        if (confirm("You sure?")) {
+            $(".editing").remove();
+        }
+    }
+
+    function _inlineEdit(e) {
+
+    }
+
+    function _inlinetoolsShow(inlineElement) {
+        el = $(inlineElement[0])
+        var pos  = el.offset();
+        _inlinePositionY = pos.top;
+        el.addClass("editing");
+        $("#inline-tools")
+            .css(pos)
+            .show();
     }
 
     $(window).bind("scroll", function() {
@@ -92,39 +132,18 @@ var Editor = function(id) {
                 if ($(".focus").length > 0)
                     $("#focus-cursor").css({top:$(".focus").position().top+5}).show();
 
-                //set button states
-                var linkNode;
-                
-                var parents = $(range.commonAncestorContainer).parents();
+                //hide link editor 
+                $(".url-editing").removeClass("url-editing");
+                $("#url-input").hide();
+
                 $("#toolbar button.textstyle").removeClass("pressed");
+
+                //set button states
+                var parents = $(range.commonAncestorContainer).parents();
                 for (var i=0; i<parents.length; i++) {
                     $("button.textstyle[data-nodetype=" + parents[i].nodeName +"]").addClass("pressed");
                     if (parents[i].nodeName == "A")
-                        linkNode = parents[i];
-                }
-
-                if (linkNode) {
-                    //position over url;
-                    var position = $(linkNode).position();
-                    var width = $(linkNode).width();
-                    var url = linkNode.href
-                    if (url.indexOf("replaceme") > 0)
-                        url = "";
-                    $(linkNode).addClass("url-editing");
-                    $("#url-input>textarea")
-                        .unbind()
-                        .val(url)
-                        .bind("change", function(e) {
-                            linkNode.href= $(this).val()
-
-                        })
-                    $("#url-input")
-                        .css({top: position.top-60, left: 100})
-                        .show();
-                }
-                else {
-                    $(".url-editing").removeClass("url-editing");
-                    $("#url-input").hide();
+                        _editLink(parents[i]);
                 }
             }
         }, 20)
@@ -134,19 +153,14 @@ var Editor = function(id) {
     //character replacement business
     editarea.bind("keydown", function(e) {
         if (e.keyCode == 222) { //either a single quote or double quote was pressed                
-            if (e.shiftKey)
-                undoChr = "&quote;";
-            else
-                undoChr = "'";
             switch (_getPreedingCharacter()) {
-                case -1:
-                case 32:
-                case 160: //space & nbsp;
+                case -1:  //no character
+                case 32:  //space
+                case 160: //nbsp
                     if (e.shiftKey) 
                         chr = "&ldquo;";
                     else
                         chr = "&lsquo;";
-                    console.log("space");
                 break;
                 default: 
                     if (e.shiftKey) 
@@ -159,6 +173,26 @@ var Editor = function(id) {
         }
     });
 
+    function _editLink(linkNode) {
+        if (linkNode) {
+            //position over url;
+            var position = $(linkNode).position();
+            var width = $(linkNode).width();
+            var url = linkNode.href
+            if (url.indexOf("replaceme") > 0)
+                url = "";
+            $(linkNode).addClass("url-editing");
+            $("#url-input>textarea")
+                .unbind()
+                .val(url)
+                .bind("change", function(e) {
+                    linkNode.href= $(this).val()
+                })
+            $("#url-input")
+                .css({top: position.top-60, left: 100})
+                .show();
+        }
+    }
     function _getPreedingCharacter() {
         var containerEl = $(".focus")[0];
         var precedingChr = "", sel, range, precedingRange;
@@ -202,7 +236,6 @@ var Editor = function(id) {
             if (sel.getRangeAt && sel.rangeCount) {
                 range = sel.getRangeAt(0);
                 range.deleteContents(); 
-                //range.insertNode( document.createTextNode(text) );
                 document.execCommand("InsertHTML", false, text);
             }
         }
@@ -222,7 +255,7 @@ var Editor = function(id) {
         document.execCommand("UNDERLINE");
     }
     function _strikethrough() {
-        document.execCommand("FORMATBLOCK", false, "<s>");
+        document.execCommand("STRIKETHROUGH");
     }
     function _blockquote() {
         document.execCommand("FORMATBLOCK", false, "<blockquote>");
@@ -234,7 +267,12 @@ var Editor = function(id) {
         document.execCommand("REDO");
     }
     function _link() {
-        document.execCommand("createLink", true, "#replaceme");
+        if (document.execCommand("createLink", true, "#replaceme")) {
+            sel = window.getSelection();
+            range = sel.getRangeAt(0);
+            _editLink(range.commonAncestorContainer.parentElement);    
+        }
+
     }
 
     function autosave() {
@@ -281,7 +319,6 @@ var Editor = function(id) {
                 icon.addClass("icon-warning-sign")
                 message.html("Saved locally. Reconnect to save to server.");
                 break;
-
         }  
     }
 

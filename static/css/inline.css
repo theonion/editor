@@ -4,9 +4,6 @@
     background-color:white;
     cursor:pointer;
 }
-.inline:hover {
-    opacity:.8;
-}
 
 .inline .caption {
     color:#ccc;
@@ -26,6 +23,7 @@
     margin-right: 30px;
     margin-left: -100px;
 }
+
 .inline.right {
     margin-right:-100px;
     float: right;
@@ -41,6 +39,7 @@
 }
 .image.full  {
     margin-left: -100px;
+    width:870px;
 }
 
 .video.centered  {

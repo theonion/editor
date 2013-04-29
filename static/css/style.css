@@ -148,8 +148,13 @@ input,textarea,
     display:none;
     position:absolute;
     z-index: 80;
-    width: 100px;
-    height: 100px;
+}
+#inline-tools button {
+    font-size: 24px;
+    margin: 10px;
+}
+.inline.editing {
+    opacity:.6;
 }
 
 #url-input textarea {
