@@ -3,6 +3,7 @@
     margin-bottom: 30px;
     background-color:white;
     cursor:pointer;
+    float:left;
 }
 
 .inline .caption {
@@ -19,16 +20,17 @@
 }
 
 .inline.left {
-    float: left;
     margin-right: 30px;
     margin-left: -100px;
 }
+
 
 .inline.right {
     margin-right:-100px;
     float: right;
     margin-left: 30px;
 }
+
 
 .image.left {
     width: 400px;
@@ -39,7 +41,12 @@
 }
 .image.full  {
     margin-left: -100px;
-    width:870px;
+    margin-right: -100px;
+    float:none;
+}
+.image.full img{
+    width:100%;
+
 }
 
 .video.centered  {
@@ -49,3 +56,20 @@
 .video {
     width: 240px;
 }
+
+#editor-wrapper.mobile .inline {
+    margin-left: -20px;
+    margin-right: -20px;
+    width: auto;
+    box-sizing: border-box;
+    float: none;
+}
+
+#editor-wrapper.mobile .inline img {
+    width: 100%;
+}
+
+#editor-wrapper.mobile .inline .caption {
+    margin-left: 20px;
+}
+

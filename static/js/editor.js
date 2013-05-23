@@ -35,11 +35,19 @@ var Editor = function(id) {
     $("#toolbar .icon-italic").click(_italic);
     $("#toolbar .icon-underline").click(_underline);
     $("#toolbar .icon-strikethrough").click(_strikethrough);
-
+    $("#icontoolbar .icon-list-ol").click(_orderedList);
+    $("#icontoolbar .icon-list-ul").click(_unorderedList);
     $("#toolbar .icon-link").click(_link);
     // $("#toolbar .icon-quote-left").click(_blockquote);
-    $("#toolbar .icon-undo").click(_undo);
-    $("#toolbar .icon-redo").click(_redo);
+    $("#undoBtn").click(_undo);
+    $("#redoBtn").click(_redo);
+
+    $("#toolbar .screensize").click(function(e) {
+        var viewport = $(e.target).data("viewport");
+        $("#editor-wrapper").attr("class", viewport);
+        $("#toolbar .screensize").removeClass("pressed");
+        $("#toolbar .screensize[data-viewport=" + viewport + "]").addClass("pressed");
+    });
     
     $(".insertable").bind("mouseover", function(e) {
         var type = $(e.target).data("type")
@@ -69,7 +77,6 @@ var Editor = function(id) {
 
     $("#inline-up").click(_inlineMoveUp);
     $("#inline-down").click(_inlineMoveDown);
-
     $("#inline-edit").click(_inlineEdit);
     $("#inline-remove").click(_inlineRemove);
 
@@ -85,7 +92,7 @@ var Editor = function(id) {
         _inlinetoolsShow($(".editing"))
         window.scrollBy(0,_inlinePositionY - tmp)
     }
-    
+
     function _inlineRemove(e) {
         if (confirm("You sure?")) {
             $(".editing").remove();
@@ -93,7 +100,7 @@ var Editor = function(id) {
     }
 
     function _inlineEdit(e) {
-
+        alert("Inline media set up window will pop up in a modal, maybe");
     }
 
     function _inlinetoolsShow(inlineElement) {
@@ -147,7 +154,6 @@ var Editor = function(id) {
                 }
             }
         }, 20)
-
     });
 
     //character replacement business
@@ -205,7 +211,6 @@ var Editor = function(id) {
                 precedingChr = range.toString().slice(-1);
             }
             chrCode = precedingChr.charCodeAt(0);
-            
             if (isNaN(chrCode)) {
                 return -1;
             }
@@ -261,10 +266,10 @@ var Editor = function(id) {
         document.execCommand("FORMATBLOCK", false, "<blockquote>");
     }
     function _undo(){ 
-        document.execCommand("UNDO");
+        document.execCommand("UNDO", false, "");
     }
     function _redo(){ 
-        document.execCommand("REDO");
+        document.execCommand("REDO", false, "");
     }
     function _link() {
         if (document.execCommand("createLink", true, "#replaceme")) {
@@ -272,7 +277,12 @@ var Editor = function(id) {
             range = sel.getRangeAt(0);
             _editLink(range.commonAncestorContainer.parentElement);    
         }
-
+    }
+    function _orderedList() {
+        document.execCommand("insertorderedlist", false, null);   
+    }
+    function _unorderedList() {
+        document.execCommand("insertunorderedlist", false, null);   
     }
 
     function autosave() {
