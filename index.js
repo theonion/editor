@@ -87,6 +87,20 @@ app.get('/doc/:slug', function(req, res){
     });
 });
 
+app.get('/newdoc/', function(req, res){
+    res.render('document-refactor.html', {
+        slug: req.param('slug'),
+
+    });
+});
+
+app.get('/wysihtml5/', function(req, res){
+    res.render('wysihtml5.html', {
+        slug: req.param('slug'),
+
+    });
+});
+
 app.get('/preview/:slug', function(req, res){
     var slug =  req.param('slug');
     fs = require('fs')

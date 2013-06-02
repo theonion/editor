@@ -14,26 +14,26 @@ h1.title {
     font-size: 24px;
 }
 
-#editor-wrapper {
+.editor-wrapper {
     
     margin: 0px auto;
     position:relative;
     background-color: #ffffff;
 }
 
-#editor-wrapper.desktop {
+.editor-wrapper/*.desktop*/ {
     width: 870px;
 }
 
 
-#editor-wrapper.tablet {
+.editor-wrapper.tablet {
     width: 768px;
 }
 
-#editor-wrapper.mobile {
+.editor-wrapper.mobile {
     width: 322px;
 }
-#editor-wrapper.mobile .editor {
+.editor-wrapper.mobile .editor {
     padding: 20px;
     font-size: 14px;
     line-height: 20px;
@@ -49,6 +49,7 @@ h1.title {
     position:relative;
     z-index:20;
 }
+
 input,textarea,
 .editor:focus {
     outline: none;
@@ -67,7 +68,7 @@ input,textarea,
 }
 
 
-#toolbar-wrapper {
+.toolbar-wrapper {
         margin: 0px auto 10px;
         border-top: 1px #E5E5E5 solid;
         border-bottom: 1px #E5E5E5 solid;
@@ -75,7 +76,7 @@ input,textarea,
         background-color: #f5f5f5;
 }
 
-#toolbar {
+.toolbar {
     width: 870px;
     margin: 5px auto;
     font-size: 11px;
@@ -83,7 +84,7 @@ input,textarea,
     color:#4A4A4A;
 }
 
-.fixed #toolbar-wrapper  {
+.fixed .toolbar-wrapper  {
     position:fixed;
     top:0px;
     z-index:100;
@@ -94,7 +95,7 @@ input,textarea,
 }
 
 #inline-tools button,
-#toolbar button {
+.toolbar button {
     border:1px transparent solid;
     color: #4A4A4A;
     background-clip: padding-box;
@@ -115,7 +116,7 @@ input,textarea,
     height:35px;
 }
 
-#toolbar .expandable {
+.toolbar .expandable {
     color: #3B5998;
 }
 #autosave-icon {
@@ -136,7 +137,7 @@ button.pressed {
     background-image: -webkit-linear-gradient(top,#eee,#e0e0e0);
     border:1px #e0e0e0 solid;
 }
-#toolbar .spacer {
+.toolbar .spacer {
     padding-left: 20px;
     border-left: 1px #eee solid;
     margin-left: 20px;
@@ -152,7 +153,7 @@ button.pressed {
 
 
 /* insertable media stuff */
-#focus-cursor {
+.focus-cursor {
     position:absolute;
     left:-15px;
     top:0px;
