@@ -2,23 +2,67 @@
 <html>
     <head>
         <meta charset="UTF-8">
-        <title>Editor Test</title>
-        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
+        <title>Editor</title>
+        <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
         <link href='/css/style.css' rel='stylesheet' type='text/css'>
-        <link href='/fontawesome/css/font-awesome.css' rel='stylesheet' type='text/css'>
+        <link href='/css/inline.css' rel='stylesheet' type='text/css'>
+
+        <link href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
     </head>
 
     <body>
-        <h1>Doucments</h1>
+        
+        <div id="editor">
+            <div class="toolbar-wrapper">
+                <div class="toolbar">
+                    <button name="bold" class="icon-bold"></button>
+                    <button name="italic" class="icon-italic"></button>
+                    <button name="underline" class="icon-underline"></button>
+                    <button name="strikethrough" class="icon-strikethrough"></button>
+                    <button name="unorderedlist" class="icon-list-ul"></button>
+                    <span class="spacer"></span>
+                </div>
+            </div>
 
-        <ul>
-            <% for(var slug in documents) { %>
-            <li><a href="/doc/<%= slug %>"><%= documents[slug].title %></a></li>
-            <% } %>
+        </div>
+        <div id="content" style="display:none">
+            <p>It’s hard not to be moved by the print ad’s haunting images of
+    desperation and sadness. Who were these emaciated young people with their gaunt flesh
+    squeezed into gold lamé leggings, their dead eyes pleading for mercy and
+    compassion? Why did a major chain choose advertising redolent of child pornography
+    from the '70s? <b>Were these <i>runaways all right?</i> Had Charney forced them into lives</b> of
+    prostitution, drug dealing, and pornography? Should I purchase American Apparel
+    clothing, or report its owners and advertisers to the proper authorities?</p>
 
-        </ul>
+        </div>
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="/lib/wysihtml5.js"></script>
+        <script src="/lib/keymaster.js"></script>
+        
+        <!--include the editor base-->
+        <script src="/js/base.js"></script>
+        <!-- indclude all modules -->
+        <script src="/js/modules/richText.js"></script>
+
+        <script src="/js/modules/textReplacement.js"></script>
+        <script src="/js/modules/toolbar.js"></script>
+        <script type="text/javascript">
+
+            var editor = new Editor({
+                /* global options */
+                element: document.getElementById("editor"),
+
+                /* module options */
+                richText: {
+
+                },
+
+
+            });
+            //editor.setContent($("#content").html());
+
+        </script>
     </body>
 
 </html>

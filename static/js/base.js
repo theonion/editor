@@ -46,7 +46,6 @@
         cursor = {
             updateFocus: function() {
                 setTimeout(function() {
-                    console.log("updateFocus");
                     var sel = window.getSelection();
                     if (sel && sel.type != "None" ) {
                         var range = sel.getRangeAt(0);
@@ -78,19 +77,60 @@
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
             $(options.element)
-                .append('<div class="editor-wrapper"><div class="editor" contenteditable="true" spellcheck="true"></div>'
+                .append('<div class="editor-wrapper"><div class="editor" contenteditable="true" spellcheck="true"><p></p></div>'
                         + '<div class="focus-cursor icon-caret-right"></div></div>')
                 
             self.emit("init");
 
 
             $(options.element)
+                .bind("keydown", function(e) {
+
+                    // handle enter key shit. 
+                    if (e.keyCode === 13) {
+
+                        //e.preventDefault();
+                    }
+                    else if (e.keyCode === 8) {
+
+                        var sel = window.getSelection()
+
+                        //this happens when the cursor is in the last remaining empty paragraph. 
+                        if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
+                            console.log("nope, not deleting anything");
+                            e.preventDefault();
+                        }
+                    }
+
+                    self.emit("keydown");
+                })
                 .bind("keyup", function(e) {
                     self.emit("keyup");
                 })
-                .bind("keyup mousdown", function(e) {
-                    cursor.updateFocus();
-                    self.emit("keyup-or-mousedown");
+                .bind("paste", function(e) {
+                    var pastedFragment = document.createDocumentFragment();
+                    var div = document.createElement("DIV");
+                    pastedFragment.appendChild(div);
+
+                    global.frag = pastedFragment;
+
+
+                    var text = e.originalEvent.clipboardData.getData('text/plain');
+                    pastedFragment.querySelector("div").innerHTML =  e.originalEvent.clipboardData.getData('text/html')
+
+                    console.log(pastedFragment);
+                    if (window.getSelection) {
+                        var sel = window.getSelection();
+                        if (sel.getRangeAt && sel.rangeCount) {
+                            var range = sel.getRangeAt(0);
+                            range.deleteContents(); 
+                            document.execCommand("InsertHTML", false, text);
+                        }
+                    }
+                    e.preventDefault();
+
+
+                    self.emit("paste");
                 })
         };
 
@@ -98,12 +138,11 @@
 
 
         self.setContent = function(contentHTML) {
-
+            $(options.element).find(".editor").html(contentHTML);
         }
 
-        options = _.extend(defaults, options);
-        init(options);        
-
+        options = $.extend(defaults, options);
+        init(options);
     }
     global.Editor = Editor;
 

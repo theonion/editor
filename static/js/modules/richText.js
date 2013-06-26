@@ -19,19 +19,27 @@
         function _strikethrough() {
             document.execCommand("STRIKETHROUGH");
         }
+        function _unorderedList() {
+            document.execCommand('formatBlock', false, 'ul');
+        }
 
         editor.on("toolbar:click:italic", _italic);
         editor.on("toolbar:click:bold", _bold);
         editor.on("toolbar:click:underline", _underline);
         editor.on("toolbar:click:strikethrough", _strikethrough);
+        editor.on("toolbar:click:unorderedlist", _unorderedList);
+
 
         editor.on("toolbar:ready", function() {
+            /*
             editor.toolbar.addButton({ name: "bold",  icon: "icon-bold"});
             editor.toolbar.addButton({ name: "italic", icon: "icon-italic"});
             editor.toolbar.addButton({ name: "underline", icon: "icon-underline"});
             editor.toolbar.addButton({ name: "strikethrough", icon: "icon-strikethrough"});
-            editor.toolbar.addSpacer();
+            editor.toolbar.addButton({ name: "unorderedlist", icon: "icon-list-ul"});
 
+            editor.toolbar.addSpacer();
+            */
         });
     }
     global.EditorModules.push(RichText);

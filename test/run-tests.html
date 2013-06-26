@@ -1,0 +1,36 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <meta charset="utf-8">
+  <title>Editor Tests</title>
+  <link rel="stylesheet" href="http://code.jquery.com/qunit/qunit-1.12.0.css">
+
+  <base href="http://0.0.0.0:3000"></base>
+</head>
+<body>
+  <div id="qunit"></div>
+  <div id="qunit-fixture"></div>
+  <script src="http://code.jquery.com/qunit/qunit-1.12.0.js"></script>
+  <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+  <script src="/lib/underscore-min.js"></script>
+  <script src="/lib/wysihtml5.js"></script>
+  <script src="/lib/keymaster.js"></script>
+
+  <!--include the editor base-->
+  <script src="/js/base.js"></script>
+  <!-- indclude all modules -->
+  <script src="/js/modules/richText.js"></script>
+
+  <script src="/js/modules/textReplacement.js"></script>
+  <script src="/js/modules/toolbar.js"></script>
+
+
+
+  <script>
+    test( "Instantiate the Editor", function() {
+      var value = "hello";
+      equal( value, "hello", "We expect value to be hello" );
+    });
+  </script>
+</body>
+</html>

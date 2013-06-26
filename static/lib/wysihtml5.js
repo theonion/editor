@@ -9432,6 +9432,16 @@ wysihtml5.views.Textarea = wysihtml5.views.View.extend(
           this.toolbar = new wysihtml5.toolbar.Toolbar(this, this.config.toolbar);
         }
       });
+
+      this.observe("focus:composer", function() {
+        if(this.textareaElement.value === '') {
+            var self = this;
+            setTimeout(function() {
+                self.composer.selection.surround(document.createElement('p'));
+            }, 10);
+        }
+      });
+
       
       try {
         console.log("Heya! This page is using wysihtml5 for rich text editing. Check out https://github.com/xing/wysihtml5");

@@ -79,3 +79,54 @@
             .css(pos)
             .show();
     }
+
+
+
+/*
+        <div id="media-templates" style="display:none">
+            <div class="inline image full template">
+                <img src="http://placehold.it/870x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+            <div class="inline image left template">
+                <img src="http://placehold.it/400x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+            <div class="inline image right template">
+                <img src="http://placehold.it/400x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+            <div class="inline image centered template">
+                <img src="http://placehold.it/670x300/C0392B/F39C12">
+                <span class="caption">A delightful image</span>
+            </div>
+
+            <div class="inline audio right template" >
+                <img src="http://placehold.it/180x180/0E7AC3/ffffff">
+                <span class="caption">A pleasant song</span>
+            </div>
+            <div class="inline audio left template" >
+                <img src="http://placehold.it/180x180/0E7AC3/ffffff">
+                <span class="caption">A pleasant song</span>
+            </div>
+
+            <div class="inline left video template">
+                <img src="http://placehold.it/240x135/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
+            </div>
+            <div class="inline right video template">
+                <img src="http://placehold.it/240x135/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
+            </div>
+            <div class="inline centered video template">
+                <img src="http://placehold.it/640x360/27AE60/ffffff">
+                <span class="caption">An enjoyable video</span>
+            </div>
+
+            <div class="inline left code template">
+
+
+            </div>
+
+        </div>
+*/

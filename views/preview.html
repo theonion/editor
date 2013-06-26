@@ -6,14 +6,61 @@
         <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:200,300,400,500,600,700,900' rel='stylesheet' type='text/css'>
         <link href='/css/style.css' rel='stylesheet' type='text/css'>
         <link href='/css/inline.css' rel='stylesheet' type='text/css'>
+        <style type="text/css">
+            article h1 {
+                margin-bottom: 32px;
+                padding:20px;
+                text-align:center;
+                font-size:32px;
+                font-family: Helvetica;
+                line-height:40px;
+                padding-left:260px;
+                width:540px
+            }
+            article {
+                width: 960px;
+                margin:0 auto;
+                background-color: #fff;
+                font-size: 18px;
+                line-height: 27px; 
+                font-family: Georgia;
 
+            }
+            .metadata {
+                margin:20px;
+                width:220px;
+                background-color:#ccc;
+                float:left;
+                height:300px;
+            }
+            .articleBody{
+                padding-left:260px;
+                width:540px;
+
+            }
+
+            .articleBody p,
+            .articleBody div {
+                margin-bottom: 24px;
+            }
+
+        </style>
     </head>
 
 
     <body> 
-        <h1><%= title %></h1>
+
         <article>
-            <%- body %>
+
+            <h1><%= title %></h1>
+
+            <div class="metadata">
+            <a href="#" rel="author">Nathan Rabin</a>
+            </div>
+            <div class="articleBody">
+                <%- body %>
+            </div>
+            
         </article>
     </body>
 

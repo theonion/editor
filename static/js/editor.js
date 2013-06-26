@@ -27,14 +27,7 @@ var Editor = function(id) {
         contentID = prompt("Enter a slug");
     }
     
-
-
-
-
-
-
-
-    $(window).bind("scroll", function() {
+$(window).bind("scroll", function() {
         if (window.scrollY > $(".title").outerHeight())
             $("body").addClass("fixed");
         else

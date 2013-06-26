@@ -1,8 +1,6 @@
 var express = require('express');
 var app = express();
-var tidy = require('htmltidy').tidy;
 var querystring = require('querystring');
-var lessMiddleware = require('less-middleware');
 
 
 app.engine('.html', require('ejs').__express);
@@ -11,16 +9,6 @@ app.set('views', __dirname + '/views');
 app.set('static dir', __dirname + '/static');
 app.use(express.static( app.set('static dir') ));
 app.use(express.bodyParser());
-
-
-app.configure(function(){
-  //other configuration here...
-  app.use(lessMiddleware({
-    src      : __dirname + "/static/css",
-    compress : true
-  }));
-  app.use(express.static(__dirname + '/static/css'));
-});
 
 // This avoids having to provide the 
 // extension to res.render()
@@ -40,25 +28,6 @@ app.get('/', function(req, res){
     documents: documents
   });
 });
-
-app.get('/image-browser', function(req, res){
-  res.render('image-browser.html', {
-  });
-});
-
-app.get('/image.JSON', function(req, res){
-    var imageData = [];
-    for (var i = 21723; i < 21775; i++) {
-        imageData.push(i);
-    }
-    //hardcode some image data
-    var data = JSON.stringify(imageData)
-
-    res.setHeader('Content-Type', 'application/json');
-    res.setHeader('Content-Length', data.length);
-    res.write(data);
-});
-
 
 
 app.get("/doc/:slug.json", function (req, res) {
@@ -87,25 +56,12 @@ app.get('/doc/:slug', function(req, res){
     });
 });
 
-app.get('/newdoc/', function(req, res){
-    res.render('document-refactor.html', {
-        slug: req.param('slug'),
-
-    });
-});
-
-app.get('/wysihtml5/', function(req, res){
-    res.render('wysihtml5.html', {
-        slug: req.param('slug'),
-
-    });
-});
 
 app.get('/preview/:slug', function(req, res){
     var slug =  req.param('slug');
     fs = require('fs')
     var contents ="<p></p>";
-    content = fs.readFileSync(__dirname + documents[slug].file, 'utf8');
+    content = fs.readFileSync(__dirname + "/data/" + documents[slug].file, 'utf8');
     
     res.render('preview.html', {
         title: documents[slug].title,
