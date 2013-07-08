@@ -525,7 +525,6 @@ $("#redoBtn").click(_redo);
 
         function replaceText(e) {
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
-                console.log(e.keyCode);
                 var p = _getPrecedingCharacter();
                 var chr;
                 switch (p) {

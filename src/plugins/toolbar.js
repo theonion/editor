@@ -17,4 +17,3 @@
     }
     global.EditorModules.push(Toolbar);
 })(this)
-
