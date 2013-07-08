@@ -97,15 +97,14 @@
 
                         //this happens when the cursor is in the last remaining empty paragraph. 
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
-                            console.log("nope, not deleting anything");
                             e.preventDefault();
                         }
                     }
-
-                    self.emit("keydown");
+                    self.emit("keydown", e);
                 })
+
                 .bind("keyup", function(e) {
-                    self.emit("keyup");
+                    self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
                     var pastedFragment = document.createDocumentFragment();

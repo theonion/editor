@@ -3,34 +3,21 @@
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
 
-        function _getPreedingCharacter() {
-            var containerEl = $(".focus")[0];
-            var precedingChr = "", sel, range, precedingRange;
-            sel = window.getSelection();
-            try {
-                if (sel.rangeCount > 0) {
-                    range = sel.getRangeAt(0).cloneRange();
-                    range.collapse(true);
-                    range.setStart(containerEl, 0);
-                    precedingChr = range.toString().slice(-1);
-                }
-                chrCode = precedingChr.charCodeAt(0);
-                if (isNaN(chrCode)) {
-                    return -1;
-                }
-                else {
-                    return chrCode;
-                }
+        function _getPrecedingCharacter() {
+            var sel = window.getSelection();
+            if (sel.focusOffset == 0) {
+                return -1
             }
-            catch (err) {
-                return -1;
+            else {
+                return sel.focusNode.textContent.substr(sel.focusOffset-1, 1).charCodeAt(0);
             }
         }
 
-        function replaceText() {
-            e = this;
+        function replaceText(e) {
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
-                switch (_getPreedingCharacter()) {
+                var p = _getPrecedingCharacter();
+                var chr;
+                switch (p) {
                     case -1:  //no character
                     case 32:  //space
                     case 160: //nbsp
@@ -50,8 +37,7 @@
             }
 
         }  
-        editor.on("keyup", replaceText);
-        
+        editor.on("keydown", replaceText);
     }
     global.EditorModules.push(TextReplacement);
 })(this)

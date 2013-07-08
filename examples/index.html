@@ -4,10 +4,10 @@
         <meta charset="UTF-8">
         <title>Editor</title>
         <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
-        <link href='/css/style.css' rel='stylesheet' type='text/css'>
-        <link href='/css/inline.css' rel='stylesheet' type='text/css'>
+        <link href='css/style.css' rel='stylesheet' type='text/css'>
+        <link href='css/inline.css' rel='stylesheet' type='text/css'>
 
-        <link href="//netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
     </head>
 
     <body>
@@ -37,16 +37,7 @@
         </div>
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="/lib/wysihtml5.js"></script>
-        <script src="/lib/keymaster.js"></script>
-        
-        <!--include the editor base-->
-        <script src="/js/base.js"></script>
-        <!-- indclude all modules -->
-        <script src="/js/modules/richText.js"></script>
-
-        <script src="/js/modules/textReplacement.js"></script>
-        <script src="/js/modules/toolbar.js"></script>
+        <script src="../build/onion-editor.js"></script>
         <script type="text/javascript">
 
             var editor = new Editor({
@@ -60,7 +51,7 @@
 
 
             });
-            //editor.setContent($("#content").html());
+            editor.setContent($("#content").html());
 
         </script>
     </body>
