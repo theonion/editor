@@ -499,19 +499,15 @@ if ( typeof define === "function" ) {
 
     var Editor = Editor || function(options) {
 
-
-        var sanitize_config = {
-          elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li'],
-          attributes: {'a': ['href', 'title']},
-          remove_contents: ['script', 'style', ],
-          protocols: { a: { href: ['http', 'https', 'mailto']}},
-        }
-
-        var sanitize = new Sanitize(sanitize_config);
-        global.sanitize = sanitize;
         var self = this,
         defaults = {
                 element: null, /* element to make Editable */
+                sanitize: {
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li'],
+                  attributes: {'a': ['href', 'title']},
+                  remove_contents: ['script', 'style', ],
+                  protocols: { a: { href: ['http', 'https', 'mailto']}},
+                }
         },
         moduleInstances = [],
         utils = { /* a place for non-editor specific function calls */
@@ -569,7 +565,8 @@ if ( typeof define === "function" ) {
                 }, 20)
             }
 
-        }
+        },
+        sanitize;
 
         function init(options) {            
             for (var i=0;i<global.EditorModules.length;i++) {
@@ -579,8 +576,10 @@ if ( typeof define === "function" ) {
                 .append('<div class="editor-wrapper"><div class="editor" contenteditable="true" spellcheck="true"><p></p></div>'
                         + '<div class="focus-cursor icon-caret-right"></div></div>')
                 
-            self.emit("init");
 
+            sanitize = new Sanitize(sanitize_config);
+
+            self.emit("init");
 
             $(options.element)
                 .bind("keydown", function(e) {
@@ -598,7 +597,6 @@ if ( typeof define === "function" ) {
                     }
                     self.emit("keydown", e);
                 })
-
                 .bind("keyup", function(e) {
                     self.emit("keyup", e);
                 })
@@ -614,7 +612,6 @@ if ( typeof define === "function" ) {
                     var cleanHTML = "";
                     for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                         var node = cleanFrag.childNodes[i];
-                        
                         if (node.nodeType == 3) {
                             cleanHTML += node.nodeValue;
                         }
