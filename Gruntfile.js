@@ -10,6 +10,7 @@ module.exports = function(grunt) {
         },        
         dist: {
           src: ['src/lib/keymaster.js',
+                'src/lib/sanitize.js',                
                 'src/base.js',
                 'src/modules/toolbar.js',
                 'src/plugins/richText.js',

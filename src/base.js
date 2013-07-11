@@ -5,6 +5,17 @@
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
+
+
+        var sanitize_config = {
+          elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li'],
+          attributes: {'a': ['href', 'title']},
+          remove_contents: ['script', 'style', ],
+          protocols: { a: { href: ['http', 'https', 'mailto']}},
+        }
+
+        var sanitize = new Sanitize(sanitize_config);
+        global.sanitize = sanitize;
         var self = this,
         defaults = {
                 element: null, /* element to make Editable */
@@ -67,11 +78,6 @@
 
         }
 
-
-
-
-
-
         function init(options) {            
             for (var i=0;i<global.EditorModules.length;i++) {
                 moduleInstances.push(new global.EditorModules[i](self, options));
@@ -88,13 +94,10 @@
 
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
-
                         //e.preventDefault();
                     }
                     else if (e.keyCode === 8) {
-
                         var sel = window.getSelection()
-
                         //this happens when the cursor is in the last remaining empty paragraph. 
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
                             e.preventDefault();
@@ -107,28 +110,36 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    var pastedFragment = document.createDocumentFragment();
-                    var div = document.createElement("DIV");
-                    pastedFragment.appendChild(div);
-
-                    global.frag = pastedFragment;
-
-
-                    var text = e.originalEvent.clipboardData.getData('text/plain');
-                    pastedFragment.querySelector("div").innerHTML =  e.originalEvent.clipboardData.getData('text/html')
-
-                    console.log(pastedFragment);
+                    /* this may be cumbersome. Probably a cleaner way to do this? */
+                    var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
+                    console.log(e.originalEvent.clipboardData.types);
+                    console.log(pastedHTML);
+                    var fragment = document.createDocumentFragment();
+                    fragment.appendChild(document.createElement("div"))
+                    fragment.childNodes[0].innerHTML = pastedHTML;
+                    var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
+                    var cleanHTML = "";
+                    for (var i = 0; i < cleanFrag.childNodes.length; i++) {
+                        var node = cleanFrag.childNodes[i];
+                        
+                        if (node.nodeType == 3) {
+                            cleanHTML += node.nodeValue;
+                        }
+                        else if (node.nodeType == 1) {
+                            if (cleanFrag.childNodes[i].innerText !== "") { // exclude tags with no content
+                                cleanHTML += cleanFrag.childNodes[i].outerHTML;
+                            }
+                        }
+                    }
                     if (window.getSelection) {
                         var sel = window.getSelection();
                         if (sel.getRangeAt && sel.rangeCount) {
                             var range = sel.getRangeAt(0);
                             range.deleteContents(); 
-                            document.execCommand("InsertHTML", false, text);
+                            document.execCommand("InsertHTML", false, cleanHTML);
                         }
                     }
                     e.preventDefault();
-
-
                     self.emit("paste");
                 })
         };
