@@ -187,9 +187,7 @@
                         }
                         else if (document.getSelection().type === "Caret") {
                             var posY = $($(document.getSelection().focusNode)).parents("p").position().top;
-
                             $(".paragraph-tools").css({top: posY})
-
                             $(".selection-tools").hide();
                             $(".paragraph-tools").show();
                         }
@@ -249,15 +247,41 @@
             document.execCommand("STRIKETHROUGH");
         }
 
-        function _unorderedList() {
-            document.execCommand('formatBlock', false, 'ul');
+        function _superscript(){ 
+            document.execCommand("superscript");
         }
+
+        function _subscript() {
+            document.execCommand("subscript");
+        }
+
+
+        function _unorderedList() {
+            document.execCommand('insertUnorderedList', null, null)
+        }
+
+        function _orderedList() {
+            document.execCommand('insertOrderedList', null, null)
+        }
+        function _toggleVisualize() {
+            $(options.element).find(".editor").toggleClass("visualize");
+        }
+
 
         editor.on("toolbar:click:italic", _italic);
         editor.on("toolbar:click:bold", _bold);
         editor.on("toolbar:click:underline", _underline);
         editor.on("toolbar:click:strikethrough", _strikethrough);
+
+        editor.on("toolbar:click:superscript", _subscript);
+        editor.on("toolbar:click:subscript", _superscript);
+
+
         editor.on("toolbar:click:unorderedlist", _unorderedList);
+        editor.on("toolbar:click:orderedlist", _orderedList);
+
+        editor.on("toolbar:click:visualize", _toggleVisualize);
+
     }
     global.EditorModules.push(Formatting);
 })(this)

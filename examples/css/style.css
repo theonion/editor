@@ -43,16 +43,16 @@ h1.title {
 }
 
 
-.editor ul,
-.editor ol,
-.editor p,
-.editor div { 
+.editor.visualize ul,
+.editor.visualize ol,
+.editor.visualize p,
+.editor.visualize div { 
     background-color: rgba(252,242,120, .2);
     margin-bottom:27px;
     min-height:23px;
 }
 
-.editor blockquote {
+.editor.visualize blockquote {
     padding: 0 30px;
     background-color: rgba(200,200,200, .1);
 

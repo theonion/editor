@@ -25,9 +25,7 @@
                         }
                         else if (document.getSelection().type === "Caret") {
                             var posY = $($(document.getSelection().focusNode)).parents("p").position().top;
-
                             $(".paragraph-tools").css({top: posY})
-
                             $(".selection-tools").hide();
                             $(".paragraph-tools").show();
                         }
