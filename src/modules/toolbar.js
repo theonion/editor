@@ -6,37 +6,31 @@
         editor.on("init", init);
 
         //TODO: localize these events just to the editor instance
-        $(document).bind("selectionchange", update);
-
+        
+        editor.on("selection:change", update);
         function update(e) {
-            setTimeout(
+            setTimeout( //give the browser a chance to catch up
                 function() {
                     //check if selection is in the editor itself.
-                    if (document.getSelection().focusNode 
-                        && $(document.getSelection().focusNode.parentNode).parents(".editor")) {
-
-                        if (document.getSelection().type === "Range") {
-                            var posY = $($(document.getSelection().focusNode)).parents("p").position().top -50;
-                            //position this badboy based on the paragraph
-                            $(".selection-tools").css({top: posY})
+                    var currentBlockNode = editor.selection.getRootParent();
+                    if (currentBlockNode) {
+                        var blockTop = $(currentBlockNode).position().top;
+                        if (editor.selection.hasSelection()) {
+                            $(".selection-tools").css({top: blockTop  - 50})
                             $(".selection-tools").show();
                             $(".paragraph-tools").hide();
 
                         }
-                        else if (document.getSelection().type === "Caret") {
-                            var posY = $($(document.getSelection().focusNode)).parents("p").position().top;
-                            $(".paragraph-tools").css({top: posY})
+                        else {
+                            $(".paragraph-tools").css({top: blockTop})
                             $(".selection-tools").hide();
                             $(".paragraph-tools").show();
-                        }
-                        else {
-                            $(".selection-tools,.paragraph-tools").hide();
                         }
                     }
                     else {
                         $(".selection-tools,.paragraph-tools").hide();                        
                     }
-                }
+                }   
             , 5);
         }
 
@@ -51,7 +45,6 @@
 
             //handle clicks
             self.toolbarElement.click(function(e) {
-                console.log(e);
                 editor.emit("toolbar:click:" + $(e.target).attr("name")); 
             });
             editor.emit("toolbar:ready");

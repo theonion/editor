@@ -5,7 +5,6 @@
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
-
         var self = this,
         defaults = {
                 element: null, /* element to make Editable */
@@ -50,29 +49,6 @@
                 };
             }
         },
-        cursor = {
-            updateFocus: function() {
-                setTimeout(function() {
-                    var sel = window.getSelection();
-                    if (sel && sel.type != "None" ) {
-                        var range = sel.getRangeAt(0);
-                        var node = range.commonAncestorContainer.parentNode;
-                        $(".editor>div,.editor>p").removeClass("focus");
-                        
-                        if ($(node).is(".editor>div,.editor>p")) {
-                            $(node).addClass("focus");
-                        }
-                        else {
-                            $(node).parents(".editor>div,.editor>p").addClass("focus");
-                        }
-                        //move the little focus indicator 
-                        if ($(".focus").length > 0)
-                            $(".focus-cursor").css({top:$(".focus").position().top+5}).show();
-                    }
-                }, 20)
-            }
-
-        },
         sanitize;
 
         function init(options) {            
@@ -116,7 +92,7 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    /* this may be cumbersome. Probably a cleaner way to do this? */
+                    /* this doesn't look very pretty & it bothers me. Probably a cleaner way to do this? */
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
                     var fragment = document.createDocumentFragment();
         
@@ -135,14 +111,9 @@
                             }
                         }
                     }
-                    if (window.getSelection) {
-                        var sel = window.getSelection();
-                        if (sel.getRangeAt && sel.rangeCount) {
-                            var range = sel.getRangeAt(0);
-                            range.deleteContents(); 
-                            document.execCommand("InsertHTML", false, cleanHTML);
-                        }
-                    }
+
+                    self.selection.insertOrReplace(cleanHTML)
+
                     e.preventDefault();
                     self.emit("paste");
                 })

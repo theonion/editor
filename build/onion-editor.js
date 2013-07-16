@@ -6,7 +6,6 @@
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
-
         var self = this,
         defaults = {
                 element: null, /* element to make Editable */
@@ -51,29 +50,6 @@
                 };
             }
         },
-        cursor = {
-            updateFocus: function() {
-                setTimeout(function() {
-                    var sel = window.getSelection();
-                    if (sel && sel.type != "None" ) {
-                        var range = sel.getRangeAt(0);
-                        var node = range.commonAncestorContainer.parentNode;
-                        $(".editor>div,.editor>p").removeClass("focus");
-                        
-                        if ($(node).is(".editor>div,.editor>p")) {
-                            $(node).addClass("focus");
-                        }
-                        else {
-                            $(node).parents(".editor>div,.editor>p").addClass("focus");
-                        }
-                        //move the little focus indicator 
-                        if ($(".focus").length > 0)
-                            $(".focus-cursor").css({top:$(".focus").position().top+5}).show();
-                    }
-                }, 20)
-            }
-
-        },
         sanitize;
 
         function init(options) {            
@@ -117,7 +93,7 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    /* this may be cumbersome. Probably a cleaner way to do this? */
+                    /* this doesn't look very pretty & it bothers me. Probably a cleaner way to do this? */
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
                     var fragment = document.createDocumentFragment();
         
@@ -136,14 +112,9 @@
                             }
                         }
                     }
-                    if (window.getSelection) {
-                        var sel = window.getSelection();
-                        if (sel.getRangeAt && sel.rangeCount) {
-                            var range = sel.getRangeAt(0);
-                            range.deleteContents(); 
-                            document.execCommand("InsertHTML", false, cleanHTML);
-                        }
-                    }
+
+                    self.selection.insertOrReplace(cleanHTML)
+
                     e.preventDefault();
                     self.emit("paste");
                 })
@@ -168,37 +139,31 @@
         editor.on("init", init);
 
         //TODO: localize these events just to the editor instance
-        $(document).bind("selectionchange", update);
-
+        
+        editor.on("selection:change", update);
         function update(e) {
-            setTimeout(
+            setTimeout( //give the browser a chance to catch up
                 function() {
                     //check if selection is in the editor itself.
-                    if (document.getSelection().focusNode 
-                        && $(document.getSelection().focusNode.parentNode).parents(".editor")) {
-
-                        if (document.getSelection().type === "Range") {
-                            var posY = $($(document.getSelection().focusNode)).parents("p").position().top -50;
-                            //position this badboy based on the paragraph
-                            $(".selection-tools").css({top: posY})
+                    var currentBlockNode = editor.selection.getRootParent();
+                    if (currentBlockNode) {
+                        var blockTop = $(currentBlockNode).position().top;
+                        if (editor.selection.hasSelection()) {
+                            $(".selection-tools").css({top: blockTop  - 50})
                             $(".selection-tools").show();
                             $(".paragraph-tools").hide();
 
                         }
-                        else if (document.getSelection().type === "Caret") {
-                            var posY = $($(document.getSelection().focusNode)).parents("p").position().top;
-                            $(".paragraph-tools").css({top: posY})
+                        else {
+                            $(".paragraph-tools").css({top: blockTop})
                             $(".selection-tools").hide();
                             $(".paragraph-tools").show();
-                        }
-                        else {
-                            $(".selection-tools,.paragraph-tools").hide();
                         }
                     }
                     else {
                         $(".selection-tools,.paragraph-tools").hide();                        
                     }
-                }
+                }   
             , 5);
         }
 
@@ -213,7 +178,6 @@
 
             //handle clicks
             self.toolbarElement.click(function(e) {
-                console.log(e);
                 editor.emit("toolbar:click:" + $(e.target).attr("name")); 
             });
             editor.emit("toolbar:ready");
@@ -227,51 +191,68 @@
     var Formatting = Formatting || function(editor, options) {
         var self = this;
 
+        var cmd = global.document.execCommand;
         key('⌘+b, ctrl+b', _bold);
         key('⌘+i, ctrl+i', _italic);
         key('⌘+u, ctrl+u', _underline);
 
         function _bold() {
-            document.execCommand("BOLD");
+            cmd("bold");
         }
         
         function _italic() {
-            document.execCommand("ITALIC");
+            cmd("italic");
         }
 
         function _underline(){ 
-            document.execCommand("UNDERLINE");
+            cmd("underline");
         }
 
         function _strikethrough() {
-            document.execCommand("STRIKETHROUGH");
+            cmd("strikethrough");
         }
 
         function _superscript(){ 
-            document.execCommand("superscript");
+            cmd("superscript");
         }
 
         function _subscript() {
-            document.execCommand("subscript");
+            cmd("subscript");
         }
 
         function _unorderedList() {
-            document.execCommand('insertUnorderedList', null, null)
+            cmd('insertUnorderedList', null, null)
         }
 
         function _orderedList() {
-            document.execCommand('insertOrderedList', null, null)
+            cmd('insertOrderedList', null, null)
         }
 
         function _blockquote(){ 
-            document.execCommand('formatBlock', null, '<blockquote>')
-
+            cmd('formatBlock', null, '<blockquote>')
         }
 
         function _toggleVisualize() {
             $(options.element).find(".editor").toggleClass("visualize");
         }
 
+        //not really formatting. Keeep here for now. We may need to custom build an undo/redo stack.
+        function _undo(){ 
+            cmd("undo", false, "");
+        }
+        function _redo(){ 
+            cmd("redo", false, "");
+        }
+
+        /*
+        function _link() {
+            if (cmd("createLink", true, "#replaceme")) {
+                sel = window.getSelection();
+                range = sel.getRangeAt(0);
+                _editLink(range.commonAncestorContainer.parentElement);    
+            }
+        }
+        */
 
         editor.on("toolbar:click:italic", _italic);
         editor.on("toolbar:click:bold", _bold);
@@ -284,72 +265,90 @@
         editor.on("toolbar:click:orderedlist", _orderedList);
 
         editor.on("toolbar:click:visualize", _toggleVisualize);
+        editor.on("toolbar:click:undo", _undo);
+        editor.on("toolbar:click:redo", _redo);
 
         editor.on("toolbar:click:special-chars", function() { alert("Special character palette")});
     }
     global.EditorModules.push(Formatting);
 })(this)
-          
+
+;/* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
+whole thing be cross-browser more easily. Also, this code always looks ugly, so let's keep
+it in one place. */
+
+(function(global) {
+    'use strict';
+    var Selection = Selection || function(editor, options) {
+        var self = this;
+        var w = global.window;
+        var s = w.getSelection();
+
+        self.insertOrReplace = function(html) {
+            if (s) {
+                if (s.getRangeAt && s.rangeCount) {
+                    var range = s.getRangeAt(0);
+                    range.deleteContents(); 
+                    w.document.execCommand("InsertHTML", false, html);
+                }
+            }
+        }
+
+        //returns true if the cursor is in the editor
+        self.hasFocus = function() {
+            if (s.focusNode) {
+                if ($.contains(options.element, s.focusNode)) {
+                    return true;
+                }
+            }
+            return false;
+        }
+
+        // returns true there is selected text in the editor
+        self.hasSelection = function() {
+            if (self.hasFocus()) { //any selection will not suffice, must be in this editor
+                if (s.type === "Range") {
+                    return true
+                }
+            }
+            return false;
+        }
 
 
+        //returns the parent of the focus node that is the immediate child of the editor itself
+        self.getRootParent = function() {
+            if (self.hasFocus()) {
+                var parents = $(s.focusNode).parentsUntil(".editor")
+                if (parents.length > 0) {
+                    return parents.slice(-1);
+                }
+                else {
+                    return s.focusNode;
+                }
+            }
+            return null;
+        }
 
-/* Editing commands */
-/*
-  <button class="textstyle icon-italic" data-nodetype="I" title="Italic"></button>
+        // emit a selction change event. 
+        $(w.document).bind("selectionchange",
+            function(e) {
+                editor.emit("selection:change");
+                //do we want to emit a "got focus & lost focus" event? Would require maintaining state.
+            }
+        );
 
-function _bold() {
-    document.execCommand("BOLD");
-}
-function _italic() {
-    document.execCommand("ITALIC");
-}
-function _underline(){ 
-    document.execCommand("UNDERLINE");
-}
-function _strikethrough() {
-    document.execCommand("STRIKETHROUGH");
-}
-function _blockquote() {
-    document.execCommand("FORMATBLOCK", false, "<blockquote>");
-}
-function _undo(){ 
-    document.execCommand("UNDO", false, "");
-}
-function _redo(){ 
-    document.execCommand("REDO", false, "");
-}
-function _link() {
-    if (document.execCommand("createLink", true, "#replaceme")) {
-        sel = window.getSelection();
-        range = sel.getRangeAt(0);
-        _editLink(range.commonAncestorContainer.parentElement);    
+        // make it possible to call selection methods from other modules
+        editor.selection = self;
     }
-}
-function _orderedList() {
-    document.execCommand("insertorderedlist", false, null);   
-}
-function _unorderedList() {
-    document.execCommand("insertunorderedlist", false, null);   
-}
+    global.EditorModules.push(Selection);
+})(this);(function(global) {
+    'use strict';
+    var Embed = Embed || function(editor, options) {
+        var self = this;
 
-key('⌘+b, ctrl+b', _bold);
-key('⌘+i, ctrl+i', _italic);
-key('⌘+u, ctrl+u', _underline);
-
-$("#toolbar .icon-bold").click(_bold);
-$("#toolbar .icon-italic").click(_italic);
-$("#toolbar .icon-underline").click(_underline);
-$("#toolbar .icon-strikethrough").click(_strikethrough);
-$("#icontoolbar .icon-list-ol").click(_orderedList);
-$("#icontoolbar .icon-list-ul").click(_unorderedList);
-$("#toolbar .icon-link").click(_link);
-// $("#toolbar .icon-quote-left").click(_blockquote);
-$("#undoBtn").click(_undo);
-$("#redoBtn").click(_redo);
-*/
-
-
-;(function(global) {
+    }
+    global.EditorModules.push(Embed);
+})(this);(function(global) {
     'use strict';
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
