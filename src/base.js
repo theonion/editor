@@ -10,7 +10,7 @@
         defaults = {
                 element: null, /* element to make Editable */
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -80,15 +80,23 @@
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
             $(options.element)
-                .append('<div class="editor-wrapper"><div class="editor" contenteditable="true" spellcheck="true"><p></p></div>'
-                        + '<div class="focus-cursor icon-caret-right"></div></div>')
+                .append('<div class="editor-wrapper">\
+                            <div class="editor" contenteditable="true" spellcheck="true">\
+                                <p></p>\
+                            </div>\
+                            <div class="document-tools toolbar"></div>\
+                            <div class="paragraph-tools toolbar"></div>\
+                            <div class="selection-tools toolbar"></div>\
+                        </div>');
                 
-
-            sanitize = new Sanitize(sanitize_config);
+            sanitize = new Sanitize(options.sanitize);
 
             self.emit("init");
 
             $(options.element)
+                .bind("click", function(e) {
+                    self.emit("click", e);
+                })
                 .bind("keydown", function(e) {
 
                     // handle enter key shit. 
@@ -110,9 +118,8 @@
                 .bind("paste", function(e) {
                     /* this may be cumbersome. Probably a cleaner way to do this? */
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
-                    console.log(e.originalEvent.clipboardData.types);
-                    console.log(pastedHTML);
                     var fragment = document.createDocumentFragment();
+        
                     fragment.appendChild(document.createElement("div"))
                     fragment.childNodes[0].innerHTML = pastedHTML;
                     var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
@@ -123,7 +130,7 @@
                             cleanHTML += node.nodeValue;
                         }
                         else if (node.nodeType == 1) {
-                            if (cleanFrag.childNodes[i].innerText !== "") { // exclude tags with no content
+                            if (!cleanFrag.childNodes[i].innerText == "") { // exclude tags with no content
                                 cleanHTML += cleanFrag.childNodes[i].outerHTML;
                             }
                         }
@@ -142,7 +149,6 @@
         };
 
         utils.enableEvents(self);
-
 
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);

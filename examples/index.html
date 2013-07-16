@@ -4,27 +4,67 @@
         <meta charset="UTF-8">
         <title>Editor</title>
         <link href='http://fonts.googleapis.com/css?family=Source+Code+Pro:400,700' rel='stylesheet' type='text/css'>
+        <link href='http://fonts.googleapis.com/css?family=Source+Sans+Pro:400,700' rel='stylesheet' type='text/css'>
+        <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+
         <link href='css/style.css' rel='stylesheet' type='text/css'>
         <link href='css/inline.css' rel='stylesheet' type='text/css'>
 
-        <link href="http://netdna.bootstrapcdn.com/font-awesome/3.0.2/css/font-awesome.css" rel="stylesheet">
     </head>
 
     <body>
         
-        <div id="editor">
-            <div class="toolbar-wrapper">
-                <div class="toolbar">
-                    <button name="bold" class="icon-bold"></button>
-                    <button name="italic" class="icon-italic"></button>
-                    <button name="underline" class="icon-underline"></button>
-                    <button name="strikethrough" class="icon-strikethrough"></button>
-                    <button name="unorderedlist" class="icon-list-ul"></button>
-                    <span class="spacer"></span>
+        <script type="text/template" id="document-tools-template">
+            <button class="primary icon-book"></button>
+            <div class="expanded">
+                <a class="save-info info">Last Saved 5m ago</a>
+                <div>
+                    <a name="undo">Undo</a>
+                    <a name="repeat">Redo</a>
+                </div>
+                <div>
+                    <a name="markup">Show Formatting</a>
+                </div>
+                <div>
+                    <span class="heading">Font</span>
+                </div>
+                <div>
+                    <span class="heading">Screensize</span>
                 </div>
             </div>
+        </script>
 
-        </div>
+        <script type="text/template" id="paragraph-tools-template">
+            <button class="icon-plus-sign-alt primary"></button>
+            <span class="expanded">
+                <button class="icon-camera"></button>
+                <button class="icon-film"></button>
+                <button class="icon-music"></button><br>
+                <button name="blockquote" class="icon-quote-left"></button>
+                <button name="orderedList" class="icon-list-ol"></button>
+                <button name="unorderedList" class="icon-list-ul"></button><br>
+            </span>
+        </script>
+
+        <script type="text/template" id="selection-tools-template">
+                <button name="link" class="icon-link"></button>
+                <button name="bold" class="icon-bold"></button>
+                <button name="italic" class="icon-italic"></button>
+                <button name="underline" class="icon-underline"></button>
+                <span class="expanded">
+                    <button name="blockquote" class="icon-quote-left"></button>
+                    <button name="orderedList" class="icon-list-ol"></button>
+                    <button name="unorderedList" class="icon-list-ul"></button><br>
+                    <button name="strikethrough" class="icon-strikethrough"></button>
+                    <button name="subscript" class="icon-subscript"></button>
+                    <button name="subscript" class="icon-superscript"></button>
+                </span>
+        </script>
+
+
+
+        <div id="editor"></div>
+
         <div id="content" style="display:none">
             <p>It’s hard not to be moved by the print ad’s haunting images of desperation and sadness. Who were these emaciated young people with their gaunt flesh squeezed into gold lamé leggings, their dead eyes pleading for mercy and compassion? Why did a major chain choose advertising redolent of child pornography from the '70s? <b>Were these <i>runaways all right?</i> Had Charney forced them into lives</b> of prostitution, drug dealing, and pornography? Should I purchase American Apparel clothing, or report its owners and advertisers to the proper authorities?</p>
         </div>
@@ -36,12 +76,12 @@
             var editor = new Editor({
                 /* global options */
                 element: document.getElementById("editor"),
+                toolbar: {
+                    documentTools:  $("#document-tools-template").html(),
+                    paragraphTools: $("#paragraph-tools-template").html(),
+                    selectionTools: $("#selection-tools-template").html()
 
-                /* module options */
-                richText: {
-
-                },
-
+                }
 
             });
             editor.setContent($("#content").html());

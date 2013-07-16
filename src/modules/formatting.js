@@ -1,6 +1,6 @@
 (function(global) {
     'use strict';
-    var RichText = RichText || function(editor, options) {
+    var Formatting = Formatting || function(editor, options) {
         var self = this;
 
         key('⌘+b, ctrl+b', _bold);
@@ -10,15 +10,19 @@
         function _bold() {
             document.execCommand("BOLD");
         }
+        
         function _italic() {
             document.execCommand("ITALIC");
         }
+
         function _underline(){ 
             document.execCommand("UNDERLINE");
         }
+
         function _strikethrough() {
             document.execCommand("STRIKETHROUGH");
         }
+
         function _unorderedList() {
             document.execCommand('formatBlock', false, 'ul');
         }
@@ -28,21 +32,8 @@
         editor.on("toolbar:click:underline", _underline);
         editor.on("toolbar:click:strikethrough", _strikethrough);
         editor.on("toolbar:click:unorderedlist", _unorderedList);
-
-
-        editor.on("toolbar:ready", function() {
-            /*
-            editor.toolbar.addButton({ name: "bold",  icon: "icon-bold"});
-            editor.toolbar.addButton({ name: "italic", icon: "icon-italic"});
-            editor.toolbar.addButton({ name: "underline", icon: "icon-underline"});
-            editor.toolbar.addButton({ name: "strikethrough", icon: "icon-strikethrough"});
-            editor.toolbar.addButton({ name: "unorderedlist", icon: "icon-list-ul"});
-
-            editor.toolbar.addSpacer();
-            */
-        });
     }
-    global.EditorModules.push(RichText);
+    global.EditorModules.push(Formatting);
 })(this)
           
 
