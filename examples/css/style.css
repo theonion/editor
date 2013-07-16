@@ -48,15 +48,24 @@ h1.title {
 .editor.visualize p,
 .editor.visualize div { 
     background-color: rgba(252,242,120, .2);
+}
+.editor.visualize blockquote {
+    background-color: rgba(200,200,200, .1);
+}
+
+.editor ul,
+.editor ol,
+.editor p,
+.editor div { 
     margin-bottom:27px;
     min-height:23px;
 }
 
-.editor.visualize blockquote {
+.editor blockquote {
     padding: 0 30px;
-    background-color: rgba(200,200,200, .1);
-
 }
+
+
 
 .auto-replacement {
     border-bottom:1px #47B2FD dotted;
