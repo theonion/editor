@@ -1,4 +1,8 @@
 
+.placeholder {
+    opacity: .5;
+}
+
 .inline {
     margin-bottom: 30px;
     background-color:white;

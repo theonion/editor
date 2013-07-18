@@ -16,20 +16,12 @@
                     if (currentBlockNode) {
                         var blockTop = $(currentBlockNode).position().top;
                         if (editor.selection.hasSelection()) {
-                            $(".selection-tools").css({top: blockTop  - 50})
+                            $(".selection-tools").css({top: blockTop  - 35})
                             $(".selection-tools").show();
-                            $(".paragraph-tools").hide();
-
-                        }
-                        else {
-                            $(".paragraph-tools").css({top: blockTop})
-                            $(".selection-tools").hide();
-                            $(".paragraph-tools").show();
+                            return;
                         }
                     }
-                    else {
-                        $(".selection-tools,.paragraph-tools").hide();                        
-                    }
+                    $(".selection-tools").hide();
                 }   
             , 5);
         }
@@ -37,7 +29,6 @@
         function init() {
 
             $(options.element).find(".document-tools").html(options.toolbar.documentTools);
-            $(options.element).find(".paragraph-tools").html(options.toolbar.paragraphTools);
             $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
 
 
@@ -45,8 +36,17 @@
 
             //handle clicks
             self.toolbarElement.click(function(e) {
-                editor.emit("toolbar:click:" + $(e.target).attr("name")); 
+                editor.emit("toolbar:click", $(e.target).attr("name")); 
             });
+
+            self.toolbarElement.bind("mouseover", function(e) {
+                editor.emit("toolbar:over", $(e.target).attr("name")); 
+            });
+
+            self.toolbarElement.bind("mouseout", function(e) {
+                editor.emit("toolbar:out", $(e.target).attr("name")); 
+            });
+
             editor.emit("toolbar:ready");
         }
     }

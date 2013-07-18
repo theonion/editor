@@ -39,7 +39,6 @@ it in one place. */
             return false;
         }
 
-
         //returns the parent of the focus node that is the immediate child of the editor itself
         self.getRootParent = function() {
             if (self.hasFocus()) {

@@ -8,8 +8,8 @@
         <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 
         <link href='css/style.css' rel='stylesheet' type='text/css'>
+        <link href='css/embed-panel.css' rel='stylesheet' type='text/css'>
         <link href='css/inline.css' rel='stylesheet' type='text/css'>
-
     </head>
 
     <body>
@@ -21,31 +21,50 @@
                     <a name="undo">Undo</a>
                     <a name="repeat">Redo</a>
                 </div>
-                <div>
-                    <a name="visualize">Show Formatting</a>
+
+                <div class="group">
+                    <span class="heading">Insert something</span><br>
+                    <button name="image" class="icon-camera"></button>
+                    <button name="video" class="icon-film"></button>
+                    <button name="audio" class="icon-music"></button><br>
+                    <button name="html" class="icon-code"></button>
+                    <button name="specialchars" >&copy;</button>
+                    <button name="tweet" class="icon-twitter"></button>
+
+                </div>
+                <div class="group">
+                    <span class="heading">Add Formatting</span><br>
+                    <button name="blockquote" class="icon-quote-left"></button>
+                    <button name="orderedlist" class="icon-list-ol"></button>
+                    <button name="unorderedlist" class="icon-list-ul"></button><br>
+
+                    <a class="action" name="visualize">Show Formatting</a>
                 </div>           
-                <div>
+                
+
+                <div class="group">
                     <span class="heading">Font</span>
                 </div>
-                <div>
-                    <span class="heading">Screensize</span>
+
+                <div class="group">
+                    <span class="heading">Color</span>
+                    <button name="dark" class="icon-circle"></button>
+                    <button name="light" class="icon-circle-blank"></button>
                 </div>
+
+
+                <div class="group">
+                    <span class="heading">Screen size</span><br>
+                    <button name="mobile" class="icon-mobile-phone"></button>
+                    <button name="tablet" class="icon-tablet"></button>
+                    <button name="desktop" class="icon-desktop"></button><br>
+                </div>
+
             </div>
         </script>
 
         <script type="text/template" id="paragraph-tools-template">
-            <button class="icon-plus-sign-alt primary"></button>
-            <span class="expanded">
-                <button class="icon-camera"></button>
-                <button class="icon-film"></button>
-                <button class="icon-music"></button><br>
-                <button name="blockquote" class="icon-quote-left"></button>
-                <button name="orderedlist" class="icon-list-ol"></button>
-                <button name="unorderedlist" class="icon-list-ul"></button><br>
-                <button name="unorderedlist" class="icon-twitter"></button>
-                <button name="special-chars" >&copy;</button>
 
-            </span>
         </script>
 
         <script type="text/template" id="selection-tools-template">
@@ -54,24 +73,53 @@
                 <button name="italic" class="icon-italic"></button>
                 <button name="underline" class="icon-underline"></button>
                 <span class="expanded">
-                    <!--
-                    <button name="blockquote" class="icon-quote-left"></button>
-                    <button name="orderedlist" class="icon-list-ol"></button>
-                    <button name="unorderedlist" class="icon-list-ul"></button><br>
-                    -->
                     <button name="strikethrough" class="icon-strikethrough"></button>
                     <button name="subscript" class="icon-subscript"></button>
                     <button name="subscript" class="icon-superscript"></button>
+                    <button name="removeformatting" class="icon-remove"></a>
                 </span>
         </script>
 
 
 
+        <script type="text/template" id="embed-panel-image">
+            Add an image
+        </script>
+        <script type="text/template" id="embed-panel-html">
+            <textarea>put some html in here</textarea>
+        </script>
+        <script type="text/template" id="embed-panel-video">
+            Add a video
+        </script>
+        <script type="text/template" id="embed-panel-specialchars">
+            Character map
+        </script>
+        <script type="text/template" id="embed-panel-tweet">
+            Embed a tweet
+        </script>
+        <script type="text/template" id="embed-panel-audio">
+            Add some audio
+        </script>
         <div id="editor"></div> 
 
         <div id="content" style="display:none">
-            <p>It’s hard not to be moved by the print ad’s haunting images of desperation and sadness. Who were these emaciated young people with their gaunt flesh squeezed into gold lamé leggings, their dead eyes pleading for mercy and compassion? Why did a major chain choose advertising redolent of child pornography from the '70s? <b>Were these <i>runaways all right?</i> Had Charney forced them into lives</b> of prostitution, drug dealing, and pornography? Should I purchase American Apparel clothing, or report its owners and advertisers to the proper authorities?</p>
+            <p>It’s hard not to be moved by the print ad’s haunting images of desperation and sadness. Who were these emaciated young people with their gaunt flesh squeezed into gold lamé leggings, their dead eyes pleading for mercy and compassion? Why did a major chain choose advertising redolent of child pornography from the '70s? Were these runaways all right? Had Charney forced them into lives of prostitution, drug dealing, and pornography? Should I purchase American Apparel clothing, or report its owners and advertisers to the proper authorities?</p>
+
+            <p>It’s hard not to be moved by the print ad’s haunting images of desperation and sadness. Who were these emaciated young people with their gaunt flesh squeezed into gold lamé leggings, their dead eyes pleading for mercy and compassion? Why did a major chain choose advertising redolent of child pornography from the '70s? Were these runaways all right? Had Charney forced them into lives of prostitution, drug dealing, and pornography? Should I purchase American Apparel clothing, or report its owners and advertisers to the proper authorities?</p>
         </div>
+
+
+
+
+        <!-- the embed panel is not part of the editor markup. It can be used by multiple editors on a page. -->
+
+        <div id="embed-panel">
+            <span id="embed-panel-close" class="icon-remove-sign"></span>
+            <div id="embed-panel-contents"></div>
+
+        </div>
+
+
 
         <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
         <script src="../build/onion-editor.js"></script>
@@ -82,9 +130,8 @@
                 element: document.getElementById("editor"),
                 toolbar: {
                     documentTools:  $("#document-tools-template").html(),
-                    paragraphTools: $("#paragraph-tools-template").html(),
+                    //paragraphTools: $("#paragraph-tools-template").html(),
                     selectionTools: $("#selection-tools-template").html()
-
                 }
 
             });

@@ -57,12 +57,12 @@
             }
             $(options.element)
                 .append('<div class="editor-wrapper">\
-                            <div class="editor" contenteditable="true" spellcheck="true">\
+                            <div class="editor" contenteditable="true" spellcheck="false">\
                                 <p></p>\
                             </div>\
                             <div class="document-tools toolbar"></div>\
-                            <div class="paragraph-tools toolbar"></div>\
                             <div class="selection-tools toolbar"></div>\
+                            <div class="embed-overlay"></div>\
                         </div>');
                 
             sanitize = new Sanitize(options.sanitize);
