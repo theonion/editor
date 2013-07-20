@@ -1,0 +1,64 @@
+/* default */
+/* .light */
+
+.light {
+    color: #101010;
+    background-color: #e0e0e0;
+}
+
+.editor,
+.light .editor {
+    border: 1px #DADADA solid;
+    background-color: #F1F1F1;
+}
+
+.light .editor a {
+    color: #4964A1;
+}
+
+/* .dark */
+.dark {
+    color: #ddd;
+    background-color: #171714;
+
+}
+
+.dark .editor {
+    border: 1px #333 solid;
+    background-color: #272822;
+    color:#d0d0d0;
+}
+.dark .editor a {
+    color: #E6DB6F;
+}
+
+
+/* fonts */
+.editor,
+.monospace .editor {
+    font-family: 'Source Code Pro', Courier, sans-serif;
+    line-height: 27px;
+}
+.editor,
+.monospace .editor blockquote {
+    font-size: 16px;
+}
+
+
+.sans-serif .editor {
+    font-family: 'Source Sans Pro', Helvetica, sans-serif;
+    line-height: 32px;
+}
+.sans-serif .editor blockquote {
+    font-size: 16px;
+    line-height: 24px;
+}
+
+.serif .editor {
+    font-family: Georgia, sans-serif;
+    line-height: 32px;
+}
+.serif .editor blockquote {
+    font-size: 16px;
+    line-height: 24px;
+}

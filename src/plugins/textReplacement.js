@@ -3,6 +3,7 @@
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
 
+        //move this to getSelection
         function _getPrecedingCharacter() {
             var sel = window.getSelection();
             if (sel.focusOffset == 0) {

@@ -1,0 +1,135 @@
+/* Menus + Buttons */
+
+.toolbar button {
+    border:1px transparent solid;
+    color: #4A4A4A;
+    background-clip: padding-box;
+    background-color:transparent;
+    border-radius:2px;
+    text-align:center;
+    display:inline-block;
+    line-height:25px;
+    font-size:14px;
+    width:25px;
+    height:25px;
+    cursor:pointer;
+}
+
+.toolbar button.text {
+    font-size: 11px;
+    width: auto;
+    padding: 0 4px;
+}
+
+button:hover,
+button.pressed {
+    background-color: rgba(0,0,0,.2);
+    background-color: #ddd;
+    background-image: -webkit-linear-gradient(top,#eee,#e0e0e0);
+    border:1px #e0e0e0 solid;
+}
+
+
+.toolbar {
+    position: absolute;
+    z-index: 100;
+    -webkit-touch-callout: none;
+    -webkit-user-select: none;
+    -khtml-user-select: none;
+    -moz-user-select: moz-none;
+    -ms-user-select: none;
+    user-select: none;
+    opacity: .6;
+    /*transition: opacity .25s ease-in-out;*/
+}
+
+
+.toolbar:hover .primary {
+    display:none;
+}
+.document-tools,
+.selection-tools {
+    padding: 4px 4px;
+    font-size: 12px;
+    background-color: #EEEEEE;
+    border: 1px #DADADA solid;
+}
+
+.selection-tools {
+    display:none;
+    border-top-right-radius: 4px;
+    border-bottom-right-radius: 4px;
+    float:right;
+    position:absolute;
+    z-index:100;
+    top:0px;
+    left:-5px;
+}
+
+
+.document-tools {
+    top: 40px;
+    border-top-left-radius: 4px;
+    border-bottom-left-radius: 4px;
+    position:fixed;
+    left:50%;
+    margin-left: 405px;
+    text-align:center;
+}
+
+.document-tools:hover {
+    margin-left: 300px;
+}
+
+
+.toolbar .primary {
+    font-size: 14px;
+    color: #4A4A4A;
+    float:right;
+    position:relative;
+    z-index:100;
+    background-color: #EEEEEE;
+
+
+}
+    
+.document-tools .expanded {
+    background-color: #eee;
+    z-index: 99;
+    font-size: 12px;
+    line-height: 20px;
+    color: #666;
+    padding: 10px 10px;
+}
+
+.toolbar .expanded {
+    display: none;
+    position: relative;
+    top: 0px;
+}
+
+
+.toolbar:hover {
+    opacity: 1;
+}
+
+.toolbar:hover .expanded {
+    display:block;
+}
+
+
+.document-tools .separator { 
+    border-bottom: 1px #DADADA solid;
+    
+}
+.document-tools .heading { 
+    font-size: 11px;
+    color: #4964A1;
+    text-transform: uppercase;
+}
+
+.document-tools .group {
+    margin: 5px 0;
+    padding: 5px 0;
+    border-top: 1px #dadada solid   ;
+}

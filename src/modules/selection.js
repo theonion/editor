@@ -6,7 +6,7 @@ it in one place. */
     'use strict';
     var Selection = Selection || function(editor, options) {
         var self = this;
-        var w = global.window;
+        var w = global;
         var s = w.getSelection();
 
         self.insertOrReplace = function(html) {
@@ -39,18 +39,45 @@ it in one place. */
             return false;
         }
 
+        //from stackoverflow, p
+        function getSelectionCoords() {
+            var sel = document.selection, range;
+            var x = 0, y = 0;
+            if (window.getSelection) {
+                sel = window.getSelection();
+                if (sel.rangeCount) {
+                    range = sel.getRangeAt(0).cloneRange();
+                    if (range.getClientRects) {
+                        range.collapse(true);
+                        var rect = range.getClientRects()[0];
+                        x = rect.left;
+                        y = rect.top;
+                    }
+                }
+            }
+            return { x: x, y: y };
+        }
+
+
         //returns the parent of the focus node that is the immediate child of the editor itself
         self.getRootParent = function() {
             if (self.hasFocus()) {
-                var parents = $(s.focusNode).parentsUntil(".editor")
+                var parents = $(s.anchorNode).parentsUntil(".editor")
                 if (parents.length > 0) {
-                    return parents.slice(-1);
+                    return parents.slice(-1)[0];
                 }
                 else {
-                    return s.focusNode;
+                    return s.anchorNode;
                 }
             }
             return null;
+        }
+
+        self.getAnchorNode = function() {
+            return s.anchorNode;
+        }
+        self.getFocusNode = function() {
+            return s.focusNode;
         }
 
         // emit a selction change event. 

@@ -1,4 +1,4 @@
-/*! onion-editor 2013-07-17 */
+/*! onion-editor 2013-07-19 */
 (function(global){
 
     'use strict';
@@ -14,7 +14,9 @@
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
-                }
+                },
+                /* settings gets serialized & dumped to local storage. put things you want to persist in here */
+                settings: {} 
         },
         moduleInstances = [],
         utils = { /* a place for non-editor specific function calls */
@@ -52,10 +54,22 @@
         },
         sanitize;
 
-        function init(options) {            
+        function loadSettings() {
+            if (localStorage.editorSettings) {
+                options.settings = JSON.parse(global.localStorage.editorSettings)
+            }
+        }
+        self.updateSetting = function(key, value) {
+            options.settings[key] = value;
+            global.localStorage.editorSettings = JSON.stringify(options.settings);
+        }
+
+        function init(options) {  
+            loadSettings();
             for (var i=0;i<global.EditorModules.length;i++) {
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
+            
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editor" contenteditable="true" spellcheck="false">\
@@ -79,6 +93,47 @@
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
                         //e.preventDefault();
+
+                        //determine if enter is pressed in an empty node. Do the right thing
+                        
+
+
+                        if (!self.selection.hasSelection() && self.selection.hasFocus()) {
+                            var node = self.selection.getAnchorNode();
+                            console.log("text: " + $(node).text());
+                            if ($(node).text() == "") {
+                                console.log("BLANK, DO SOMTHIN");
+                                console.log(self.selection.getRootParent());
+                                var rootTagName = self.selection.getRootParent().tagName;
+                                console.log("rootTag: " + rootTagName);
+                                if (rootTagName == "BLOCKQUOTE") {
+                                    // Remove current node, 
+                                    // Insert new paragraph.
+                                    // make sure cursor is in there.
+
+                                    e.preventDefault();
+                                }
+                                else if (rootTagName == "OL" || rootTagName == "UL") {
+                                    // Remove current node, 
+                                    
+                                    var container = node.parentNode;    
+                                    $(node).remove();
+                                    $(container).after("<p><br></p>")
+                                    var sel = window.getSelection();
+                                    var range = document.createRange();
+                                    range.selectNodeContents($(container).next()[0]);
+                                    range.collapse(true);
+                                    sel.removeAllRanges();
+                                    sel.addRange(range);
+                                    //remove an empty <UL> or <OL>
+                                    if ($("li", container).length == 0) {
+                                        $(container).remove();
+                                    }
+
+                                    e.preventDefault();
+                                }
+                            }
+                        }
                     }
                     else if (e.keyCode === 8) {
                         var sel = window.getSelection()
@@ -127,6 +182,8 @@
         }
 
         options = $.extend(defaults, options);
+
+
         init(options);
     }
     global.Editor = Editor;
@@ -191,6 +248,14 @@
     var Formatting = Formatting || function(editor, options) {
         var self = this;
 
+        editor.on("init", init);
+
+        function init() {
+            if (options.settings.visualize) {
+                $(options.element)
+                    .addClass("visualize");
+            }
+        }
 
         var commands = {
             bold : function() {
@@ -212,17 +277,22 @@
                 global.document.execCommand("subscript");
             },
             unorderedlist: function() {
-                global.document.execCommand('insertunorderedlist', null, null)
+                //global.document.execCommand('insertunorderedlist', null, null)
             },
             orderedlist: function() {
-                global.document.execCommand('insertorderedlist', null, null)
+                //global.document.execCommand('insertorderedlist', null, null)
             },
             blockquote: function() {
-                global.document.execCommand('formatBlock', null, '<blockquote>')
+                //global.document.execCommand('formatBlock', null, '<blockquote>')
             },
             visualize: function() {
-                $(options.element).find(".editor").toggleClass("visualize");
+                editor.updateSetting("visualize", 
+                    $(options.element)
+                        .toggleClass("visualize")
+                        .hasClass("visualize"));
             },
+
+
             //I don't think these belong here? maybe in base?
             undo: function() {
                 global.document.execCommand("undo", false, "");
@@ -268,7 +338,7 @@ it in one place. */
     'use strict';
     var Selection = Selection || function(editor, options) {
         var self = this;
-        var w = global.window;
+        var w = global;
         var s = w.getSelection();
 
         self.insertOrReplace = function(html) {
@@ -301,18 +371,45 @@ it in one place. */
             return false;
         }
 
+        //from stackoverflow, p
+        function getSelectionCoords() {
+            var sel = document.selection, range;
+            var x = 0, y = 0;
+            if (window.getSelection) {
+                sel = window.getSelection();
+                if (sel.rangeCount) {
+                    range = sel.getRangeAt(0).cloneRange();
+                    if (range.getClientRects) {
+                        range.collapse(true);
+                        var rect = range.getClientRects()[0];
+                        x = rect.left;
+                        y = rect.top;
+                    }
+                }
+            }
+            return { x: x, y: y };
+        }
+
+
         //returns the parent of the focus node that is the immediate child of the editor itself
         self.getRootParent = function() {
             if (self.hasFocus()) {
-                var parents = $(s.focusNode).parentsUntil(".editor")
+                var parents = $(s.anchorNode).parentsUntil(".editor")
                 if (parents.length > 0) {
-                    return parents.slice(-1);
+                    return parents.slice(-1)[0];
                 }
                 else {
-                    return s.focusNode;
+                    return s.anchorNode;
                 }
             }
             return null;
+        }
+
+        self.getAnchorNode = function() {
+            return s.anchorNode;
+        }
+        self.getFocusNode = function() {
+            return s.focusNode;
         }
 
         // emit a selction change event. 
@@ -416,6 +513,7 @@ it in one place. */
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
 
+        //move this to getSelection
         function _getPrecedingCharacter() {
             var sel = window.getSelection();
             if (sel.focusOffset == 0) {
@@ -455,7 +553,77 @@ it in one place. */
     global.EditorModules.push(TextReplacement);
 })(this)
 
-;/**
+;
+(function(global) {
+    'use strict';
+    var Screensize = Screensize || function(editor, options) {
+        var self = this;
+        var sizes = ["mobile", "desktop", "tablet"];
+        editor.on("toolbar:click", function(name) {
+            if (sizes.indexOf(name) !== -1) {
+                $(options.element)
+                	.removeClass(sizes.join(" "))
+                	.addClass(name);
+            }
+        })
+    }
+    global.EditorModules.push(Screensize);
+})(this);(function(global) {
+    'use strict';
+    var Theme = Theme || function(editor, options) {
+        var self = this;
+
+        editor.on("init", init);
+
+        function init() {
+            $(options.element)
+                .addClass(options.settings.font)
+                .addClass(options.settings.color)
+        }
+
+        var opts = {
+            color: ["light", "dark"],
+            font: ["monospace", "sans-serif", "serif"]
+        } 
+
+        editor.on("toolbar:click", function(name) {
+            if (name === "font" || name === "color") {
+                var i = opts[name].indexOf(options.settings[name]);
+                if (i == opts[name].length -1) {
+                    i = 0;
+                }
+                else {
+                    i++;
+                }
+                $(options.element)
+                    .removeClass(opts[name].join(" "))
+                    .addClass(opts[name][i]);
+                editor.updateSetting(name, opts[name][i]);
+            }
+        })
+    }
+    global.EditorModules.push(Theme);
+})(this);(function(global) {
+    'use strict';
+    var Stats = Stats || function(editor, options) {
+        var self = this;
+
+        editor.on("init", updateStats);
+
+        function updateStats() {
+            var text = $(".editor", editor.element)[0].innerText;
+            var wordcount = text.split(/\s+/).length - 1;
+            var stats = {
+                wordcount: wordcount,
+                characters: text.length,
+                readingtime: wordcount / 225
+            }
+            $(".wordcount", editor.element).html(wordcount);
+            setTimeout(updateStats, 5000);
+        }
+    }
+    global.EditorModules.push(Stats);
+})(this);/**
  * Copyright (c) 2010 by Gabriel Birke
  * 
  * Permission is hereby granted, free of charge, to any person obtaining a copy

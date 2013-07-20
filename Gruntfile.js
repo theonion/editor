@@ -16,6 +16,11 @@ module.exports = function(grunt) {
                 'src/modules/embed.js',
 
                 'src/plugins/textReplacement.js',
+                'src/plugins/screensize.js',
+                'src/plugins/theme.js',
+                'src/plugins/stats.js',
+
+
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
                 ],

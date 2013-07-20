@@ -3,6 +3,14 @@
     var Formatting = Formatting || function(editor, options) {
         var self = this;
 
+        editor.on("init", init);
+
+        function init() {
+            if (options.settings.visualize) {
+                $(options.element)
+                    .addClass("visualize");
+            }
+        }
 
         var commands = {
             bold : function() {
@@ -24,17 +32,22 @@
                 global.document.execCommand("subscript");
             },
             unorderedlist: function() {
-                global.document.execCommand('insertunorderedlist', null, null)
+                //global.document.execCommand('insertunorderedlist', null, null)
             },
             orderedlist: function() {
-                global.document.execCommand('insertorderedlist', null, null)
+                //global.document.execCommand('insertorderedlist', null, null)
             },
             blockquote: function() {
-                global.document.execCommand('formatBlock', null, '<blockquote>')
+                //global.document.execCommand('formatBlock', null, '<blockquote>')
             },
             visualize: function() {
-                $(options.element).find(".editor").toggleClass("visualize");
+                editor.updateSetting("visualize", 
+                    $(options.element)
+                        .toggleClass("visualize")
+                        .hasClass("visualize"));
             },
+
+
             //I don't think these belong here? maybe in base?
             undo: function() {
                 global.document.execCommand("undo", false, "");
