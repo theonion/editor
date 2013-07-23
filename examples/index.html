@@ -88,7 +88,12 @@
 
 
         <script type="text/template" id="embed-panel-image">
-            Add an image
+            <input type="text/javascript" id="image_id" value="1">
+            Insert: 
+            <a name="left">left</a>
+            <a name="center">center</a>
+            <a name="right">right</a>
+            <a name="full">full</a>
         </script>
         <script type="text/template" id="embed-panel-html">
             <textarea>put some html in here</textarea>
@@ -106,6 +111,39 @@
             Add some audio
         </script>
         <div id="editor"></div> 
+
+
+
+        <!-- the embed panel is not part of the editor markup. It can be used by multiple editors on a page. -->
+
+        <div id="embed-panel" class="toolbar">
+            <span id="embed-panel-close" class="icon-remove-sign"></span>
+            <div id="embed-panel-contents"></div>
+        </div>
+
+
+
+        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="../build/onion-editor.js"></script>
+        <script type="text/javascript">
+
+            var editor = new Editor({
+                /* global options */
+                element: document.getElementById("editor"),
+                toolbar: {
+                    documentTools:  $("#document-tools-template").html(),
+                    selectionTools: $("#selection-tools-template").html(),
+                },
+                settings: {
+                    font: "monospace",
+                    color: "light",
+                    visualize: true
+                }
+
+            });
+            editor.setContent($("#content").html());
+
+        </script>
 
         <div id="content" style="display:none">
         <blockquote>
@@ -146,41 +184,7 @@
 
         <p>Bursting with intensely personal songs that sound universal by virtue of their oversized, near-operatic emotionalism, <i>Ten </i>was neither subtle nor particularly cool, which helped it communicate better and more profoundly with more people than any other rock record of its time. Along with <a target="_blank" href="/artists/metallica,22853/">Metallica</a>&#8217;s Black Album and <a target="_blank" href="/artists/radiohead,4291/">Radiohead</a>&#8217;s <i>OK Computer</i>, Pearl Jam&#8217;s <i>Ten </i>is easily one of the most influential mainstream rock records of the last 20 years. The power of <i>Ten </i>was so great that it eventually stood apart from Pearl Jam; as Vedder and his increasingly marginalized supporting cast distanced themselves from the record&#8217;s gauche chest-thumping by churning out progressively restrained, more &#8220;mature,&#8221; and less expressive music, <i>Ten </i>was dusted off by other bands and recycled again and again. Today, Pearl Jam is a popular touring band and intermittently successful on the charts; <i>Ten</i>, meanwhile, is still all over modern-rock radio, though only a handful of the songs are actually by Pearl Jam.&#160; &#160;</p>
         </div>
-
-
-
-
-        <!-- the embed panel is not part of the editor markup. It can be used by multiple editors on a page. -->
-
-        <div id="embed-panel">
-            <span id="embed-panel-close" class="icon-remove-sign"></span>
-            <div id="embed-panel-contents"></div>
-        </div>
-
-
-
-        <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="../build/onion-editor.js"></script>
-        <script type="text/javascript">
-
-            var editor = new Editor({
-                /* global options */
-                element: document.getElementById("editor"),
-                toolbar: {
-                    documentTools:  $("#document-tools-template").html(),
-                    //paragraphTools: $("#paragraph-tools-template").html(),
-                    selectionTools: $("#selection-tools-template").html(),
-                },
-                settings: {
-                    font: "monospace",
-                    color: "light",
-                    visualize: true
-                }
-
-            });
-            editor.setContent($("#content").html());
-
-        </script>
+        
     </body>
 
 </html>

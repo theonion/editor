@@ -42,4 +42,3 @@
     }
     global.EditorModules.push(TextReplacement);
 })(this)
-

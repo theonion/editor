@@ -15,10 +15,10 @@ module.exports = function(grunt) {
                 'src/modules/selection.js',
                 'src/modules/embed.js',
 
-                'src/plugins/textReplacement.js',
-                'src/plugins/screensize.js',
-                'src/plugins/theme.js',
-                'src/plugins/stats.js',
+                'src/modules/textReplacement.js',
+                'src/modules/screensize.js',
+                'src/modules/theme.js',
+                'src/modules/stats.js',
 
 
                 'src/lib/sanitize.js',

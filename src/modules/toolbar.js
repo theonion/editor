@@ -39,6 +39,7 @@
                 editor.emit("toolbar:click", $(e.target).attr("name")); 
             });
 
+            
             self.toolbarElement.bind("mouseover", function(e) {
                 editor.emit("toolbar:over", $(e.target).attr("name")); 
             });
@@ -46,7 +47,7 @@
             self.toolbarElement.bind("mouseout", function(e) {
                 editor.emit("toolbar:out", $(e.target).attr("name")); 
             });
-
+            
             editor.emit("toolbar:ready");
         }
     }

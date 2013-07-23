@@ -49,6 +49,13 @@
                         catch (e) {}
                     }
                 };
+            },
+            // really basic templating
+            template: function(html, dict) {
+                for (k in dict) {
+                    html = html.replace("{{" + k + "}}", dict[k]);
+                }
+                return html;
             }
         },
         sanitize;

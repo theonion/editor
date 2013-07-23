@@ -3,6 +3,10 @@
     padding:0px;
 }
 
+a {
+    cursor:pointer;
+}
+
 input,textarea,
 .editor:focus {
     outline: none;

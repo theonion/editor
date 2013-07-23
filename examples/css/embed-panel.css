@@ -10,6 +10,7 @@
     width: 100%;
     z-index: 50;
     color: #F8F8F2;
+    opacity: 1;
 }
 
 #embed-panel.open {

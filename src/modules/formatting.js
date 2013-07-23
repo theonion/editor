@@ -71,16 +71,6 @@
             }
         })
 
-        /*
-        function _link() {
-            if (global.document.execCommand("createLink", true, "#replaceme")) {
-                sel = window.getSelection();
-                range = sel.getRangeAt(0);
-                _editLink(range.commonAncestorContainer.parentElement);    
-            }
-        }
-        */
-
     }
     global.EditorModules.push(Formatting);
 })(this)
