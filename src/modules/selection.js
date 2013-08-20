@@ -1,6 +1,10 @@
 /* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
 whole thing be cross-browser more easily. Also, this code always looks ugly, so let's keep
-it in one place. */
+it in one place. 
+
+Now that I'm using RANGY, some of this stuff needs to be revisited. 
+
+*/
 
 (function(global) {
     'use strict';
@@ -31,7 +35,9 @@ it in one place. */
 
         // returns true there is selected text in the editor
         self.hasSelection = function() {
+            var s = w.getSelection();
             if (self.hasFocus()) { //any selection will not suffice, must be in this editor
+                //TODO: This doesn't work in firefox. 
                 if (s.type === "Range") {
                     return true
                 }
@@ -39,8 +45,8 @@ it in one place. */
             return false;
         }
 
-        //from stackoverflow, p
-        function getSelectionCoords() {
+        
+        self.getCoordinates = function () {
             var sel = document.selection, range;
             var x = 0, y = 0;
             if (window.getSelection) {
@@ -50,6 +56,7 @@ it in one place. */
                     if (range.getClientRects) {
                         range.collapse(true);
                         var rect = range.getClientRects()[0];
+                        console.log(range.getClientRects()[0]);
                         x = rect.left;
                         y = rect.top;
                     }
@@ -78,6 +85,45 @@ it in one place. */
         }
         self.getFocusNode = function() {
             return s.focusNode;
+        }
+        self.setCaretBefore = function(node) {
+            var range = document.createRange();
+            var sel = window.getSelection();
+            range.setStartBefore(node);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        self.setCaretAfter = function(node) {
+            var range = document.createRange();
+            var sel = window.getSelection();
+            range.setStartAfter(node);
+            range.collapse(true);
+            sel.removeAllRanges();
+            sel.addRange(range);
+        }
+
+        self.getNonInlineParent = function() {
+            var anchorNode = self.getAnchorNode();
+
+            if (anchorNode.nodeType == 3 || $(anchorNode).css("display") === "inline") {
+                var node;
+                var parents = $(anchorNode).parentsUntil(".editor");
+                for (var i =0; i < parents.length; i++) {
+                    if ($(parents[i]).css("display") !== "inline") {
+                        node = parents[i];
+                        break;
+                    }
+                }
+                if (!node) {
+                    node = anchorNode;
+                }
+                return node;
+            }
+            else {
+                return anchorNode;
+            }
         }
 
         // emit a selction change event. 

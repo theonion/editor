@@ -1,6 +1,7 @@
 * {
     margin:0px;
     padding:0px;
+    box-sizing: border-box;
 }
 
 a {
@@ -14,6 +15,7 @@ input,textarea,
 
 body {
     font-family: Helvetica, Arial, sans-serif;
+    background-color: #E0E0E0;
 }
 
 #editor {
@@ -45,7 +47,7 @@ h1.title {
     padding:100px;
     position:relative;
     z-index:20;
-    width:668px;
+    width: 870px;
 }
 
 
@@ -67,7 +69,7 @@ h1.title {
 
 
 
-
+.editor blockquote,
 .editor ul,
 .editor ol,
 .editor p,
@@ -99,5 +101,19 @@ h1.title {
 
 
 
+/* debug css */
 
+.visualize .debug-previousChildNode {
+    border:2px red solid;
+}
+
+.visualize .debug-node {
+    border:2px green solid;
+}
+
+span.rangePlaceholder {
+    display: inline-block;
+    width: 20px;
+    background-color: yellow;
+}
 

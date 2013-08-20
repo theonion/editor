@@ -8,6 +8,8 @@
         var self = this,
         defaults = {
                 element: null, /* element to make Editable */
+                content: "<p><br></p>",
+                allowNewline: true,
                 sanitize: {
                   elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br'],
                   attributes: {'a': ['href', 'title']},
@@ -60,6 +62,16 @@
         },
         sanitize;
 
+
+        function isEmptyCheck() {
+            //if the editor is empty, show the placeholder. 
+            if ($(".editor", options.element).text() === "") {
+                $(".editorPlaceholder", options.element).show();
+            }
+            else {
+                $(".editorPlaceholder", options.element).hide();
+            }
+        }
         function loadSettings() {
             if (localStorage.editorSettings) {
                 options.settings = JSON.parse(global.localStorage.editorSettings)
@@ -78,6 +90,7 @@
             
             $(options.element)
                 .append('<div class="editor-wrapper">\
+                            <div class="editorPlaceholder"></div>\
                             <div class="editor" contenteditable="true" spellcheck="false">\
                                 <p></p>\
                             </div>\
@@ -86,7 +99,13 @@
                             <div class="embed-overlay"></div>\
                         </div>');
                 
+
+            $(".editorPlaceholder", options.element).html(options.placeholder);
             sanitize = new Sanitize(options.sanitize);
+
+            self.setContent(options.content);
+
+            isEmptyCheck();
 
             self.emit("init");
 
@@ -95,67 +114,119 @@
                     self.emit("click", e);
                 })
                 .bind("keydown", function(e) {
+                    
+                    /* for undo */
+                    var beforeState = self.getContent();
+
+                    var node = self.selection.getNonInlineParent();
+                    
+                    var previousChildNode = $(node).prev()[0];
+
+
+                    var parentNode = node.parentNode || node;
+                    var isParentRoot = $( parentNode).hasClass("editor");
+                    var isBlank = ($(node).text() === "");
+                    var isPreviousChildBlank = ($(previousChildNode).text() === "");
+                    var isFirstChild = (typeof previousChildNode === "undefined");
+                    var isLastChild = (typeof $(node).next()[0] === "undefined");
+                    var isTextSelected = self.selection.hasSelection();
+
+                    /*
+                    console.log(" nodeName: " + node.tagName +
+                                " parentNodeName: " + parentNode.tagName +
+                                " isParentRoot: " + isParentRoot + 
+                                " isBlank: " + isBlank + 
+                                " isPreviousChildBlank: " + isPreviousChildBlank + 
+                                " isFirstChild: " + isFirstChild + 
+                                " isLastChild: " + isLastChild + 
+                                " isTextSelected: " + isTextSelected
+                        )
+                    */
 
                     // handle enter key shit. 
-                    if (e.keyCode === 13) {
-                        //e.preventDefault();
+                    if (e.keyCode === 13 && !e.shiftKey) {
 
-                        //determine if enter is pressed in an empty node. Do the right thing
-                        
-
-
-                        if (!self.selection.hasSelection() && self.selection.hasFocus()) {
-                            var node = self.selection.getAnchorNode();
-                            console.log("text: " + $(node).text());
-                            if ($(node).text() == "") {
-                                console.log("BLANK, DO SOMTHIN");
-                                console.log(self.selection.getRootParent());
-                                var rootTagName = self.selection.getRootParent().tagName;
-                                console.log("rootTag: " + rootTagName);
-                                if (rootTagName == "BLOCKQUOTE") {
-                                    // Remove current node, 
-                                    // Insert new paragraph.
-                                    // make sure cursor is in there.
-
+                        if (isTextSelected || !options.allowNewline) {  
+                            // shit gets weird when enter is pushed and text is selected. Nobody does this
+                            e.preventDefault();
+                        }
+                        else if (isBlank) { //enter was hit in an empty node.
+                            //$(node).remove();
+                            if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
+                                // is the "P" inside something? Does it matter?
+                            }
+                            else if (node.tagName == "LI") {
+                                if (isLastChild && isFirstChild) {
+                                    e.preventDefault();
+                                    console.log("LI: Only item in list. removing");
+                                    $(node).remove(); // remove the li
+                                    document.execCommand("formatBlock", false, "P");
+                                    setTimeout(function() {
+                                        var nodeToRemove = self.selection.getNonInlineParent()
+                                        $(nodeToRemove).remove();
+                                    }, 5)
+                                
+                                }
+                                else if (isFirstChild) {
+                                    //LI: First item in the list, but list isn't empty. removing node & adding paragraph above"
                                     e.preventDefault();
                                 }
-                                else if (rootTagName == "OL" || rootTagName == "UL") {
-                                    // Remove current node, 
-                                    
-                                    var container = node.parentNode;    
-                                    $(node).remove();
-                                    $(container).after("<p><br></p>")
-                                    var sel = window.getSelection();
-                                    var range = document.createRange();
-                                    range.selectNodeContents($(container).next()[0]);
-                                    range.collapse(true);
-                                    sel.removeAllRanges();
-                                    sel.addRange(range);
-                                    //remove an empty <UL> or <OL>
-                                    if ($("li", container).length == 0) {
-                                        $(container).remove();
-                                    }
-
+                                else if (isLastChild) {
+                                    // LI: At end of list, removing node
                                     e.preventDefault();
+
+                                        $(node).remove(); 
+                                        
+                                        //$(parentNode).after("<span class='tmp'></span>");
+                                        self.selection.setCaretAfter(parentNode);
+                                        setTimeout(function() {
+                                            document.execCommand("insertHtml", false, "<p><br></p>");
+                                        }, 20)
+                                }
+                                else if (!isLastChild && !isFirstChild) {
+                                    //LI: In the middle of the list
+                                    //e.preventDefault();
+                                    setTimeout(function() {
+                                        $(".editor div").remove();
+                                        document.execCommand("insertHtml", false, "<p><br></p>")
+                                    })
                                 }
                             }
+
                         }
                     }
                     else if (e.keyCode === 8) {
+                        self.emit("backspace");
                         var sel = window.getSelection()
                         //this happens when the cursor is in the last remaining empty paragraph. 
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
                             e.preventDefault();
+
+                            // do we want to "merge adjacent lists if they are of the same type"
                         }
+                        
                     }
+                    setTimeout(isEmptyCheck, 50);
+
+                    clearTimeout(self.undoTimeout);
+                    self.undoTimeout =  setTimeout(function() {
+                        var afterState = self.getContent();
+
+                        self.options.undo.addCommand(self, "typing", beforeState, afterState);
+                    }, 250)
+
                     self.emit("keydown", e);
                 })
                 .bind("keyup", function(e) {
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    /* this doesn't look very pretty & it bothers me. Probably a cleaner way to do this? */
+
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
+                    //prefer html, but take text if it's not avaialble
+                    if (pastedHTML === "") {
+                        pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
+                    }
                     var fragment = document.createDocumentFragment();
         
                     fragment.appendChild(document.createElement("div"))
@@ -177,7 +248,12 @@
                     self.selection.insertOrReplace(cleanHTML)
 
                     e.preventDefault();
+
+
+
+
                     self.emit("paste");
+                    
                 })
         };
 
@@ -186,9 +262,10 @@
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);
         }
-
+        self.getContent = function(contentHTML) {
+            return $(options.element).find(".editor").html();
+        }
         options = $.extend(defaults, options);
-
 
         init(options);
     }

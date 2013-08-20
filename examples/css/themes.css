@@ -9,7 +9,7 @@
 .editor,
 .light .editor {
     border: 1px #DADADA solid;
-    background-color: #F1F1F1;
+    /*background-color: #F1F1F1; */
 }
 
 .light .editor a {
@@ -35,30 +35,57 @@
 
 /* fonts */
 .editor,
+.editorPlaceholder,
 .monospace .editor {
     font-family: 'Source Code Pro', Courier, sans-serif;
     line-height: 27px;
 }
+
 .editor,
+.editorPlaceholder,
 .monospace .editor blockquote {
     font-size: 16px;
 }
 
 
-.sans-serif .editor {
+.sans-serif .editor,
+.sans-serif .editorPlaceholder {
     font-family: 'Source Sans Pro', Helvetica, sans-serif;
     line-height: 32px;
 }
+.sans-serif .editorPlaceholder blockquote, 
 .sans-serif .editor blockquote {
     font-size: 16px;
     line-height: 24px;
 }
 
+.serif .editorPlaceholder,
 .serif .editor {
     font-family: Georgia, sans-serif;
     line-height: 32px;
+    font-size: 18px;
 }
+.serif .editorPlaceholder blockquote, 
 .serif .editor blockquote {
     font-size: 16px;
     line-height: 24px;
+}
+
+.title .editorPlaceholder,
+.title .editor {
+    font-family: Georgia, sans-serif;
+    font-size:28px;
+    line-height: 42px;
+}
+
+.subhead .editorPlaceholder,
+.subhead .editor {
+    font-family: Georgia, sans-serif;
+    font-size:22px;
+    line-height: 32px;
+    color: #444;
+}
+
+.editorPlaceholder {
+    color: #B3B3B3 !important;
 }

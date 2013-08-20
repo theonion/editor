@@ -21,8 +21,8 @@
     padding: 0 4px;
 }
 
-button:hover,
-button.pressed {
+.toolbar button:hover,
+.toolbar button.pressed {
     background-color: rgba(0,0,0,.2);
     background-color: #ddd;
     background-image: -webkit-linear-gradient(top,#eee,#e0e0e0);
@@ -39,7 +39,7 @@ button.pressed {
     -moz-user-select: moz-none;
     -ms-user-select: none;
     user-select: none;
-    opacity: .6;
+    opacity: .8;
     /*transition: opacity .25s ease-in-out;*/
 }
 
@@ -73,12 +73,15 @@ button.pressed {
     border-bottom-left-radius: 4px;
     position:fixed;
     left:50%;
-    margin-left: 405px;
+    margin-left: 340px; /* TODO: DO THIS ON THE FLY? */
     text-align:center;
+
 }
 
 .document-tools:hover {
-    margin-left: 300px;
+    margin-left: 235px;
+    display: block;
+    width: 140px;
 }
 
 

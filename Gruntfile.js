@@ -10,17 +10,23 @@ module.exports = function(grunt) {
         dist: {
           src: [
                 'src/base.js',
+                'src/undoManager.js',
+
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
-                'src/modules/embed.js',
+                'src/modules/embed.js', 
+                'src/modules/undo.js', 
 
                 'src/modules/textReplacement.js',
-                'src/modules/screensize.js',
+                'src/mo`dules/screensize.js',
                 'src/modules/theme.js',
                 'src/modules/stats.js',
 
-
+                'src/lib/rangy/rangy-core.js',
+                'src/lib/rangy/rangy-cssclassapplier.js',
+                'src/lib/rangy/rangy-selectionsaverestore.js',
+                'src/lib/rangy/rangy-serializer.js',
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
                 ],

@@ -6,7 +6,7 @@
         var currentType;
         function init() {
             $("#embed-panel-close").click(function() { $("#embed-panel").removeClass("open") })
-            $("#embed-panel").click(handlePanelClick);
+            //$("#embed-panel").click(handlePanelClick);
         }
 
         init();
@@ -38,19 +38,7 @@
         })
 
 
-        editor.on("toolbar:hover", function(position) {
-            if (["left", "right", "full", "center"].indexOf(position) !== -1) {
-
-                var id = $("#image_id").val();
-                var dict = {
-                    id: id,
-                    url: editor.utils.template(editor.embed.types.url, {id: id, crop})
-
-                }
-                previeItem("")
-
-            }
-        })
+        
         
         editor.embed = {};
 

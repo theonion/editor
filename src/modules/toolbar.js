@@ -16,21 +16,31 @@
                     if (currentBlockNode) {
                         var blockTop = $(currentBlockNode).position().top;
                         if (editor.selection.hasSelection()) {
-                            $(".selection-tools").css({top: blockTop  - 35})
-                            $(".selection-tools").show();
+
+                            var coords = editor.selection.getCoordinates();
+                            $(".selection-tools",  options.element).css({top: coords.top  - 35, left: coords.left})
+                            $(".selection-tools",  options.element).show();
                             return;
                         }
                     }
-                    $(".selection-tools").hide();
+                    $(".selection-tools", options.element).hide();
                 }   
             , 5);
         }
 
         function init() {
-
-            $(options.element).find(".document-tools").html(options.toolbar.documentTools);
-            $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
-
+            if (options.toolbar.documentTools) {
+                $(options.element).find(".document-tools").html(options.toolbar.documentTools);
+            }
+            else {
+                $(options.element).find(".document-tools").hide();
+            }
+            if (options.toolbar.selectionTools) {            
+                $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
+            }
+            else {
+                $(options.element).find(".selection-tools").hide();
+            }
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 

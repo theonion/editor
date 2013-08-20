@@ -6,9 +6,11 @@
         editor.on("init", init);
 
         function init() {
+            
             $(options.element)
                 .addClass(options.settings.font)
                 .addClass(options.settings.color)
+            
         }
 
         var opts = {
@@ -28,7 +30,7 @@
                 $(options.element)
                     .removeClass(opts[name].join(" "))
                     .addClass(opts[name][i]);
-                editor.updateSetting(name, opts[name][i]);
+                //editor.updateSetting(name, opts[name][i]);
             }
         })
     }
