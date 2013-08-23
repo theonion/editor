@@ -212,7 +212,7 @@
                     self.undoTimeout =  setTimeout(function() {
                         var afterState = self.getContent();
 
-                        self.options.undo.addCommand(self, "typing", beforeState, afterState);
+                        //self.options.undo.addCommand(self, "typing", beforeState, afterState);
                     }, 250)
 
                     self.emit("keydown", e);

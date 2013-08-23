@@ -72,7 +72,7 @@ body {
 
 #content-wrapper {
     margin-top: 100px;
-    border: 1px #DADADA solid;
+    
     margin: 20px auto 0;
 }
 
@@ -91,6 +91,12 @@ body {
 
 #content-body .editor {
     min-height: 600px;
+}
+
+#tags,
+#categorization {
+    padding: 10px 10px 0px 10px;
+    font-size:110%;
 }
 
 .inline-input {
@@ -118,4 +124,12 @@ body {
     margin: 0 5px;
     color: #aaa;
     border-radius: 5px;
+}
+
+.document-tools {
+    position:absolute;
+}
+
+.label {
+    opacity: .7;
 }

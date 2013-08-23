@@ -11,34 +11,13 @@
         <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
 
         <!-- Latest compiled and minified CSS -->
-        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0-rc1/css/bootstrap.min.css" rel="stylesheet">
-         
-        <link href='css/cms-demo.css' rel='stylesheet' type='text/css'>
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">         
         <link href='css/themes.css' rel='stylesheet' type='text/css'>
         <link href='css/toolbar.css' rel='stylesheet' type='text/css'>
         <link href='css/embed-panel.css' rel='stylesheet' type='text/css'>
         <link href='css/inline.css' rel='stylesheet' type='text/css'>
+        <link href='css/cms-demo.css' rel='stylesheet' type='text/css'>
 
-        <style>
-
-            .editor {
-                min-height: 0;
-            }
-
-            .document-tools {
-                position:absolute;
-            }
-
-
-
-            .tags .form-control {
-                width: 160px;
-            }
-
-
-
-
-        </style>
     </head>
 
     <body>
@@ -47,6 +26,7 @@
                 <span class="navbar-brand" data-toggle="tooltip" title="Save &amp; Return"></span>
 
                 <div class="navbar-form pull-right" >
+                    <button class="btn">Send to Editor</button>
                     
                     
                     <button class="btn btn-primary">Preview &amp; Publish</button>
@@ -59,12 +39,20 @@
 
 
         <div id="content-wrapper" class="container">
+            <div id="categorization">
+                <span class="label label-primary">Add Section</span> <span class="label label-default">Set Feature Type</span>
+                <span class="label label-default pull-right">Add Special Image</span>
+            </div>
+            <div id="tags">
+                <span class="label label-primary">Add Tag</span>
+            </div>
             <div id="content-title"></div> 
             <div id="content-subhead"></div>
             <div id="authors" class="inline-input">
                 By <span class="values"></span><span class="add icon-plus-sign-alt"> Add Author</span>
             </div> 
             <div id="content-body"></div> 
+
         </div>
 
         <!-- the embed panel is not part of the editor markup. It can be used by multiple editors on a page. -->
@@ -118,12 +106,36 @@
         </script>
 
         <script type="text/template" id="embed-panel-image">
-            <input type="text/javascript" id="image_id" value="1">
-            Insert: 
-            <a name="left">left</a>
-            <a name="center">center</a>
-            <a name="right">right</a>
-            <a name="full">full</a>
+                
+                
+                <div class="image-add container">
+                    <div class="row">
+                        <div class="col-md-4">
+                            <span class="label label-default">Upload an image</span>
+                            <div style="margin-top: 40px">
+                                <input type="file" name="image">
+                            </div>
+                        </div>
+                        <div class="col-md-8">
+                            <div>
+                            <span class="label label-default">Images in this Article</span>
+                            <input class="pull-right" type="text" placeholder="Search library">
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="image-edit" style="display:none">
+                    <div class="image-place">
+                        <a name="left">left</a>
+                        <a name="center">center</a>
+                        <a name="right">right</a>
+                        <a name="full">full</a>
+                    </div>
+                
+
+                </div>
+                
         </script>
         
         <script type="text/template" id="embed-panel-html">
@@ -147,7 +159,7 @@
         <script>
 
 
-            new UndoManager();
+            var undomanager = new UndoManager();
 
             var content_title_editor = new Editor({
                 /* global options */
@@ -204,22 +216,6 @@
 
         </script>
 
-        <script>
-            /* CMS demo stuff */
-
-            $("#toggleDetails").click(
-                function() {
-                    $("body").toggleClass("details-expanded");
-                }
-            )
-
-            $(".image-widget").click(
-                function() {
-
-                }
-            );
-
-        </script>
 
     </body>
 
