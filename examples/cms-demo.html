@@ -15,8 +15,10 @@
         <link href='css/themes.css' rel='stylesheet' type='text/css'>
         <link href='css/toolbar.css' rel='stylesheet' type='text/css'>
         <link href='css/embed-panel.css' rel='stylesheet' type='text/css'>
+        <link href='css/image.css' rel='stylesheet' type='text/css'>
         <link href='css/inline.css' rel='stylesheet' type='text/css'>
         <link href='css/cms-demo.css' rel='stylesheet' type='text/css'>
+        
 
     </head>
 
@@ -108,7 +110,7 @@
         <script type="text/template" id="embed-panel-image">
                 
                 
-                <div class="image-add container">
+                <div class="image-add container" style="display:none">
                     <div class="row">
                         <div class="col-md-4">
                             <span class="label label-default">Upload an image</span>
@@ -125,7 +127,8 @@
                     </div>
                 </div>
 
-                <div class="image-edit" style="display:none">
+                <div class="image-edit" >
+                    <input type="text" style="width: 100px" id="image-embed-id" value="1">
                     <div class="image-place">
                         <a name="left">left</a>
                         <a name="center">center</a>
@@ -154,6 +157,7 @@
             Add some audio
         </script>
         <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
+        <script src="../src/lib/image.js"></script>
 
         <script src="../build/onion-editor.js"></script>
         <script>

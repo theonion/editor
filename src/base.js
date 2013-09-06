@@ -53,9 +53,11 @@
                 };
             },
             // really basic templating
-            template: function(html, dict) {
-                for (k in dict) {
-                    html = html.replace("{{" + k + "}}", dict[k]);
+            template: function(html, dict) {    
+                for (var k in dict) {
+                    if (k) {
+                        html = html.replace(new RegExp("{{" + k + "}}", 'g'), dict[k]);
+                    }
                 }
                 return html;
             }
@@ -258,6 +260,8 @@
         };
 
         utils.enableEvents(self);
+
+        self.utils = utils;
 
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);

@@ -19,7 +19,7 @@ module.exports = function(grunt) {
                 'src/modules/undo.js', 
 
                 'src/modules/textReplacement.js',
-                'src/mo`dules/screensize.js',
+                'src/modules/screensize.js',
                 'src/modules/theme.js',
                 'src/modules/stats.js',
 
@@ -29,6 +29,12 @@ module.exports = function(grunt) {
                 'src/lib/rangy/rangy-serializer.js',
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
+
+                /* TODO: Move plugins outside of this project */
+                'src/plugins/onion-embed.js',
+                'src/plugins/onion-images.js',
+
+
                 ],
           dest: 'build/<%= pkg.name %>.js'
         }

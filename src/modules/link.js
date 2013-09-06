@@ -1,3 +1,4 @@
+/*  
     function _editLink(linkNode) {
         if (linkNode) {
             //position over url;
@@ -18,3 +19,4 @@
                 .show();
         }
     }
+*/

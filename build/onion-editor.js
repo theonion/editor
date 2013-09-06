@@ -1,4 +1,4 @@
-/*! onion-editor 2013-08-23 */
+/*! onion-editor 2013-09-05 */
 (function(global){
 
     'use strict';
@@ -54,9 +54,11 @@
                 };
             },
             // really basic templating
-            template: function(html, dict) {
-                for (k in dict) {
-                    html = html.replace("{{" + k + "}}", dict[k]);
+            template: function(html, dict) {    
+                for (var k in dict) {
+                    if (k) {
+                        html = html.replace(new RegExp("{{" + k + "}}", 'g'), dict[k]);
+                    }
                 }
                 return html;
             }
@@ -259,6 +261,8 @@
         };
 
         utils.enableEvents(self);
+
+        self.utils = utils;
 
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);
@@ -618,91 +622,31 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
     var Embed = Embed || function(editor, options) {
         var self = this;
 
-        var currentType;
-        function init() {
-            $("#embed-panel-close").click(function() { $("#embed-panel").removeClass("open") })
-            //$("#embed-panel").click(handlePanelClick);
-        }
-
-        init();
-
+/*
         function previewItem(type) {
             var node = editor.selection.getRootParent();
             var item = editor.embed.types[type];
+            
             if (node) {
-                $(node).before(item.placeholder);
+                $(node).before( item.placeholder()  );
             }
+
         }
 
         function placeItem(type) {
-            //try to use INSERTHML so undo works
             $(".placeholder", editor.element).removeClass("placeholder");
         }
-
+*/
 
         editor.on("toolbar:click", function(type) {
-            if (typeof editor.embed.types[type] === "object" ) {
-                //TODO: manage templates better
-                currentType = type;
-                $("#embed-panel-contents")
-                    .html($("#embed-panel-" + type).html());
+            if (editor.embed.types.indexOf(type) !== -1 ) {
 
-                $("#embed-panel")
-                    .addClass("open");
+                //emit an embed event for third party embed implementations to listen on
+                editor.emit("embed:" + type);                
             }
         })
 
-
-        
-        
-        editor.embed = {};
-
-        //let's hardcode some types here for now. break into files later
-        editor.embed.types = {
-            
-
-            /* 
-            Image Service stuff:
-            curl --form "image=@selig.jpg" http://localhost:8888/api/new
-
-            */ 
-            image: {
-
-                url: "http://localhost:8888/{{id}}/{{crop}}/{{width}}.jpg",
-
-                embedMarkup: '<div class="inline image {{position}} placeholder">\
-                    <img src="{{url}}">\
-                    <span class="caption">An image caption</span>\
-                    </div>'
-            },
-            video: {
-                edit: function() {
-                    //this happens when you edit.
-                },
-                placeholder: '<div class="inline right video placeholder">\
-                    <img src="http://placehold.it/240x135/27AE60/ffffff">\
-                    <span class="caption">An enjoyable video</span>\
-                    </div>'
-            },
-
-            audio: {
-                edit: function () {}
-
-            },
-            tweet: {
-                edit: function () {}
-
-            },
-            specialchars: {
-                edit: function () {}
-
-            },
-            html: {
-                edit: function () {}
-
-            }
-
-        }
+        editor.embed = {types: []};
     }
     global.EditorModules.push(Embed);
 })(this);/* Editor's interface to global Undo */
@@ -758,6 +702,21 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         editor.on("keydown", replaceText);
     }
     global.EditorModules.push(TextReplacement);
+})(this);
+(function(global) {
+    'use strict';
+    var Screensize = Screensize || function(editor, options) {
+        var self = this;
+        var sizes = ["mobile", "desktop", "tablet"];
+        editor.on("toolbar:click", function(name) {
+            if (sizes.indexOf(name) !== -1) {
+                $(options.element)
+                	.removeClass(sizes.join(" "))
+                	.addClass(name);
+            }
+        })
+    }
+    global.EditorModules.push(Screensize);
 })(this);(function(global) {
     'use strict';
     var Theme = Theme || function(editor, options) {
@@ -5739,3 +5698,83 @@ if ( typeof define === "function" ) {
   if(typeof module !== 'undefined') module.exports = key;
 
 })(this);
+;// Stubbing out some drawer functionality for demo purposes.
+
+function openDrawer(type) {
+	$("#embed-panel").addClass("open");
+}
+
+$("#embed-panel-close").click(function() {
+	$("#embed-panel").removeClass("open");
+});
+
+function populateDrawer(id) {
+	$("#embed-panel-contents").html($("#" + id).html());
+};/* 
+
+Image 
+
+This bridges the embed module that the editor exposes & our custom image implementation. 
+
+*/
+
+(function(global) {
+    'use strict';
+    var OnionImage = OnionImage || function(editor, options) {
+ 
+
+        window.IMAGE_URL = "http://img.onionstatic.com/avclub/{{id}}/{{crop}}/{{width}}.jpg"
+        var embedMarkup = 
+            '<div data-picture class="image inline placeholder {{position}} {{crop}}"  data-image-id="{{id}}" data-image-alt="" contenteditable="false">\
+                <div>\
+                    <noscript><img src="http://img.onionstatic.com/avclub/{{id}}/original/300.jpg"></noscript>\
+                </div>\
+            </div>'
+
+
+        function getImageID() {
+            // CMS CONNECTION POINT
+            return $("#image-embed-id").val()
+        }
+
+
+        editor.on("embed:image", start);    
+
+
+        function start() {
+            //CMS Connection point
+            populateDrawer("embed-panel-image");
+            // register events for buttons
+            $(".image-place a").bind("mouseover", previewItem)
+            $(".image-place a").bind("mouseout", clearItem)
+            $(".image-place a").bind("click", placeItem)
+            openDrawer();
+        }
+
+        function clearItem() {
+            $(".placeholder", editor.element).remove();
+        }
+        function previewItem() {
+            var node = editor.selection.getRootParent();
+            if (node) {
+                //re-render images
+                
+                console.log(editor);
+                $(node).before( 
+
+                    editor.utils.template(embedMarkup, {id: getImageID(), position: this.name, crop:''})
+                );
+            }
+            window.picturefill();
+
+        }
+
+        function placeItem(type) {
+            $(".placeholder", editor.element).removeClass("placeholder");
+             window.picturefill();
+        }
+
+        editor.embed.types.push('image'); // register as embeddable type
+    }
+    global.EditorModules.push(OnionImage);
+})(this)
