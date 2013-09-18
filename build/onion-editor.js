@@ -1,4 +1,4 @@
-/*! onion-editor 2013-09-05 */
+/*! onion-editor 2013-09-18 */
 (function(global){
 
     'use strict';
@@ -12,7 +12,7 @@
                 content: "<p><br></p>",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -350,24 +350,40 @@ Making a few assumptions, for now:
         //TODO: localize these events just to the editor instance
         
         editor.on("selection:change", update);
-        function update(e) {
-            setTimeout( //give the browser a chance to catch up
-                function() {
-                    //check if selection is in the editor itself.
-                    var currentBlockNode = editor.selection.getRootParent();
-                    if (currentBlockNode) {
-                        var blockTop = $(currentBlockNode).position().top;
-                        if (editor.selection.hasSelection()) {
 
-                            var coords = editor.selection.getCoordinates();
-                            $(".selection-tools",  options.element).css({top: coords.top  - 35, left: coords.left})
-                            $(".selection-tools",  options.element).show();
-                            return;
-                        }
+        var scrollTimeout;
+        $(window).scroll(function() {
+            clearTimeout(scrollTimeout);
+            if (editor.selection.hasSelection()) {
+                $(".selection-tools",  options.element).hide();
+                scrollTimeout = setTimeout(
+                    function() {
+                        update();
+                        //$(".selection-tools",  options.element).show();
                     }
-                    $(".selection-tools", options.element).hide();
-                }   
-            , 5);
+                , 250);
+            };
+        });
+
+        function update(e) {
+            if (options.toolbar.selectionTools) {
+                setTimeout( //give the browser a chance to catch up
+                    function() {
+                        //check if selection is in the editor itself.
+                        var currentBlockNode = editor.selection.getTopLevelParent();
+                        if (currentBlockNode) {
+                            var blockTop = $(currentBlockNode).position().top;
+                            if (editor.selection.hasSelection()) {
+                                var coords = editor.selection.getCoordinates();
+                                $(".selection-tools",  options.element).css({top: coords.top - 55, left: coords.left})
+                                $(".selection-tools",  options.element).show();
+                                return;
+                            }
+                        }
+                        $(".selection-tools", options.element).hide();
+                    }   
+                , 5);
+            }
         }
 
         function init() {
@@ -377,7 +393,7 @@ Making a few assumptions, for now:
             else {
                 $(options.element).find(".document-tools").hide();
             }
-            if (options.toolbar.selectionTools) {            
+            if (options.toolbar.selectionTools) {
                 $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
             }
             else {
@@ -419,44 +435,68 @@ Making a few assumptions, for now:
                     .addClass("visualize");
             }
 
+
+            // only enable key commands if that kind of markup is allowed in sanitize config. 
+
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);
             key('⌘+u, ctrl+u', commands["underline"]);
 
             editor.on("toolbar:click", function(name) {
                 if (typeof commands[name] === "function" ) {
-                    commands[name]();
+                    if (editor.selection.hasFocus()) {
+                        commands[name]();
+                    }
                 }
             })
         }
 
+        function canFormat(tagName) {
+            return editor.selection.hasFocus() && 
+                options.sanitize.elements.indexOf(tagName) !== -1
+        }
+
         var commands = {
             bold : function() {
-                global.document.execCommand("bold");
+                if (canFormat("b")) {
+                    global.document.execCommand("bold");
+                }
             },
             italic: function() {
-                global.document.execCommand("italic");
+                if (canFormat("i")) {
+                    global.document.execCommand("italic");
+                }
             },
             underline: function() {
-                global.document.execCommand("underline");
+                if (canFormat("u")) {
+                    global.document.execCommand("underline");
+                }
             },
             strikethrough: function() {
-                global.document.execCommand("strikethrough");
+                if (canFormat("s")) {
+                    global.document.execCommand("strikethrough");
+                }
             },
             superscript: function() {
-                global.document.execCommand("superscript");
+                if (canFormat("sup")) {
+                    global.document.execCommand("superscript");
+                }
             },
             subscript: function() {
-                global.document.execCommand("subscript");
+                if (canFormat("sub")) {
+                    global.document.execCommand("subscript");
+                }
             },
+
+            /* structural formatting */
             unorderedlist: function() {
-                
+                doList("UL")
             },
             orderedlist: function() {
-                
+                doList("OL")
             },
             blockquote: function() {
-
+                wrap("blockquote")
             },
             visualize: function() {
                 editor.updateSetting("visualize", 
@@ -471,8 +511,101 @@ Making a few assumptions, for now:
             }
         }
 
+        function wrap(tagName) {
+
+            // 1. Selection is within a single node, or no selection
+            // ---> Wrap element within the tagName
+            console.log(tagName);
+            console.log(editor.selection.getSelectedBlockNodes());
+            var nodes = editor.selection.getSelectedBlockNodes();
+            
 
 
+            // we have a list of nodes. can we wrap them?
+
+        }
+
+        function doList(tagName) {
+            console.log(tagName)
+            var nodes = editor.selection.getSelectedBlockNodes();
+            var nodeNames = nodes.map(function(n) {return n.nodeName})
+            console.log(nodeNames);
+
+            /*
+            Let's talk about this list of nodes:
+                All Lists? Merge 'em & change the list type. 
+                All Paragraphs? Turn them all into LIs & wrap 'em w/ the right tagName
+                Is there a blockquote or div in the list? ABORT!!!
+            */
+
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1){
+                console.log("Selection contains blockquote or div. Abort!")
+            }
+            else {
+                // if there's only one node selected & it is a list of the same type as the one selected, convert to paragraphs
+                if (nodes.length == 1 && nodes[0].nodeName == tagName) {
+                    var html = "";
+                    var items = $("li", nodes[0]);
+                    items.map(function(i) {  html += "<p class='tmp-selectme'>" + $(items[i]).html() + "</p>";})
+                    $(nodes[0])[0].outerHTML = html;
+
+                    //TODO: select newly inserted paragraphs
+
+                    //the only thing that matter are the first & last nodes. probably should do that instead. 
+                    editor.selection.selectNodes($(".tmp-selectme"));
+
+                    $(".tmp-selectme").removeClass("tmp-selectme");
+                }
+                else {
+                    //we should only have existing UL/OL and paragraphs now, all with the same parent
+                    
+                    // let's make a fragment to dump all this new shit into.
+                    var newListItems = []
+                    for (var i = 0; i < nodes.length; i++) {
+
+                        //get list of html fragments to encase in LIs
+                        if (nodes[i].nodeName === "OL" || nodes[i].nodeName === "UL") {
+                            //throw all the li innerhtml into a list
+                            var listItems = $.makeArray( $("li", nodes[i]) );
+                            listItems.map(function(el) { newListItems.push($(el).html()) });
+                        }
+                        else {
+                            //throw paragraph innerhtml in a list
+
+                            newListItems.push( nodes[i].innerHTML )
+                        }
+                    }
+                    /*iterarte over nodelist, wrap html in the list with an LI, append to
+                    list inside fragment
+                    */
+                    
+                    var frag = document.createDocumentFragment();
+                    frag.appendChild(document.createElement(tagName));
+                    
+                    for (var i = 0; i< newListItems.length; i++) {
+                        var li = document.createElement("LI");
+                        li.innerHTML = newListItems[i]
+                        frag.childNodes[0].appendChild( li );
+
+                    }
+
+                    //find the right place to insert
+                    var prevNode = $(nodes[0]).prev();
+                    var parentNode = $(nodes[0]).parent();
+                    $(nodes).remove();
+                    if (prevNode.length !== 0) {
+                        $(prevNode).after(frag.firstChild)
+                        editor.selection.selectNode($(prevNode).next());
+                    }
+                    else {
+                        $(parentNode).prepend(frag.firstChild);
+                        editor.selection.selectNode(parentNode[0].firstChild);
+                    }
+                }
+            }
+
+
+        }
     }
     global.EditorModules.push(Formatting);
 })(this)
@@ -492,7 +625,11 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         var w = global;
         var s = w.getSelection();
 
+
+        // TODO: REWRITE USING ONLY RANGY CALLS
+
         self.insertOrReplace = function(html) {
+            console.log("DEPRECATED: insertOrReplace");
             if (s) {
                 if (s.getRangeAt && s.rangeCount) {
                     var range = s.getRangeAt(0);
@@ -502,30 +639,31 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
         }
 
-        //returns true if the cursor is in the editor
+        
         self.hasFocus = function() {
-            if (s.focusNode) {
-                if ($.contains(options.element, s.focusNode)) {
-                    return true;
-                }
+            var sel = self.getSelection();
+            if (sel) {
+                return true;
             }
-            return false;
+            else {
+                return false;
+            }
         }
 
         // returns true there is selected text in the editor
         self.hasSelection = function() {
-            var s = w.getSelection();
-            if (self.hasFocus()) { //any selection will not suffice, must be in this editor
-                //TODO: This doesn't work in firefox. 
-                if (s.type === "Range") {
-                    return true
-                }
+            var sel = self.getSelection();
+            if (sel && sel.isCollapsed) {
+                return false;
             }
-            return false;
+            else {
+                return true;
+            }
         }
 
         
         self.getCoordinates = function () {
+            //console.log("DEPRECATED: getCoordinates");
             var sel = document.selection, range;
             var x = 0, y = 0;
             if (window.getSelection) {
@@ -535,37 +673,47 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                     if (range.getClientRects) {
                         range.collapse(true);
                         var rect = range.getClientRects()[0];
-                        console.log(range.getClientRects()[0]);
                         x = rect.left;
                         y = rect.top;
                     }
                 }
             }
-            return { x: x, y: y };
+            return rect;
+        }
+
+        /*wrapper for rangy's getSelection. Only returns a value if the focus is 
+          within the current instances of the editor
+        */
+        self.getSelection = function() {
+            var sel = rangy.getSelection();
+            if (sel.rangeCount == 1) {
+                if ($.contains(options.element, sel.focusNode)) {
+                    if (!sel.isCollapsted) {
+                        return sel;
+                    }
+                }
+            }
+            return null
         }
 
 
-        //returns the parent of the focus node that is the immediate child of the editor itself
-        self.getRootParent = function() {
-            if (self.hasFocus()) {
-                var parents = $(s.anchorNode).parentsUntil(".editor")
+        self.getTopLevelParent = function() {
+            var sel = self.getSelection();
+            if (sel) {
+                var parents = $(sel.anchorNode).parentsUntil(".editor")
                 if (parents.length > 0) {
                     return parents.slice(-1)[0];
                 }
                 else {
-                    return s.anchorNode;
+                    return sel.anchorNode;
                 }
             }
             return null;
         }
 
-        self.getAnchorNode = function() {
-            return s.anchorNode;
-        }
-        self.getFocusNode = function() {
-            return s.focusNode;
-        }
         self.setCaretBefore = function(node) {
+            console.log("DEPRECATED: setCaretBefore");
+
             var range = document.createRange();
             var sel = window.getSelection();
             range.setStartBefore(node);
@@ -575,6 +723,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         }
 
         self.setCaretAfter = function(node) {
+            console.log("DEPRECATED: setCaretAfter");
             var range = document.createRange();
             var sel = window.getSelection();
             range.setStartAfter(node);
@@ -583,14 +732,46 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             sel.addRange(range);
         }
 
-        self.getNonInlineParent = function() {
-            var anchorNode = self.getAnchorNode();
+        
+        self.selectNode = function(node) {
+            //parameter is 
+
+            var el = $(node)[0]
+            var range = rangy.createRange();
+            range.selectNodeContents(el);
+            var sel = rangy.getSelection();
+            sel.setSingleRange(range);
+        }
+
+        self.selectNodes = function(nodes) {
+            nodes = $.makeArray(nodes);
+            console.log(nodes);
+
+            var sel = rangy.getSelection();
+            //sel.collapse(document.body, 0); //clear the selection, maybe wrong
+            /*
+            var ranges = [];
+            for (var i = 0; i < nodes.length; i++) {
+                var range = rangy.createRange();
+                ranges.push(range);
+            }
+            */
+            var range = rangy.createRangyRange();
+            range.setStartBefore(nodes[0]);
+            range.setEndAfter(nodes[nodes.length-1]);
+
+            sel.setSingleRange(range);
+        }
+
+        self.getBlockParent = function() {
+            var sel = self.getSelection();
+            var anchorNode = sel.anchorNode;
 
             if (anchorNode.nodeType == 3 || $(anchorNode).css("display") === "inline") {
                 var node;
                 var parents = $(anchorNode).parentsUntil(".editor");
                 for (var i =0; i < parents.length; i++) {
-                    if ($(parents[i]).css("display") !== "inline") {
+                    if ($(parents[i]).css("display") === "block") {
                         node = parents[i];
                         break;
                     }
@@ -603,7 +784,53 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             else {
                 return anchorNode;
             }
+        
         }
+        self.getNonInlineParent = self.getBlockParent;
+        /* UPDATED API HERE */
+
+
+        self.nodeDepth = function(node) {
+            return $(node).parentsUntil(".editor").length;
+        }
+
+        function isBlock(node) {
+            //return (['P', 'BLOCKQUOTE', 'UL', 'OL', 'LI', 'DIV'].indexOf(node.nodeName) !== -1)
+            return $(node).css("display") === "block" && node.nodeType !== 3;
+        }
+
+        /* Grab a list of siblings that are block elements */
+        //includes LI, maybe not a good name.  Excludes Textnodes & inline elements. 
+        self.getSelectedBlockNodes = function() {
+            var sel = self.getSelection()
+            if (sel) {
+                var nodes = sel._ranges[0].getNodes(null, isBlock);
+                //The selection is completely within a block element, or there is no selection just focus
+                if (nodes.length == 0) {
+                    return [ self.getNonInlineParent() ]
+                }
+                else {
+                    var topDepth = 999;
+                    var nodesByDepth = {}
+                    for (var i = 0; i < nodes.length; i++) {
+                        var depth = self.nodeDepth(nodes[i]);
+                        topDepth = Math.min(topDepth, depth);
+                        if (!nodesByDepth[depth]) {
+                            nodesByDepth[depth] = [];
+                        }
+                        //TODO: We're including an extra node here sometimes. It's not visibly selected. http://cg.cg/m/04WAO.png 
+                        nodesByDepth[depth].push(nodes[i]);
+                    }
+                    return nodesByDepth[topDepth];
+                }
+            }
+            else {
+                return [];
+            }   
+        }
+
+
+
 
         // emit a selction change event. 
         $(w.document).bind("selectionchange",
@@ -624,7 +851,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
 
 /*
         function previewItem(type) {
-            var node = editor.selection.getRootParent();
+            var node = editor.selection.getTopLevelParent();
             var item = editor.embed.types[type];
             
             if (node) {
@@ -762,14 +989,14 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         editor.on("init", updateStats);
 
         function updateStats() {
-            var text = $(".editor", editor.element)[0].innerText;
+            var text = $(".editor", options.element)[0].innerText;
             var wordcount = text.split(/\s+/).length - 1;
             var stats = {
                 wordcount: wordcount,
                 characters: text.length,
                 readingtime: wordcount / 225
             }
-            $(".wordcount", editor.element).html(wordcount);
+            $(".wordcount", options.element).html(wordcount);
             setTimeout(updateStats, 5000);
         }
     }
@@ -5698,83 +5925,3 @@ if ( typeof define === "function" ) {
   if(typeof module !== 'undefined') module.exports = key;
 
 })(this);
-;// Stubbing out some drawer functionality for demo purposes.
-
-function openDrawer(type) {
-	$("#embed-panel").addClass("open");
-}
-
-$("#embed-panel-close").click(function() {
-	$("#embed-panel").removeClass("open");
-});
-
-function populateDrawer(id) {
-	$("#embed-panel-contents").html($("#" + id).html());
-};/* 
-
-Image 
-
-This bridges the embed module that the editor exposes & our custom image implementation. 
-
-*/
-
-(function(global) {
-    'use strict';
-    var OnionImage = OnionImage || function(editor, options) {
- 
-
-        window.IMAGE_URL = "http://img.onionstatic.com/avclub/{{id}}/{{crop}}/{{width}}.jpg"
-        var embedMarkup = 
-            '<div data-picture class="image inline placeholder {{position}} {{crop}}"  data-image-id="{{id}}" data-image-alt="" contenteditable="false">\
-                <div>\
-                    <noscript><img src="http://img.onionstatic.com/avclub/{{id}}/original/300.jpg"></noscript>\
-                </div>\
-            </div>'
-
-
-        function getImageID() {
-            // CMS CONNECTION POINT
-            return $("#image-embed-id").val()
-        }
-
-
-        editor.on("embed:image", start);    
-
-
-        function start() {
-            //CMS Connection point
-            populateDrawer("embed-panel-image");
-            // register events for buttons
-            $(".image-place a").bind("mouseover", previewItem)
-            $(".image-place a").bind("mouseout", clearItem)
-            $(".image-place a").bind("click", placeItem)
-            openDrawer();
-        }
-
-        function clearItem() {
-            $(".placeholder", editor.element).remove();
-        }
-        function previewItem() {
-            var node = editor.selection.getRootParent();
-            if (node) {
-                //re-render images
-                
-                console.log(editor);
-                $(node).before( 
-
-                    editor.utils.template(embedMarkup, {id: getImageID(), position: this.name, crop:''})
-                );
-            }
-            window.picturefill();
-
-        }
-
-        function placeItem(type) {
-            $(".placeholder", editor.element).removeClass("placeholder");
-             window.picturefill();
-        }
-
-        editor.embed.types.push('image'); // register as embeddable type
-    }
-    global.EditorModules.push(OnionImage);
-})(this)

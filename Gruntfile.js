@@ -30,11 +30,6 @@ module.exports = function(grunt) {
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
 
-                /* TODO: Move plugins outside of this project */
-                'src/plugins/onion-embed.js',
-                'src/plugins/onion-images.js',
-
-
                 ],
           dest: 'build/<%= pkg.name %>.js'
         }
@@ -49,19 +44,28 @@ module.exports = function(grunt) {
         dest: 'build/<%= pkg.name %>.min.js'
       }
     },
+    copy: {
+      main: {
+      files: [
+        { src: 'build/onion-editor.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.js' },
+        { src: 'build/onion-editor.min.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.min.js' },
+      ]
+      }
+    },
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
         tasks: ['concat', 'uglify'],
       },
     },
+
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-contrib-copy');
 
-
-  grunt.registerTask('default', ['concat', 'uglify']);
+  grunt.registerTask('default', ['concat', 'uglify', 'copy']);
 
 };

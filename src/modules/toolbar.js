@@ -8,24 +8,40 @@
         //TODO: localize these events just to the editor instance
         
         editor.on("selection:change", update);
-        function update(e) {
-            setTimeout( //give the browser a chance to catch up
-                function() {
-                    //check if selection is in the editor itself.
-                    var currentBlockNode = editor.selection.getRootParent();
-                    if (currentBlockNode) {
-                        var blockTop = $(currentBlockNode).position().top;
-                        if (editor.selection.hasSelection()) {
 
-                            var coords = editor.selection.getCoordinates();
-                            $(".selection-tools",  options.element).css({top: coords.top  - 35, left: coords.left})
-                            $(".selection-tools",  options.element).show();
-                            return;
-                        }
+        var scrollTimeout;
+        $(window).scroll(function() {
+            clearTimeout(scrollTimeout);
+            if (editor.selection.hasSelection()) {
+                $(".selection-tools",  options.element).hide();
+                scrollTimeout = setTimeout(
+                    function() {
+                        update();
+                        //$(".selection-tools",  options.element).show();
                     }
-                    $(".selection-tools", options.element).hide();
-                }   
-            , 5);
+                , 250);
+            };
+        });
+
+        function update(e) {
+            if (options.toolbar.selectionTools) {
+                setTimeout( //give the browser a chance to catch up
+                    function() {
+                        //check if selection is in the editor itself.
+                        var currentBlockNode = editor.selection.getTopLevelParent();
+                        if (currentBlockNode) {
+                            var blockTop = $(currentBlockNode).position().top;
+                            if (editor.selection.hasSelection()) {
+                                var coords = editor.selection.getCoordinates();
+                                $(".selection-tools",  options.element).css({top: coords.top - 55, left: coords.left})
+                                $(".selection-tools",  options.element).show();
+                                return;
+                            }
+                        }
+                        $(".selection-tools", options.element).hide();
+                    }   
+                , 5);
+            }
         }
 
         function init() {
@@ -35,7 +51,7 @@
             else {
                 $(options.element).find(".document-tools").hide();
             }
-            if (options.toolbar.selectionTools) {            
+            if (options.toolbar.selectionTools) {
                 $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
             }
             else {

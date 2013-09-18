@@ -5,7 +5,7 @@
 
 /*
         function previewItem(type) {
-            var node = editor.selection.getRootParent();
+            var node = editor.selection.getTopLevelParent();
             var item = editor.embed.types[type];
             
             if (node) {

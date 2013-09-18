@@ -58,12 +58,17 @@ body {
     padding: 0 30px;
 }
 
+
 .editor ul,
 .editor ol {
     padding: 0 45px;
-    line-height:24px;
-    font-size:16px;
+    
 }
+
+.editor li {
+    margin-bottom: 4px;
+}
+
 
 .editor,
 .light .editor {
@@ -126,10 +131,29 @@ body {
     border-radius: 5px;
 }
 
-.document-tools {
-    position:absolute;
-}
 
 .label {
     opacity: .7;
 }
+
+
+
+.visualize .editor ul,
+.visualize .editor ol {
+    background-color: rgba(166,226,45,.1);
+}
+
+.visualize .editor div {
+    background-color: rgba(249,39,114,.5); /* don't want these to appear */
+}
+.visualize .editor p
+ { 
+    background-color: rgba(102,217,239,.1);
+}
+.visualize .editor blockquote {
+    background-color: rgba(174,129,255,.1);
+}
+
+blockquote {
+    border-left: 5px solid #ccc;
+}`

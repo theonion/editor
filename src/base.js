@@ -11,7 +11,7 @@
                 content: "<p><br></p>",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},

@@ -9,7 +9,6 @@ This bridges the embed module that the editor exposes & our custom image impleme
 (function(global) {
     'use strict';
     var OnionImage = OnionImage || function(editor, options) {
- 
 
         window.IMAGE_URL = "http://img.onionstatic.com/avclub/{{id}}/{{crop}}/{{width}}.jpg"
         var embedMarkup = 
@@ -18,6 +17,7 @@ This bridges the embed module that the editor exposes & our custom image impleme
                     <noscript><img src="http://img.onionstatic.com/avclub/{{id}}/original/300.jpg"></noscript>\
                 </div>\
             </div>'
+ 
 
 
         function getImageID() {
@@ -43,19 +43,23 @@ This bridges the embed module that the editor exposes & our custom image impleme
             $(".placeholder", editor.element).remove();
         }
         function previewItem() {
-            var node = editor.selection.getRootParent();
+            var node = editor.selection.getTopLevelParent();
             if (node) {
+                
                 //re-render images
                 
                 console.log(editor);
                 $(node).before( 
-
                     editor.utils.template(embedMarkup, {id: getImageID(), position: this.name, crop:''})
                 );
+            }
+            else {
+                node = $(".editor",options.element);
             }
             window.picturefill();
 
         }
+
 
         function placeItem(type) {
             $(".placeholder", editor.element).removeClass("placeholder");
