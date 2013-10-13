@@ -1,4 +1,4 @@
-/*! onion-editor 2013-09-18 */
+/*! onion-editor 2013-10-12 */
 (function(global){
 
     'use strict';
@@ -12,7 +12,7 @@
                 content: "<p><br></p>",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -52,6 +52,7 @@
                         catch (e) {}
                     }
                 };
+
             },
             // really basic templating
             template: function(html, dict) {    
@@ -63,7 +64,8 @@
                 return html;
             }
         },
-        sanitize;
+        sanitize,
+        domChangeTimeout;
 
 
         function isEmptyCheck() {
@@ -94,37 +96,45 @@
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editorPlaceholder"></div>\
-                            <div class="editor" contenteditable="true" spellcheck="false">\
+                            <div class="editor" contenteditable="true" spellcheck="true">\
                                 <p></p>\
                             </div>\
                             <div class="document-tools toolbar"></div>\
-                            <div class="selection-tools toolbar"></div>\
-                            <div class="embed-overlay"></div>\
+                            <div class="embed-tools toolbar"></div>\
+                            <div class="link-tools toolbar"></div>\
+                            <div class="inline-tools toolbar"></div>\
                         </div>');
                 
 
+
+            //block drag/drop of text
+            $(options.element).bind('dragover drop', function(event){
+                event.preventDefault();
+                return false;
+            });
             $(".editorPlaceholder", options.element).html(options.placeholder);
             sanitize = new Sanitize(options.sanitize);
 
+            self.listenForChanges();
             self.setContent(options.content);
-
             isEmptyCheck();
 
             self.emit("init");
 
-            $(options.element)
+            $(".editor", options.element)
+                .bind("mousedown", function() {
+                    self.stashState()
+                })
                 .bind("click", function(e) {
                     self.emit("click", e);
                 })
                 .bind("keydown", function(e) {
-                    
-                    /* for undo */
-                    var beforeState = self.getContent();
+                    self.stashState()
+                    /*  This type of stuff should move into formatting, but not sure how yet. */
 
                     var node = self.selection.getNonInlineParent();
                     
                     var previousChildNode = $(node).prev()[0];
-
 
                     var parentNode = node.parentNode || node;
                     var isParentRoot = $( parentNode).hasClass("editor");
@@ -133,18 +143,6 @@
                     var isFirstChild = (typeof previousChildNode === "undefined");
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
-
-                    /*
-                    console.log(" nodeName: " + node.tagName +
-                                " parentNodeName: " + parentNode.tagName +
-                                " isParentRoot: " + isParentRoot + 
-                                " isBlank: " + isBlank + 
-                                " isPreviousChildBlank: " + isPreviousChildBlank + 
-                                " isFirstChild: " + isFirstChild + 
-                                " isLastChild: " + isLastChild + 
-                                " isTextSelected: " + isTextSelected
-                        )
-                    */
 
                     // handle enter key shit. 
                     if (e.keyCode === 13 && !e.shiftKey) {
@@ -204,19 +202,10 @@
                         //this happens when the cursor is in the last remaining empty paragraph. 
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
                             e.preventDefault();
-
-                            // do we want to "merge adjacent lists if they are of the same type"
                         }
                         
                     }
                     setTimeout(isEmptyCheck, 50);
-
-                    clearTimeout(self.undoTimeout);
-                    self.undoTimeout =  setTimeout(function() {
-                        var afterState = self.getContent();
-
-                        //self.options.undo.addCommand(self, "typing", beforeState, afterState);
-                    }, 250)
 
                     self.emit("keydown", e);
                 })
@@ -224,7 +213,7 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-
+                    self.stashState();
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
                     //prefer html, but take text if it's not avaialble
                     if (pastedHTML === "") {
@@ -252,9 +241,6 @@
 
                     e.preventDefault();
 
-
-
-
                     self.emit("paste");
                     
                 })
@@ -264,10 +250,47 @@
 
         self.utils = utils;
 
+
+        // stash the state before any action occurs, just in case it triggers a change and can be undone.
+        self.stashState = function() {
+            self.stashedState = {
+                content: self.getContent(),
+                selection: self.serializeRange()
+            }
+        }
+
+        self.serializeRange = function() {
+            var s =  rangy.serializeSelection(rangy.getSelection(), true, $(".editor", options.element)[0]);
+            console.log(s);
+            return s;
+        }
+
+        self.deserializeRange = function(serializedRange) {
+            rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
+        }
+
+
+        function changed() {
+            clearTimeout(domChangeTimeout);
+            domChangeTimeout = setTimeout(function() {
+                self.emit("contentchanged");
+                console.log("dom modified")
+            }, 200);
+        }
+
+        self.listenForChanges = function() {
+           $(".editor", options.element)
+                .bind("DOMSubtreeModified", changed )
+        }
+        self.dontListenForChanges = function() {
+           $(".editor", options.element)
+                .unbind("DOMSubtreeModified", changed )
+        }
+
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);
         }
-        self.getContent = function(contentHTML) {
+        self.getContent = function() {
             return $(options.element).find(".editor").html();
         }
         options = $.extend(defaults, options);
@@ -289,57 +312,65 @@ Making a few assumptions, for now:
     'use strict';
     var UndoManager = UndoManager || function() {
         var self = this,
-            UNDO_LEVELS = 9999999,
-            undoTimeout,
             undoStack = [],
-            position = -1,
-            currentState;
-
-
+            position = -1;
 
         self.undoStack = undoStack;
-
-
-
-        
-
 
         /*  savedSelection = rangy.serializeSelection(undefined, true );
 
             rangy.deserializeSelection( state.selection);
         */
-        console.log(this);
-        self.addCommand = function(commandObj) {
-            undoStack.push(commandObj);            
+
+        self.pushState = function(obj, data) {
+            // clear all parts of the stack after the current position
+            if (position < undoStack.length - 1) {
+                undoStack = undoStack.splice(0, position + 1)
+            }
+
+            undoStack.push({
+                obj: obj,
+                data: data
+            });
+            position++;                    
         }
 
-
+        self.dumpStack = function() {
+            console.log("Position: " , position);
+            console.log(undoStack)
+        }
 
         function undo() {
-
+            if (position > 0) {
+                console.log(position)
+                undoStack[position].obj.setState(undoStack[position].data.previous)
+                position--;
+            }
         }
 
         function redo() {
-
+            if (position < undoStack.length -1 ) {
+                position++;
+                undoStack[position].obj.setState(undoStack[position].data.current)
+            }
         }
 
         function init() {
-            console.log("undo init");
             key('⌘+z, ctrl+z', function(e) {
                 e.preventDefault();
-                console.log("cmd+z")
+                undo()
             });
 
             key('shift+⌘+z, shift+ctrl+z', function(e) {
                 e.preventDefault();
-                console.log("cmd+shift + z")
-
+                redo();
             });
         }
 
         init();
     }
     global.UndoManager = UndoManager;
+    return self;
 })(this);(function(global) {
     'use strict';
     var Toolbar = Toolbar || function(editor, options) {
@@ -351,69 +382,78 @@ Making a few assumptions, for now:
         
         editor.on("selection:change", update);
 
-        var scrollTimeout;
-        $(window).scroll(function() {
-            clearTimeout(scrollTimeout);
-            if (editor.selection.hasSelection()) {
-                $(".selection-tools",  options.element).hide();
-                scrollTimeout = setTimeout(
-                    function() {
-                        update();
-                        //$(".selection-tools",  options.element).show();
-                    }
-                , 250);
-            };
-        });
 
         function update(e) {
-            if (options.toolbar.selectionTools) {
-                setTimeout( //give the browser a chance to catch up
-                    function() {
-                        //check if selection is in the editor itself.
-                        var currentBlockNode = editor.selection.getTopLevelParent();
-                        if (currentBlockNode) {
-                            var blockTop = $(currentBlockNode).position().top;
-                            if (editor.selection.hasSelection()) {
-                                var coords = editor.selection.getCoordinates();
-                                $(".selection-tools",  options.element).css({top: coords.top - 55, left: coords.left})
-                                $(".selection-tools",  options.element).show();
-                                return;
-                            }
-                        }
-                        $(".selection-tools", options.element).hide();
-                    }   
-                , 5);
+
+            var tagNames = editor.selection.getTagnamesInRange();
+            $(".document-tools button", options.element).removeClass("active");
+            for (var i = 0; i<tagNames.length; i++) {
+                $(".document-tools button[tag=" + tagNames[i] + "]", options.element).addClass("active");
             }
         }
 
         function init() {
             if (options.toolbar.documentTools) {
-                $(options.element).find(".document-tools").html(options.toolbar.documentTools);
+                $(".document-tools", options.element).html(options.toolbar.documentTools);
             }
             else {
-                $(options.element).find(".document-tools").hide();
+                $(".document-tools", options.element).hide();
             }
-            if (options.toolbar.selectionTools) {
-                $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
+            
+            if (options.toolbar.embedTools) {
+                $(".embed-tools", options.element).html(options.toolbar.embedTools);
             }
-            else {
-                $(options.element).find(".selection-tools").hide();
+            if (options.toolbar.linkTools) {
+                $(".link-tools", options.element).html(options.toolbar.linkTools);
             }
+            if (options.toolbar.inlineTools) {
+                $(".inline-tools", options.element).html(options.toolbar.inlineTools);
+            }
+
+
+            //mouse events for embed toolbar
+
+
+            $(".editor", options.element).mousemove( function(e) {
+                var node = $(".editor>*:hover");
+                if (node.length == 1) {
+                    $(".embed-tools", options.element)
+                        .css({ top:$(node).position().top - 4  })
+                        .addClass("active");
+                }
+                else {
+                    $(".embed-tools", options.element).removeClass("active");
+                }
+            });
+
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 
             //handle clicks
-            self.toolbarElement.click(function(e) {
-                editor.emit("toolbar:click", $(e.target).attr("name")); 
-            });
+            function getButtonName(e) {
+                if (e.target.tagName === "BUTTON") {
+                    var el = $(e.target);
+                }
+                else {
+                    var el = $(e.target).parents('button')
+                }
+                return el.attr("name");
+            }
 
+            self.toolbarElement.click(function(e) {
+                editor.emit("toolbar:click", getButtonName(e)); 
+            });
+            
+            self.toolbarElement.bind("mousedown", function() {
+                editor.stashState()
+            })
             
             self.toolbarElement.bind("mouseover", function(e) {
-                editor.emit("toolbar:over", $(e.target).attr("name")); 
+                editor.emit("toolbar:over", getButtonName(e)); 
             });
 
             self.toolbarElement.bind("mouseout", function(e) {
-                editor.emit("toolbar:out", $(e.target).attr("name")); 
+                editor.emit("toolbar:out", getButtonName(e)); 
             });
             
             editor.emit("toolbar:ready");
@@ -422,7 +462,7 @@ Making a few assumptions, for now:
     global.EditorModules.push(Toolbar);
 })(this)
 
-;(function(global) {
+;    (function(global) {
     'use strict';
     var Formatting = Formatting || function(editor, options) {
         var self = this;
@@ -430,11 +470,12 @@ Making a few assumptions, for now:
         editor.on("init", init);
 
         function init() {
+            /*
             if (options.settings.visualize) {
                 $(options.element)
                     .addClass("visualize");
             }
-
+            */
 
             // only enable key commands if that kind of markup is allowed in sanitize config. 
 
@@ -496,10 +537,11 @@ Making a few assumptions, for now:
                 doList("OL")
             },
             blockquote: function() {
-                wrap("blockquote")
+                wrap("BLOCKQUOTE", false)
             },
             visualize: function() {
-                editor.updateSetting("visualize", 
+                editor.updateSetting("visualize",
+                    // this returns
                     $(options.element)
                         .toggleClass("visualize")
                         .hasClass("visualize"));
@@ -508,28 +550,79 @@ Making a few assumptions, for now:
             removeformatting: function() {
                 global.document.execCommand("removeformat", false, "");
 
+
             }
         }
 
-        function wrap(tagName) {
 
+        function wrap(tagName, allowNesting) {
+            tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
             console.log(tagName);
             console.log(editor.selection.getSelectedBlockNodes());
             var nodes = editor.selection.getSelectedBlockNodes();
-            
-
-
+            var nodeNames = nodes.map(function(n) {return n.nodeName})
             // we have a list of nodes. can we wrap them?
 
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1){
+                console.log("Selection contains blockquote or div. Abort!")
+            }
+            else {
+                var parentNodeNames = nodes.map(function(n) {return n.parentNode.nodeName})
+
+                //check to see if the thing you're trying to wrap with doesn't already exist in the list of nodes
+                if (parentNodeNames.indexOf(tagName) !== -1) {
+                    var parent = nodes[0].parentNode;
+                    $(parent).after($(parent).html())
+                    editor.selection.selectNode($(parent).next());
+                    $(parent).remove();
+                }
+                else {
+                    var prevNode = $(nodes[0]).prev();
+                    var parentNode = $(nodes[0]).parent();                    
+                    var frag = document.createDocumentFragment();
+                    
+                    frag.appendChild(document.createElement(tagName));
+                    for (var i = 0; i < nodes.length; i++) {
+                        //throw paragraph innerhtml in a list
+                        var newNode = document.createElement(nodes[i].nodeName);
+                        newNode.innerHTML = nodes[i].innerHTML;
+                        frag.childNodes[0].appendChild( newNode );
+                    }
+                    //remove existing nodes.
+                    //find the right place to insert
+                    $(nodes).remove();
+                    if (prevNode.length !== 0) {
+                        $(prevNode).after(frag.firstChild)
+                        editor.selection.selectNode($(prevNode).next());
+                    }
+                    else {
+                        $(parentNode).prepend(frag.firstChild);
+                        editor.selection.selectNode(parentNode[0].firstChild);
+                    }                    
+                }
+            }
+        }
+
+        function canDoList() {
+
+            //use this in doList, also use this when to show whether or not a button can be clicked
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
+
+            }
+
+            //Not sure how to have these modules provide actual feedback to the toolbar to give the user a hint that a button can't be pushed. 
+            /* Options: 
+                1) put names of "action validators" in the markup. call these on hover.
+                2) 
+
+            */
         }
 
         function doList(tagName) {
-            console.log(tagName)
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
-            console.log(nodeNames);
 
             /*
             Let's talk about this list of nodes:
@@ -538,7 +631,8 @@ Making a few assumptions, for now:
                 Is there a blockquote or div in the list? ABORT!!!
             */
 
-            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1){
+            // TODO: Move this out, so you can have the buttons indicate wheter the list action is 
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
                 console.log("Selection contains blockquote or div. Abort!")
             }
             else {
@@ -548,21 +642,15 @@ Making a few assumptions, for now:
                     var items = $("li", nodes[0]);
                     items.map(function(i) {  html += "<p class='tmp-selectme'>" + $(items[i]).html() + "</p>";})
                     $(nodes[0])[0].outerHTML = html;
-
                     //TODO: select newly inserted paragraphs
-
                     //the only thing that matter are the first & last nodes. probably should do that instead. 
                     editor.selection.selectNodes($(".tmp-selectme"));
-
                     $(".tmp-selectme").removeClass("tmp-selectme");
                 }
                 else {
                     //we should only have existing UL/OL and paragraphs now, all with the same parent
-                    
-                    // let's make a fragment to dump all this new shit into.
                     var newListItems = []
                     for (var i = 0; i < nodes.length; i++) {
-
                         //get list of html fragments to encase in LIs
                         if (nodes[i].nodeName === "OL" || nodes[i].nodeName === "UL") {
                             //throw all the li innerhtml into a list
@@ -571,24 +659,19 @@ Making a few assumptions, for now:
                         }
                         else {
                             //throw paragraph innerhtml in a list
-
                             newListItems.push( nodes[i].innerHTML )
                         }
                     }
                     /*iterarte over nodelist, wrap html in the list with an LI, append to
                     list inside fragment
                     */
-                    
                     var frag = document.createDocumentFragment();
                     frag.appendChild(document.createElement(tagName));
-                    
                     for (var i = 0; i< newListItems.length; i++) {
                         var li = document.createElement("LI");
                         li.innerHTML = newListItems[i]
                         frag.childNodes[0].appendChild( li );
-
                     }
-
                     //find the right place to insert
                     var prevNode = $(nodes[0]).prev();
                     var parentNode = $(nodes[0]).parent();
@@ -653,32 +736,35 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         // returns true there is selected text in the editor
         self.hasSelection = function() {
             var sel = self.getSelection();
-            if (sel && sel.isCollapsed) {
-                return false;
+            if ( (sel && !sel.isCollapsed) ) {
+                if ($.contains(options.element, sel.focusNode)) {
+                    return true;
+                }
             }
-            else {
-                return true;
-            }
+            return false
         }
 
         
         self.getCoordinates = function () {
             //console.log("DEPRECATED: getCoordinates");
             var sel = document.selection, range;
-            var x = 0, y = 0;
+            var top = 0, left = 0;
             if (window.getSelection) {
                 sel = window.getSelection();
                 if (sel.rangeCount) {
                     range = sel.getRangeAt(0).cloneRange();
                     if (range.getClientRects) {
                         range.collapse(true);
+                        //these are relative to the viewport
                         var rect = range.getClientRects()[0];
-                        x = rect.left;
-                        y = rect.top;
+
+                        //let's find position relative to page.
+                        left = rect.left + document.body.scrollLeft - $(options.element).position().left;
+                        top = rect.top + document.body.scrollTop -  $(options.element).position().top;
                     }
                 }
             }
-            return rect;
+            return {top: top, left: left};
         }
 
         /*wrapper for rangy's getSelection. Only returns a value if the focus is 
@@ -688,9 +774,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             var sel = rangy.getSelection();
             if (sel.rangeCount == 1) {
                 if ($.contains(options.element, sel.focusNode)) {
-                    if (!sel.isCollapsted) {
-                        return sel;
-                    }
+                    return sel;
+
                 }
             }
             return null
@@ -802,7 +887,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         /* Grab a list of siblings that are block elements */
         //includes LI, maybe not a good name.  Excludes Textnodes & inline elements. 
         self.getSelectedBlockNodes = function() {
-            var sel = self.getSelection()
+            var sel = self.getSelection();
+
             if (sel) {
                 var nodes = sel._ranges[0].getNodes(null, isBlock);
                 //The selection is completely within a block element, or there is no selection just focus
@@ -829,49 +915,168 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }   
         }
 
+        //list of tagnames within current selection
+        self.getTagnamesInRange = function() {
+            var sel = self.getSelection();
+            if (sel) {
+                if (sel.isCollapsed) {
+                    var nodes = [sel.anchorNode];
+                }
+                else {
+                    var nodes = sel._ranges[0].getNodes();
+                }
+                var tagNames = [];
+                for (var i = 0; i < nodes.length; i++) {
+                    
+                    var parents = $(nodes[i]).parentsUntil(".editor");
+                    parents.push(nodes[i]);
 
+                    for (var j = 0; j < parents.length; j++) {
+                        if (parents[j].nodeType !==3 && tagNames.indexOf(parents[j].tagName) === -1) {
+                            tagNames.push(parents[j].tagName);
+                        }
+                    }
+                }
+                return tagNames;
+            }
+            else {
+                return [];
+            }
+        }
 
-
+        var selectionTimeout;
         // emit a selction change event. 
+        //TODO: Make it fire for a only within the  editor
+        //TODO: Need to be smarter about how this fires. Really kills performance. Maybe only do on click? 
+        
         $(w.document).bind("selectionchange",
             function(e) {
-                editor.emit("selection:change");
-                //do we want to emit a "got focus & lost focus" event? Would require maintaining state.
+                clearTimeout(selectionTimeout);
+                selectionTimeout = setTimeout(function() {
+                    editor.emit("selection:change");
+                }, 100);
             }
         );
-
         // make it possible to call selection methods from other modules
         editor.selection = self;
     }
     global.EditorModules.push(Selection);
+})(this);/* 
+    provides a generic way to move around "inline objects" within the markup
+*/
+
+(function(global) {
+    'use strict';
+    var InlineObjects = InlineObjects || function(editor, options) {
+        var self = this;
+
+        editor.on('init', init);
+
+        editor.on("toolbar:click", function(name){
+            if (typeof actions[name] === "function") {
+                actions[name]();
+            }
+        });
+
+        var activeElement;
+        function init() {
+            //register dialog events:
+            $(".editor", options.element).mouseover( function(e) {
+                //check to see if the target is inside of an inline element
+                var parents = $(e.target).parents('.inline');
+                if (parents.length == 1) {
+                    //let's position tools over the inline element
+                    activeElement = parents[parents.length-1];
+                    showToolbar()
+                }
+                else {
+                    hideToolbar();
+                }
+            });
+            $(".inline-tools", options.element).mouseleave(hideToolbar)
+        }
+
+        function hideToolbar() {
+                $(".inline-tools").hide();
+                $(options.element).removeClass("inline-active")
+        }
+
+        function showToolbar() {
+            var el = $(activeElement);
+            var pos = el.position();
+            $(options.element).addClass("inline-active")
+
+            $(".inline-tools", options.element)
+                .css({
+                    top: pos.top + parseInt(el.css('margin-top')), 
+                    left: pos.left + parseInt(el.css('margin-left')),
+                    width: el.width(),
+                    height: el.height()
+                })
+                .show();
+        }
+
+        //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
+        var actions = {
+            inline_up: function() {
+                var previousBlock = $(activeElement).prev()[0];
+                if (previousBlock) {
+                    var top = $(activeElement).offset().top;
+                    $(activeElement).after(previousBlock);
+                    
+                    showToolbar()
+
+                    var newTop = $(activeElement).offset().top;
+                    window.scrollBy(0, newTop - top)
+                }
+            },
+            inline_down: function() {
+                var nextBlock = $(activeElement).next()[0];
+                if (nextBlock) {
+                    var top = $(activeElement).offset().top;
+                    $(activeElement).before(nextBlock)
+                    showToolbar()
+                    var newTop = $(activeElement).offset().top;
+                    window.scrollBy(0, newTop - top)
+                }
+            },
+            inline_remove: function () {
+                $(activeElement).remove();
+                hideToolbar();
+            },
+            inline_edit: function () {
+                // need a way to determine type & call properly fire the right edit event.
+                alert("Edit\n\n" + $(activeElement)[0].outerHTML);
+                editor.emit("inline:edit:" + type)
+            }
+        }
+        
+    }
+    global.EditorModules.push(InlineObjects);
 })(this);(function(global) {
     'use strict';
     var Embed = Embed || function(editor, options) {
         var self = this;
+        var embedMarkup = 
+            '<div class="inline left video" data-youtube="{{youtube_id}}" data-title="{{caption}}">\
+                <img src="http://i1.ytimg.com/vi/{{youtube_id}}/mqdefault.jpg">\
+                <span class="caption">{{caption}}</span>\
+            </div>'
+ 
 
-/*
-        function previewItem(type) {
-            var node = editor.selection.getTopLevelParent();
-            var item = editor.embed.types[type];
-            
-            if (node) {
-                $(node).before( item.placeholder()  );
-            }
-
-        }
-
-        function placeItem(type) {
-            $(".placeholder", editor.element).removeClass("placeholder");
-        }
-*/
 
         editor.on("toolbar:click", function(type) {
-            if (editor.embed.types.indexOf(type) !== -1 ) {
+            if (type === "youtube" ) {
 
-                //emit an embed event for third party embed implementations to listen on
-                editor.emit("embed:" + type);                
+
+                console.log("Youtube");
+                          
             }
         })
+
+
+
+        //
 
         editor.embed = {types: []};
     }
@@ -880,13 +1085,164 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
 
 (function(global) {
     'use strict';
-    var Undo = Undo || function(options) {
+    var EditorUndo = EditorUndo || function(editor, options) {
         var self = this;
 
+        // TODO: Need a way to block undo/redo from browser menu 
+
+
+        if (options.undoManager) {
+            editor.on("contentchanged", changed);
+        }
+        function changed() {
+            options.undoManager.pushState(
+            self,
+            {
+                previous: editor.stashedState,
+                current: {
+                    content: editor.getContent(),
+                    selection: editor.serializeRange()
+                }
+            });
+        }
+
+
+        self.setState = function(data) {
+            //STOP LISTENING FOR CHANGES. Don't want undo/redo to contiune to add to the stack!
+            editor.dontListenForChanges()
+            editor.setContent(data.content)
+            editor.deserializeRange(data.selection)
+            //START LISTENING AGAIN
+            editor.listenForChanges()
+        }
     }
-    /*global.EditorModules.push(Undo);*/
-    return self;
-})(this)    ;(function(global) {
+    global.EditorModules.push(EditorUndo);
+})(this);;/* 
+
+TODO: Clean up showing/hiding stuff. 
+
+*/
+
+
+
+(function(global) {
+    'use strict';
+    var Link = Link || function(editor, options) {
+        var self = this;
+        editor.on("init", init);
+
+
+        key('⌘+k, ctrl+k', makeLink);
+
+        var activeLinkElement; 
+
+        function init() {
+            editor.on("toolbar:click", function(name) {
+                if (name === "link") 
+                    makeLink();
+            })
+            
+            //register dialog events:
+            $(".editor", options.element).click( function(e) {
+
+                if (e.target.nodeName == "A") {
+                    //Show link info
+                    activeLinkElement = e.target;
+                    showViewLinkDialog();
+                }
+                else {
+                    //HIDE 
+                    $(".link-tools", options.element).hide();                       
+                }
+            });
+
+            $(".link-change", options.element).click(showEditLinkDialog);
+            $(".link-remove", options.element).click(removeLink);
+            $(".link-apply", options.element).click(applyLinkEdits);
+        }
+
+        function removeLink() {
+            activeLinkElement.outerHTML = activeLinkElement.innerHTML;
+            $(".link-tools", options.element).hide();
+        }
+
+
+        function setURL() {
+            var url = $(activeLinkElement).attr("href");
+            $(".link-url", options.element).html(url);
+            $(".link-url", options.element).attr("href", url);
+
+            if (url !== "#") {
+                $(".link-input-textbox", options.element).val(url);
+            }
+        }
+
+        function positionDialog() {
+            var pos = editor.selection.getCoordinates();
+            $(".link-tools", options.element).css({top: pos.top + 20, left: pos.left})
+
+        }
+        function showViewLinkDialog() {
+            //shows the url, change & remove buttons
+            //only shows up on click
+            setURL();
+            positionDialog();
+            $(".link-tools", options.element).show();
+            $(".link-edit-dialog", options.element).hide();
+            $(".link-view-dialog", options.element).show();
+        }
+
+        function showEditLinkDialog() {
+            positionDialog();
+            $(".link-tools", options.element).show();
+            $(".link-edit-dialog", options.element).show();
+            $(".link-view-dialog", options.element).hide();
+            $(".link-input-textbox", options.element).focus();
+
+        }
+        function canDoLink() {
+            return true;
+        }
+
+        function makeLink() {
+            //make a link, then throw open the edit dialog.
+            if (editor.selection.hasSelection() ) {
+                global.document.execCommand("CREATELINK", false, "#");
+                activeLinkElement = rangy.getSelection().anchorNode.parentNode;
+
+                setTimeout(function() {
+                    setURL();
+                    showEditLinkDialog();
+                }, 5);
+            }
+        }
+        function applyLinkEdits() {
+            
+
+            activeLinkElement.setAttribute("href", $(".link-input-textbox", options.element).val())
+            $(".link-tools", options.element).hide();
+        }
+
+
+
+    }
+    global.EditorModules.push(Link);
+})(this);/* 
+    Basecamp style autosave. 
+
+    Dumps body into localstorage after the dom changes.
+*/
+(function(global) {
+    'use strict';
+    var Persist = Persist || function(editor, options) {
+        var self = this;
+
+        //editor.on("domchange", )
+
+        editor.embed = {types: []};
+    }
+    global.EditorModules.push(Persist);
+})(this);(function(global) {
     'use strict';
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;

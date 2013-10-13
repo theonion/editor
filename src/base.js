@@ -11,7 +11,7 @@
                 content: "<p><br></p>",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -51,6 +51,7 @@
                         catch (e) {}
                     }
                 };
+
             },
             // really basic templating
             template: function(html, dict) {    
@@ -62,7 +63,8 @@
                 return html;
             }
         },
-        sanitize;
+        sanitize,
+        domChangeTimeout;
 
 
         function isEmptyCheck() {
@@ -93,37 +95,45 @@
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editorPlaceholder"></div>\
-                            <div class="editor" contenteditable="true" spellcheck="false">\
+                            <div class="editor" contenteditable="true" spellcheck="true">\
                                 <p></p>\
                             </div>\
                             <div class="document-tools toolbar"></div>\
-                            <div class="selection-tools toolbar"></div>\
-                            <div class="embed-overlay"></div>\
+                            <div class="embed-tools toolbar"></div>\
+                            <div class="link-tools toolbar"></div>\
+                            <div class="inline-tools toolbar"></div>\
                         </div>');
                 
 
+
+            //block drag/drop of text
+            $(options.element).bind('dragover drop', function(event){
+                event.preventDefault();
+                return false;
+            });
             $(".editorPlaceholder", options.element).html(options.placeholder);
             sanitize = new Sanitize(options.sanitize);
 
+            self.listenForChanges();
             self.setContent(options.content);
-
             isEmptyCheck();
 
             self.emit("init");
 
-            $(options.element)
+            $(".editor", options.element)
+                .bind("mousedown", function() {
+                    self.stashState()
+                })
                 .bind("click", function(e) {
                     self.emit("click", e);
                 })
                 .bind("keydown", function(e) {
-                    
-                    /* for undo */
-                    var beforeState = self.getContent();
+                    self.stashState()
+                    /*  This type of stuff should move into formatting, but not sure how yet. */
 
                     var node = self.selection.getNonInlineParent();
                     
                     var previousChildNode = $(node).prev()[0];
-
 
                     var parentNode = node.parentNode || node;
                     var isParentRoot = $( parentNode).hasClass("editor");
@@ -132,18 +142,6 @@
                     var isFirstChild = (typeof previousChildNode === "undefined");
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
-
-                    /*
-                    console.log(" nodeName: " + node.tagName +
-                                " parentNodeName: " + parentNode.tagName +
-                                " isParentRoot: " + isParentRoot + 
-                                " isBlank: " + isBlank + 
-                                " isPreviousChildBlank: " + isPreviousChildBlank + 
-                                " isFirstChild: " + isFirstChild + 
-                                " isLastChild: " + isLastChild + 
-                                " isTextSelected: " + isTextSelected
-                        )
-                    */
 
                     // handle enter key shit. 
                     if (e.keyCode === 13 && !e.shiftKey) {
@@ -203,19 +201,10 @@
                         //this happens when the cursor is in the last remaining empty paragraph. 
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
                             e.preventDefault();
-
-                            // do we want to "merge adjacent lists if they are of the same type"
                         }
                         
                     }
                     setTimeout(isEmptyCheck, 50);
-
-                    clearTimeout(self.undoTimeout);
-                    self.undoTimeout =  setTimeout(function() {
-                        var afterState = self.getContent();
-
-                        //self.options.undo.addCommand(self, "typing", beforeState, afterState);
-                    }, 250)
 
                     self.emit("keydown", e);
                 })
@@ -223,7 +212,7 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-
+                    self.stashState();
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
                     //prefer html, but take text if it's not avaialble
                     if (pastedHTML === "") {
@@ -251,9 +240,6 @@
 
                     e.preventDefault();
 
-
-
-
                     self.emit("paste");
                     
                 })
@@ -263,10 +249,47 @@
 
         self.utils = utils;
 
+
+        // stash the state before any action occurs, just in case it triggers a change and can be undone.
+        self.stashState = function() {
+            self.stashedState = {
+                content: self.getContent(),
+                selection: self.serializeRange()
+            }
+        }
+
+        self.serializeRange = function() {
+            var s =  rangy.serializeSelection(rangy.getSelection(), true, $(".editor", options.element)[0]);
+            console.log(s);
+            return s;
+        }
+
+        self.deserializeRange = function(serializedRange) {
+            rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
+        }
+
+
+        function changed() {
+            clearTimeout(domChangeTimeout);
+            domChangeTimeout = setTimeout(function() {
+                self.emit("contentchanged");
+                console.log("dom modified")
+            }, 200);
+        }
+
+        self.listenForChanges = function() {
+           $(".editor", options.element)
+                .bind("DOMSubtreeModified", changed )
+        }
+        self.dontListenForChanges = function() {
+           $(".editor", options.element)
+                .unbind("DOMSubtreeModified", changed )
+        }
+
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);
         }
-        self.getContent = function(contentHTML) {
+        self.getContent = function() {
             return $(options.element).find(".editor").html();
         }
         options = $.extend(defaults, options);

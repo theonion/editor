@@ -9,69 +9,78 @@
         
         editor.on("selection:change", update);
 
-        var scrollTimeout;
-        $(window).scroll(function() {
-            clearTimeout(scrollTimeout);
-            if (editor.selection.hasSelection()) {
-                $(".selection-tools",  options.element).hide();
-                scrollTimeout = setTimeout(
-                    function() {
-                        update();
-                        //$(".selection-tools",  options.element).show();
-                    }
-                , 250);
-            };
-        });
 
         function update(e) {
-            if (options.toolbar.selectionTools) {
-                setTimeout( //give the browser a chance to catch up
-                    function() {
-                        //check if selection is in the editor itself.
-                        var currentBlockNode = editor.selection.getTopLevelParent();
-                        if (currentBlockNode) {
-                            var blockTop = $(currentBlockNode).position().top;
-                            if (editor.selection.hasSelection()) {
-                                var coords = editor.selection.getCoordinates();
-                                $(".selection-tools",  options.element).css({top: coords.top - 55, left: coords.left})
-                                $(".selection-tools",  options.element).show();
-                                return;
-                            }
-                        }
-                        $(".selection-tools", options.element).hide();
-                    }   
-                , 5);
+
+            var tagNames = editor.selection.getTagnamesInRange();
+            $(".document-tools button", options.element).removeClass("active");
+            for (var i = 0; i<tagNames.length; i++) {
+                $(".document-tools button[tag=" + tagNames[i] + "]", options.element).addClass("active");
             }
         }
 
         function init() {
             if (options.toolbar.documentTools) {
-                $(options.element).find(".document-tools").html(options.toolbar.documentTools);
+                $(".document-tools", options.element).html(options.toolbar.documentTools);
             }
             else {
-                $(options.element).find(".document-tools").hide();
+                $(".document-tools", options.element).hide();
             }
-            if (options.toolbar.selectionTools) {
-                $(options.element).find(".selection-tools").html(options.toolbar.selectionTools);
+            
+            if (options.toolbar.embedTools) {
+                $(".embed-tools", options.element).html(options.toolbar.embedTools);
             }
-            else {
-                $(options.element).find(".selection-tools").hide();
+            if (options.toolbar.linkTools) {
+                $(".link-tools", options.element).html(options.toolbar.linkTools);
             }
+            if (options.toolbar.inlineTools) {
+                $(".inline-tools", options.element).html(options.toolbar.inlineTools);
+            }
+
+
+            //mouse events for embed toolbar
+
+
+            $(".editor", options.element).mousemove( function(e) {
+                var node = $(".editor>*:hover");
+                if (node.length == 1) {
+                    $(".embed-tools", options.element)
+                        .css({ top:$(node).position().top - 4  })
+                        .addClass("active");
+                }
+                else {
+                    $(".embed-tools", options.element).removeClass("active");
+                }
+            });
+
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 
             //handle clicks
-            self.toolbarElement.click(function(e) {
-                editor.emit("toolbar:click", $(e.target).attr("name")); 
-            });
+            function getButtonName(e) {
+                if (e.target.tagName === "BUTTON") {
+                    var el = $(e.target);
+                }
+                else {
+                    var el = $(e.target).parents('button')
+                }
+                return el.attr("name");
+            }
 
+            self.toolbarElement.click(function(e) {
+                editor.emit("toolbar:click", getButtonName(e)); 
+            });
+            
+            self.toolbarElement.bind("mousedown", function() {
+                editor.stashState()
+            })
             
             self.toolbarElement.bind("mouseover", function(e) {
-                editor.emit("toolbar:over", $(e.target).attr("name")); 
+                editor.emit("toolbar:over", getButtonName(e)); 
             });
 
             self.toolbarElement.bind("mouseout", function(e) {
-                editor.emit("toolbar:out", $(e.target).attr("name")); 
+                editor.emit("toolbar:out", getButtonName(e)); 
             });
             
             editor.emit("toolbar:ready");

@@ -15,8 +15,11 @@ module.exports = function(grunt) {
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
+                'src/modules/inline.js', 
                 'src/modules/embed.js', 
                 'src/modules/undo.js', 
+                'src/modules/link.js',
+                'src/modules/persist.js',
 
                 'src/modules/textReplacement.js',
                 'src/modules/screensize.js',

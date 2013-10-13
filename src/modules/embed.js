@@ -2,30 +2,26 @@
     'use strict';
     var Embed = Embed || function(editor, options) {
         var self = this;
+        var embedMarkup = 
+            '<div class="inline left video" data-youtube="{{youtube_id}}" data-title="{{caption}}">\
+                <img src="http://i1.ytimg.com/vi/{{youtube_id}}/mqdefault.jpg">\
+                <span class="caption">{{caption}}</span>\
+            </div>'
+ 
 
-/*
-        function previewItem(type) {
-            var node = editor.selection.getTopLevelParent();
-            var item = editor.embed.types[type];
-            
-            if (node) {
-                $(node).before( item.placeholder()  );
-            }
-
-        }
-
-        function placeItem(type) {
-            $(".placeholder", editor.element).removeClass("placeholder");
-        }
-*/
 
         editor.on("toolbar:click", function(type) {
-            if (editor.embed.types.indexOf(type) !== -1 ) {
+            if (type === "youtube" ) {
 
-                //emit an embed event for third party embed implementations to listen on
-                editor.emit("embed:" + type);                
+
+                console.log("Youtube");
+                          
             }
         })
+
+
+
+        //
 
         editor.embed = {types: []};
     }

@@ -5,9 +5,15 @@
 
 .inline {
     margin-bottom: 30px;
-    background-color:white;
     cursor:pointer;
     float:left;
+
+}
+
+.editor div.inline {
+    margin-top: 27px;
+    padding-top: 0px;
+
 }
 
 .inline .caption {
@@ -26,11 +32,19 @@
 .inline.left {
     margin-right: 30px;
     margin-left: -100px;
+    clear:left;
 }
 
 
 .inline.right {
     margin-right:-100px;
+    float: right;
+    margin-left: 30px;
+    clear:right;
+}
+
+.inline.right-small {
+    margin-right: 0px;
     float: right;
     margin-left: 30px;
 }
@@ -49,6 +63,7 @@ div[data-picture].inline>div {
 }
 
 /* 16x9 */
+
 div[data-picture].center>div {
     padding-bottom: 56.25%;
 }
@@ -64,6 +79,10 @@ div[data-picture].full>div {
 }
 
 
+.image.right-small {
+    width: 150px;
+}
+
 .image.left {
     width: 300px;
 
@@ -74,14 +93,14 @@ div[data-picture].full>div {
 
 }
 
-.image.center {
-    width: 650px;
-
+.center {
+    width: 100%;    
 }
 
 .image.full  {
     margin-left: -100px;
     margin-right: -100px;
+    clear:both;
     float:none;
 }
 
@@ -113,3 +132,24 @@ div[data-picture].full>div {
     margin-left: 20px;
 }
 
+
+/* embed css */
+
+
+div[data-type="embed"].center {
+    width: 100%;
+}
+div[data-type="embed"].center>div {
+    width: 100%;
+    padding-bottom: 56.25%;
+    position:relative;
+}
+
+div[data-type="embed"].center>div embed,
+div[data-type="embed"].center>div>*{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height: 100%;
+    width: 100%;    
+}

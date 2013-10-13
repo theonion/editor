@@ -11,55 +11,63 @@ Making a few assumptions, for now:
     'use strict';
     var UndoManager = UndoManager || function() {
         var self = this,
-            UNDO_LEVELS = 9999999,
-            undoTimeout,
             undoStack = [],
-            position = -1,
-            currentState;
-
-
+            position = -1;
 
         self.undoStack = undoStack;
-
-
-
-        
-
 
         /*  savedSelection = rangy.serializeSelection(undefined, true );
 
             rangy.deserializeSelection( state.selection);
         */
-        console.log(this);
-        self.addCommand = function(commandObj) {
-            undoStack.push(commandObj);            
+
+        self.pushState = function(obj, data) {
+            // clear all parts of the stack after the current position
+            if (position < undoStack.length - 1) {
+                undoStack = undoStack.splice(0, position + 1)
+            }
+
+            undoStack.push({
+                obj: obj,
+                data: data
+            });
+            position++;                    
         }
 
-
+        self.dumpStack = function() {
+            console.log("Position: " , position);
+            console.log(undoStack)
+        }
 
         function undo() {
-
+            if (position > 0) {
+                console.log(position)
+                undoStack[position].obj.setState(undoStack[position].data.previous)
+                position--;
+            }
         }
 
         function redo() {
-
+            if (position < undoStack.length -1 ) {
+                position++;
+                undoStack[position].obj.setState(undoStack[position].data.current)
+            }
         }
 
         function init() {
-            console.log("undo init");
             key('⌘+z, ctrl+z', function(e) {
                 e.preventDefault();
-                console.log("cmd+z")
+                undo()
             });
 
             key('shift+⌘+z, shift+ctrl+z', function(e) {
                 e.preventDefault();
-                console.log("cmd+shift + z")
-
+                redo();
             });
         }
 
         init();
     }
     global.UndoManager = UndoManager;
+    return self;
 })(this)

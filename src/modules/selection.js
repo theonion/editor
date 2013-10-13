@@ -41,32 +41,35 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         // returns true there is selected text in the editor
         self.hasSelection = function() {
             var sel = self.getSelection();
-            if (sel && sel.isCollapsed) {
-                return false;
+            if ( (sel && !sel.isCollapsed) ) {
+                if ($.contains(options.element, sel.focusNode)) {
+                    return true;
+                }
             }
-            else {
-                return true;
-            }
+            return false
         }
 
         
         self.getCoordinates = function () {
             //console.log("DEPRECATED: getCoordinates");
             var sel = document.selection, range;
-            var x = 0, y = 0;
+            var top = 0, left = 0;
             if (window.getSelection) {
                 sel = window.getSelection();
                 if (sel.rangeCount) {
                     range = sel.getRangeAt(0).cloneRange();
                     if (range.getClientRects) {
                         range.collapse(true);
+                        //these are relative to the viewport
                         var rect = range.getClientRects()[0];
-                        x = rect.left;
-                        y = rect.top;
+
+                        //let's find position relative to page.
+                        left = rect.left + document.body.scrollLeft - $(options.element).position().left;
+                        top = rect.top + document.body.scrollTop -  $(options.element).position().top;
                     }
                 }
             }
-            return rect;
+            return {top: top, left: left};
         }
 
         /*wrapper for rangy's getSelection. Only returns a value if the focus is 
@@ -76,9 +79,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             var sel = rangy.getSelection();
             if (sel.rangeCount == 1) {
                 if ($.contains(options.element, sel.focusNode)) {
-                    if (!sel.isCollapsted) {
-                        return sel;
-                    }
+                    return sel;
+
                 }
             }
             return null
@@ -190,7 +192,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         /* Grab a list of siblings that are block elements */
         //includes LI, maybe not a good name.  Excludes Textnodes & inline elements. 
         self.getSelectedBlockNodes = function() {
-            var sel = self.getSelection()
+            var sel = self.getSelection();
+
             if (sel) {
                 var nodes = sel._ranges[0].getNodes(null, isBlock);
                 //The selection is completely within a block element, or there is no selection just focus
@@ -217,17 +220,48 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }   
         }
 
+        //list of tagnames within current selection
+        self.getTagnamesInRange = function() {
+            var sel = self.getSelection();
+            if (sel) {
+                if (sel.isCollapsed) {
+                    var nodes = [sel.anchorNode];
+                }
+                else {
+                    var nodes = sel._ranges[0].getNodes();
+                }
+                var tagNames = [];
+                for (var i = 0; i < nodes.length; i++) {
+                    
+                    var parents = $(nodes[i]).parentsUntil(".editor");
+                    parents.push(nodes[i]);
 
+                    for (var j = 0; j < parents.length; j++) {
+                        if (parents[j].nodeType !==3 && tagNames.indexOf(parents[j].tagName) === -1) {
+                            tagNames.push(parents[j].tagName);
+                        }
+                    }
+                }
+                return tagNames;
+            }
+            else {
+                return [];
+            }
+        }
 
-
+        var selectionTimeout;
         // emit a selction change event. 
+        //TODO: Make it fire for a only within the  editor
+        //TODO: Need to be smarter about how this fires. Really kills performance. Maybe only do on click? 
+        
         $(w.document).bind("selectionchange",
             function(e) {
-                editor.emit("selection:change");
-                //do we want to emit a "got focus & lost focus" event? Would require maintaining state.
+                clearTimeout(selectionTimeout);
+                selectionTimeout = setTimeout(function() {
+                    editor.emit("selection:change");
+                }, 100);
             }
         );
-
         // make it possible to call selection methods from other modules
         editor.selection = self;
     }
