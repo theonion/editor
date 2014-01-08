@@ -3,7 +3,7 @@
     var Stats = Stats || function(editor, options) {
         var self = this;
 
-        editor.on("init", updateStats);
+        editor.on("contentchanged", updateStats);
 
         function updateStats() {
             var text = $(".editor", options.element)[0].innerText;
@@ -13,8 +13,7 @@
                 characters: text.length,
                 readingtime: wordcount / 225
             }
-            $(".wordcount", options.element).html(wordcount);
-            setTimeout(updateStats, 5000);
+            $(".wordcount").html(wordcount);
         }
     }
     global.EditorModules.push(Stats);

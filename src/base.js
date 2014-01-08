@@ -66,7 +66,6 @@
         sanitize,
         domChangeTimeout;
 
-
         function isEmptyCheck() {
             //if the editor is empty, show the placeholder. 
             if ($(".editor", options.element).text() === "") {
@@ -78,7 +77,7 @@
         }
         function loadSettings() {
             if (localStorage.editorSettings) {
-                options.settings = JSON.parse(global.localStorage.editorSettings)
+                //  options.settings = JSON.parse(global.localStorage.editorSettings)
             }
         }
         self.updateSetting = function(key, value) {
@@ -114,21 +113,27 @@
             $(".editorPlaceholder", options.element).html(options.placeholder);
             sanitize = new Sanitize(options.sanitize);
 
-            self.listenForChanges();
+            
             self.setContent(options.content);
+
+            self.content = options.content;
+
             isEmptyCheck();
 
             self.emit("init");
 
+            self.listenForChanges(); //triggers undo & other items that require 
+
             $(".editor", options.element)
                 .bind("mousedown", function() {
-                    self.stashState()
+                    
                 })
                 .bind("click", function(e) {
                     self.emit("click", e);
+                    e.preventDefault();
                 })
                 .bind("keydown", function(e) {
-                    self.stashState()
+                    
                     /*  This type of stuff should move into formatting, but not sure how yet. */
 
                     var node = self.selection.getNonInlineParent();
@@ -143,22 +148,39 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
+                    console.log("node: ", node);
+                    console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
-                    if (e.keyCode === 13 && !e.shiftKey) {
+                    if (e.keyCode === 13) {
 
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
-                        else if (isBlank) { //enter was hit in an empty node.
+                        else if (isBlank  && !e.shiftKey) { //enter was hit in an empty node.
                             //$(node).remove();
                             if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
                                 // is the "P" inside something? Does it matter?
+
+                                //is there a paragraph above, that's empty? turn it into an HR.
+
+                                //is there an HR above, no more enters!
+                                /*
+                                    if (isBlank && previousChildNode.tagName == "HR") {
+                                        e.preventDefault(); 
+                                    }
+                                    else if (isBlank && node.tagName == "P") {
+                                        node.outerHTML = "<hr><p class='new-paragraph'>NEW P</p>";
+                                        window.n = node;
+                                        setTimeout(function() {
+                                            console.log("new node", node.outerHTML);
+                                        }, 5);
+                                    }
+                                */
                             }
                             else if (node.tagName == "LI") {
                                 if (isLastChild && isFirstChild) {
                                     e.preventDefault();
-                                    console.log("LI: Only item in list. removing");
                                     $(node).remove(); // remove the li
                                     document.execCommand("formatBlock", false, "P");
                                     setTimeout(function() {
@@ -202,7 +224,14 @@
                         if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
                             e.preventDefault();
                         }
-                        
+                        // need to prevent deletion of inline elements.
+
+                        // If the cursor is in the first position of a paragraph, the normal ba
+                        /*
+                        if ($(previousChildNode).hasClass("inline")) {
+                            e.preventDefault();   
+                        }
+                        */
                     }
                     setTimeout(isEmptyCheck, 50);
 
@@ -212,14 +241,13 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    self.stashState();
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
                     //prefer html, but take text if it's not avaialble
                     if (pastedHTML === "") {
                         pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
                     }
+                    pastedHTML = pastedHTML.replace(/\n/g, " ");
                     var fragment = document.createDocumentFragment();
-        
                     fragment.appendChild(document.createElement("div"))
                     fragment.childNodes[0].innerHTML = pastedHTML;
                     var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
@@ -227,56 +255,69 @@
                     for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                         var node = cleanFrag.childNodes[i];
                         if (node.nodeType == 3) {
-                            cleanHTML += node.nodeValue;
+                            cleanHTML += node.nodeValue + "\n\n";
                         }
                         else if (node.nodeType == 1) {
-                            if (!cleanFrag.childNodes[i].innerText == "") { // exclude tags with no content
+                            if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
                                 cleanHTML += cleanFrag.childNodes[i].outerHTML;
                             }
                         }
                     }
-
+                    
                     self.selection.insertOrReplace(cleanHTML)
-
                     e.preventDefault();
-
                     self.emit("paste");
                     
                 })
         };
 
+        self.destroy = function() {
+            console.log("Emitting Destroy");
+            self.emit("destroy");
+            //delete self;
+        }
+
         utils.enableEvents(self);
 
         self.utils = utils;
 
-
-        // stash the state before any action occurs, just in case it triggers a change and can be undone.
-        self.stashState = function() {
-            self.stashedState = {
-                content: self.getContent(),
-                selection: self.serializeRange()
+        self.serializeRange = function() {
+            try { 
+                var s =  rangy.serializeSelection(rangy.getSelection(), true, $(".editor", options.element)[0]);
+                return s;
+            }
+            catch (e) {
+                return "";
             }
         }
 
-        self.serializeRange = function() {
-            var s =  rangy.serializeSelection(rangy.getSelection(), true, $(".editor", options.element)[0]);
-            console.log(s);
-            return s;
-        }
-
         self.deserializeRange = function(serializedRange) {
-            rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
+            console.log("range", serializedRange);
+            if (serializedRange !== "") {
+                rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
+            }
+            else {
+                //remove focus from contenteditable elmenet by putting the cursor in another one. 
+               self.killFocus()
+            }
         }
-
+        
 
         function changed() {
             clearTimeout(domChangeTimeout);
             domChangeTimeout = setTimeout(function() {
                 self.emit("contentchanged");
-                console.log("dom modified")
-            }, 200);
+                if (typeof options.onContentChange === "function") {
+                    options.onContentChange(self);
+
+                }
+            }, 500);
         }
 
+
+        self.killFocus = function () {
+            $('<div style="position:fixed; top:0;" contenteditable="true"></div>').appendTo('body').focus().remove()
+        }
         self.listenForChanges = function() {
            $(".editor", options.element)
                 .bind("DOMSubtreeModified", changed )
@@ -286,13 +327,45 @@
                 .unbind("DOMSubtreeModified", changed )
         }
 
+
         self.setContent = function(contentHTML) {
             $(options.element).find(".editor").html(contentHTML);
+
+            //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
+            var firstDiv = $(".editor>div", options.element);
+            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
+                console.log("wrapped in a div");
+                $("#content-body .editor").html( $("#content-body .editor>div").html() )            
+            }
+
+            //add contentEditable false to any inline objects
+            $(".inline").attr("contentEditable", "false");
+
+            if (typeof window.picturefill === "function") {
+                window.picturefill();
+            }
         }
         self.getContent = function() {
-            return $(options.element).find(".editor").html();
+            //remove images
+            var fragment = document.createDocumentFragment();
+            fragment.appendChild(document.createElement("div"))
+            fragment.childNodes[0].innerHTML = $(options.element).find(".editor").html();
+            $(".image>div>img", fragment.childNodes[0]).remove();
+            $(".image", fragment.childNodes[0]).removeClass("new");
+
+            //let's strip out any contentEditable attributes
+            $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
+            
+            var html = fragment.childNodes[0].innerHTML;
+
+            //remove nbsp, if not permitted.
+            if (options.allowNbsp === false) {
+                html = html.replace(/&nbsp;/g, " ").trim();
+            }
+            return html;
         }
         options = $.extend(defaults, options);
+
 
         init(options);
     }

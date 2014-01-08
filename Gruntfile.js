@@ -16,14 +16,14 @@ module.exports = function(grunt) {
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
                 'src/modules/inline.js', 
-                'src/modules/embed.js', 
                 'src/modules/undo.js', 
                 'src/modules/link.js',
                 'src/modules/persist.js',
-
+                'src/modules/editSource.js',
                 'src/modules/textReplacement.js',
                 'src/modules/screensize.js',
                 'src/modules/theme.js',
+                'src/modules/youtube.js',
                 'src/modules/stats.js',
 
                 'src/lib/rangy/rangy-core.js',
@@ -32,6 +32,7 @@ module.exports = function(grunt) {
                 'src/lib/rangy/rangy-serializer.js',
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
+                //'src/lib/image.js',
 
                 ],
           dest: 'build/<%= pkg.name %>.js'
@@ -58,7 +59,7 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
-        tasks: ['concat', 'uglify'],
+        tasks: ['concat', 'uglify', 'copy'],
       },
     },
 

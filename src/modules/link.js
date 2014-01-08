@@ -4,20 +4,18 @@ TODO: Clean up showing/hiding stuff.
 
 */
 
-
-
 (function(global) {
     'use strict';
     var Link = Link || function(editor, options) {
         var self = this;
         editor.on("init", init);
-
-
-        key('⌘+k, ctrl+k', makeLink);
+        editor.on("destroy", destroy);
+        
 
         var activeLinkElement; 
 
         function init() {
+            key('⌘+k, ctrl+k', makeLink);
             editor.on("toolbar:click", function(name) {
                 if (name === "link") 
                     makeLink();
@@ -25,10 +23,10 @@ TODO: Clean up showing/hiding stuff.
             
             //register dialog events:
             $(".editor", options.element).click( function(e) {
-
-                if (e.target.nodeName == "A") {
+                var link = $(e.target).closest("A");
+                if (link.length === 1) {
                     //Show link info
-                    activeLinkElement = e.target;
+                    activeLinkElement = link[0];
                     showViewLinkDialog();
                 }
                 else {
@@ -40,6 +38,10 @@ TODO: Clean up showing/hiding stuff.
             $(".link-change", options.element).click(showEditLinkDialog);
             $(".link-remove", options.element).click(removeLink);
             $(".link-apply", options.element).click(applyLinkEdits);
+        }
+
+        function destroy() {
+            key.unbind('⌘+k, ctrl+k');
         }
 
         function removeLink() {
@@ -55,6 +57,9 @@ TODO: Clean up showing/hiding stuff.
 
             if (url !== "#") {
                 $(".link-input-textbox", options.element).val(url);
+            }
+            else {
+                $(".link-input-textbox", options.element).val("");
             }
         }
 
@@ -82,15 +87,14 @@ TODO: Clean up showing/hiding stuff.
 
         }
         function canDoLink() {
-            return true;
+            return options.sanitize.elements.indexOf("a") !== -1;
         }
 
         function makeLink() {
             //make a link, then throw open the edit dialog.
-            if (editor.selection.hasSelection() ) {
+            if (editor.selection.hasSelection() && canDoLink() ) {
                 global.document.execCommand("CREATELINK", false, "#");
                 activeLinkElement = rangy.getSelection().anchorNode.parentNode;
-
                 setTimeout(function() {
                     setURL();
                     showEditLinkDialog();
@@ -98,8 +102,6 @@ TODO: Clean up showing/hiding stuff.
             }
         }
         function applyLinkEdits() {
-            
-
             activeLinkElement.setAttribute("href", $(".link-input-textbox", options.element).val())
             $(".link-tools", options.element).hide();
         }

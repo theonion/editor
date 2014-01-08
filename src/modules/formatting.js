@@ -4,16 +4,9 @@
         var self = this;
 
         editor.on("init", init);
+        editor.on("destroy", destroy);
 
         function init() {
-            /*
-            if (options.settings.visualize) {
-                $(options.element)
-                    .addClass("visualize");
-            }
-            */
-
-            // only enable key commands if that kind of markup is allowed in sanitize config. 
 
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);
@@ -27,6 +20,12 @@
                 }
             })
         }
+        
+        function destroy() {
+            key.unbind('⌘+b, ctrl+b');
+            key.unbind('⌘+i, ctrl+i');
+            key.unbind('⌘+u, ctrl+u');
+        }
 
         function canFormat(tagName) {
             return editor.selection.hasFocus() && 
@@ -35,6 +34,7 @@
 
         var commands = {
             bold : function() {
+                console.log("butt");
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
                 }
@@ -64,7 +64,6 @@
                     global.document.execCommand("subscript");
                 }
             },
-
             /* structural formatting */
             unorderedlist: function() {
                 doList("UL")
@@ -76,17 +75,11 @@
                 wrap("BLOCKQUOTE", false)
             },
             visualize: function() {
-                editor.updateSetting("visualize",
-                    // this returns
-                    $(options.element)
-                        .toggleClass("visualize")
-                        .hasClass("visualize"));
+                $(options.element)
+                    .toggleClass("visualize");
             },
-
             removeformatting: function() {
                 global.document.execCommand("removeformat", false, "");
-
-
             }
         }
 

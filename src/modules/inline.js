@@ -5,19 +5,51 @@
 (function(global) {
     'use strict';
     var InlineObjects = InlineObjects || function(editor, options) {
-        var self = this;
+        var self = this,
+            inlineTypes = Object.keys(options.inline || {} );
 
         editor.on('init', init);
 
         editor.on("toolbar:click", function(name){
+            //is it a registered action below?
             if (typeof actions[name] === "function") {
                 actions[name]();
             }
+
+            //is there an inline type defined
+            else if (inlineTypes.indexOf(name) !== -1) {
+                //insert placeholder item
+                editor.killFocus();
+                //call edit on placeholder
+                editor.emit("inline:insert:" + name, 
+                    {
+                        block: activeBlock, 
+                        onSuccess: function(block, values) {
+                            $(block).before(
+                                editor.utils.template(
+                                    options.inline[name].template,
+                                    $.extend(options.inline[name].defaults, values) 
+                                )
+                            );
+                            $(".inline").attr("contentEditable", "false");
+                        },
+                        onError: function() {
+                            //do nothing!
+                        }
+                        
+                    }
+                );
+                $(".embed-tools", options.element).removeClass("active");
+                activeBlock = undefined;
+            }
         });
 
+        
         var activeElement;
+        var activeBlock;
+
         function init() {
-            //register dialog events:
+            //Inline overlay events
             $(".editor", options.element).mouseover( function(e) {
                 //check to see if the target is inside of an inline element
                 var parents = $(e.target).parents('.inline');
@@ -30,39 +62,97 @@
                     hideToolbar();
                 }
             });
-            $(".inline-tools", options.element).mouseleave(hideToolbar)
+
+            /* Events for inline insert */
+            $(".editor", options.element).mousemove( function(e) {
+                if ($(e.target).hasClass("editor")) {
+                    var cursorOffset = e.clientY + window.scrollY;
+                    // probably inefficient, but may not matter
+                    var blocks = $(".editor>*", options.element)
+                    for (var i =0; i < blocks.length; i++) {
+                        if (cursorOffset < $(blocks[i]).offset().top + 40  ) {
+                            break;
+                        }
+                    }
+                    if (blocks[i]) {
+                        var top = $(blocks[i]).position().top;
+                        $(".embed-tools", options.element)
+                            .css({ top: top - 35  })
+                            .addClass("active");
+                        activeBlock = blocks[i];
+                    }
+                }
+                else {
+                    $(".embed-tools", options.element).removeClass("active");
+                    activeBlock = undefined;
+                }
+
+            });
+            $(options.element).mouseleave(function() {
+                $(".embed-tools", options.element).removeClass("active");
+                activeBlock = undefined;
+            });
+            $(".inline-tools", options.element).mouseleave(hideToolbar);
         }
 
+
         function hideToolbar() {
-                $(".inline-tools").hide();
-                $(options.element).removeClass("inline-active")
+            $(".inline-tools").hide();
+            $(options.element).removeClass("inline-active")
         }
 
         function showToolbar() {
             var el = $(activeElement);
             var pos = el.position();
-            $(options.element).addClass("inline-active")
+            $(options.element).addClass("inline-active");
+            
+            //set size
+            $(".inline-tools .size", options.element)
+                .html($(activeElement).attr("data-size"));
+
+            //set crop
+            $(".inline-tools .crop", options.element)
+                .html($(activeElement).attr("data-crop"));
 
             $(".inline-tools", options.element)
                 .css({
                     top: pos.top + parseInt(el.css('margin-top')), 
-                    left: pos.left + parseInt(el.css('margin-left')),
+                    left: pos.left + parseInt(el.css('margin-left')) + parseInt($(".editor", options.element).css('margin-left')),
                     width: el.width(),
                     height: el.height()
                 })
                 .show();
         }
 
+
         //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
         var actions = {
+
+            inline_caption: function() {
+                var caption = prompt("Caption", 
+                    $(".caption", activeElement).html()
+                );
+                if (caption) {
+                    $(".caption", activeElement).html(caption);
+                }
+            },
+            //TODO: size/crop isn't working right after you hit the "HUGE" size in images
+            inline_size: function() {
+                var l = Object.keys(options.inline[$(activeElement).data("type")].size)
+                toggleAttribute("size", l);
+            },
+            inline_crop: function() {
+                var l = options
+                    .inline[$(activeElement).data("type")]
+                    .size[$(activeElement).data("size")];
+                toggleAttribute("crop", l);
+            },
             inline_up: function() {
                 var previousBlock = $(activeElement).prev()[0];
                 if (previousBlock) {
                     var top = $(activeElement).offset().top;
                     $(activeElement).after(previousBlock);
-                    
-                    showToolbar()
-
+                    showToolbar();
                     var newTop = $(activeElement).offset().top;
                     window.scrollBy(0, newTop - top)
                 }
@@ -82,12 +172,50 @@
                 hideToolbar();
             },
             inline_edit: function () {
-                // need a way to determine type & call properly fire the right edit event.
-                alert("Edit\n\n" + $(activeElement)[0].outerHTML);
-                editor.emit("inline:edit:" + type)
+                /* I think this should be a bit more like insert.
+                We establish an onChange callback where we update the template with new values. 
+                For now, the module is responsible for making modifications to the markup. 
+
+                */
+                editor.emit("inline:edit:" + $(activeElement).attr("data-type"), 
+                    {
+
+                        element: activeElement,
+                        onChange: function(element, values) {
+                            
+                            var type = $(element).attr("data-type");
+                            console.log(type);
+                            console.log(
+                                editor.utils.template(
+                                    options.inline[type].template,
+                                    $.extend(options.inline[name].defaults, values) 
+                                ));
+                            element.outerHTML = 
+                                editor.utils.template(
+                                    options.inline[type].template,
+                                    $.extend(options.inline[name].defaults, values) 
+                                )
+                        }
+                    }
+                )
             }
         }
-        
+
+        function toggleAttribute(attribute, list) {
+            var currentValue = $(activeElement).attr("data-" + attribute);
+            var index = list.indexOf(currentValue) + 1;
+            if (index >= list.length)
+                index = 0;
+            $(activeElement)
+                .removeClass(attribute + "-" + currentValue)
+                .addClass(attribute + "-" + list[index])
+                .attr("data-" + attribute, list[index])
+            
+            if (typeof window.picturefill === "function") {
+                setTimeout(window.picturefill, 100);
+            }
+            showToolbar();
+        } 
     }
     global.EditorModules.push(InlineObjects);
 })(this)

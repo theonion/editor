@@ -1,20 +1,11 @@
-/* default */
-/* .light */
-
-.light {
-}
-
 .editor {
-    border: 1px #DADADA solid;
     color: #101010;
     background-color: #e0e0e0;
-
 }
 
 .editor a {
     color: #1155CC;
 }
-
 
 /* fonts */
 .editorPlaceholder,
@@ -27,7 +18,6 @@
 blockquote p {
     line-height: 32px;
 }
-
 
 .title .editorPlaceholder,
 .title .editor {
@@ -46,4 +36,22 @@ blockquote p {
 
 .editorPlaceholder {
     color: #B3B3B3 !important;
+}
+
+@media screen and (min-width: 320px) and (max-width: 800px) {
+    .title .editorPlaceholder,
+    .title .editor {
+        font-size:20px;
+        line-height: 30px;
+    }
+    .subhead .editorPlaceholder,
+    .subhead .editor {
+        font-size:16px;
+        line-height: 24px;
+    }
+    .editorPlaceholder,
+    .editor {
+        line-height: 24px;
+        font-size: 16px;
+    }
 }

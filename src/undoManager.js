@@ -34,6 +34,19 @@ Making a few assumptions, for now:
             position++;                    
         }
 
+        //make it so you can insert 
+        self.pushInitialState = function (obj, data) {
+            if (typeof undoStack[0]  === "undefined") {
+                undoStack[0] = [];
+            }
+            undoStack[0].push({
+                obj: obj,
+                data: data
+            });
+            position = 0;
+        }
+
+
         self.dumpStack = function() {
             console.log("Position: " , position);
             console.log(undoStack)
@@ -41,16 +54,30 @@ Making a few assumptions, for now:
 
         function undo() {
             if (position > 0) {
-                console.log(position)
-                undoStack[position].obj.setState(undoStack[position].data.previous)
                 position--;
+                //do we have a list of states?
+                setState(undoStack[position]);
             }
+        }
+
+
+
+        function setState(state) {
+            if (Object.prototype.toString.call( state ) === '[object Array]') {
+                for (var i = 0; i < state.length; i++) {
+                    state[i].obj.setState(state[i].data)
+                }
+            }
+            else {
+                state.obj.setState(state.data)
+            }
+
         }
 
         function redo() {
             if (position < undoStack.length -1 ) {
                 position++;
-                undoStack[position].obj.setState(undoStack[position].data.current)
+                setState(undoStack[position]);
             }
         }
 

@@ -1,7 +1,16 @@
+/* 
+
+TODO:
+
+    -- -> &mdash;
+
+*/
+
 (function(global) {
     'use strict';
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
+
 
         //move this to getSelection
         function _getPrecedingCharacter() {

@@ -1,7 +1,7 @@
 /* Menus + Buttons */
 
 .inline-active .toolbar {
-    display:none;
+    /*display:none; */
 }
 
 .inline-active .inline-tools.toolbar{
@@ -39,7 +39,7 @@
     width:25px;
     height:25px;
     cursor:pointer;
-    border-radius: 2px;
+    border-radius: 3px;
 }
 
 .toolbar button.text {
@@ -95,36 +95,39 @@
 
 
 
-
 .document-tools>.toolbar-contents {
     top: 100px;
-    
     position:fixed;
     left:50%;
     text-align:center;
-    margin-left: 350px;
+    margin-left:-480px;
     display: block;
     opacity: 1;
 }
+
 .embed-tools {
-    left:70px;
-    margin-left: 20px;
+    left:0ox;
     position:absolute;
     display:none;
+
 }
 
 
 .embed-tools:hover .embed-heading {
     border-bottom:1px #DADADA solid; ;
-    text-align:center;
- 
-}
-.embed-tools .embed-heading .btn-label{
-    font-size:10px;
 }
 
-.embed-tools:hover .embed-bug {
-    display:none;
+.embed-tools .embed-heading .btn-label {
+    font-size:12px;
+    display:inline-block;
+}
+.embed-tools .toolbar-contents {
+    border-color:transparent;
+    background-color:transparent;
+}
+.embed-tools:hover .toolbar-contents {
+    background-color: #EEEEEE;
+    border: 1px #DADADA solid;
 }
 
 .embed-tools .embed-bug {
@@ -162,7 +165,10 @@
     position:absolute;
     z-index: 100;
     display:none;
-    background-color: #fff;
+    background-color: #eee;
+    border:1px #ccc solid;
+    border-radius: 4px;
+    white-space:nowrap;
 }
 .link-tools .link-view-dialog{
     width: auto;
@@ -186,7 +192,12 @@
 
 .link-tools input {
     padding: 8px;
-    width: 350px;
+    margin-top: 4px;
+    width: 320px;
+    border-radius: 4px;
+    background-color: #f1f1f1;
+    border:1px #ddd solid;
+
 }
 
 .link-search-results ul {
@@ -205,5 +216,43 @@
     width:auto;
 }
 
+.inline-tools  button.inline-attribute {
+    font-size: 11px;
+    text-transform:uppercase;
+}
 
+.inline-tools .remove {
+    position: absolute;
+    right: 10px;
+    bottom: 10px;
+    background-color: #930900;
+    border-radius: 4px;
+}
+.inline-tools .edit button,
+.inline-tools .remove button {
+    color: white;
+} 
+
+.inline-tools .remove button:hover {
+    background-color: #C70A00;
+}
+
+.inline-tools .edit {
+    position: absolute;
+    left: 10px;
+    bottom: 10px;
+    border-radius: 4px;
+    background-color: #333;
+    color: white;
+}
+
+.inline-tools .edit button:hover {
+    background-color: #444;
+}
+
+.inline-tools .toolbar-contents {
+    margin-top: 20px;
+    left: 50%;
+    margin-left: -96px;
+}
 

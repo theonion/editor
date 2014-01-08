@@ -38,21 +38,6 @@
             }
 
 
-            //mouse events for embed toolbar
-
-
-            $(".editor", options.element).mousemove( function(e) {
-                var node = $(".editor>*:hover");
-                if (node.length == 1) {
-                    $(".embed-tools", options.element)
-                        .css({ top:$(node).position().top - 4  })
-                        .addClass("active");
-                }
-                else {
-                    $(".embed-tools", options.element).removeClass("active");
-                }
-            });
-
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 
@@ -72,7 +57,6 @@
             });
             
             self.toolbarElement.bind("mousedown", function() {
-                editor.stashState()
             })
             
             self.toolbarElement.bind("mouseover", function(e) {

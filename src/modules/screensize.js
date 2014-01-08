@@ -6,7 +6,7 @@
         var sizes = ["mobile", "desktop", "tablet"];
         editor.on("toolbar:click", function(name) {
             if (sizes.indexOf(name) !== -1) {
-                $(options.element)
+                $("#content-wrapper")
                 	.removeClass(sizes.join(" "))
                 	.addClass(name);
             }
