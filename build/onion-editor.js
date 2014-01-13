@@ -1,4 +1,4 @@
-/*! onion-editor 2014-01-08 */
+/*! onion-editor 2014-01-13 */
 (function(global){
 
     'use strict';
@@ -149,7 +149,7 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
-                    console.log("node: ", node);
+                    console.log("node: ", parentNode);
                     console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
@@ -196,6 +196,7 @@
                                 }
                                 else if (isLastChild) {
                                     // LI: At end of list, removing node
+                                    console.log("LI: At end of list, removing node");
                                     e.preventDefault();
 
                                         $(node).remove(); 
@@ -228,11 +229,17 @@
                         // need to prevent deletion of inline elements.
 
                         // If the cursor is in the first position of a paragraph, the normal ba
-                        /*
+                        
+                        //is the previous element an inline element
                         if ($(previousChildNode).hasClass("inline")) {
-                            e.preventDefault();   
+                            //is the cursor in the first position of the current node.
+                            var sel = self.selection.getSelection()
+
+                            if (sel.anchorOffset === 0 && sel.isCollapsed) {
+                                e.preventDefault();
+                            }
                         }
-                        */
+                        
                     }
                     setTimeout(isEmptyCheck, 50);
 
@@ -581,20 +588,22 @@ Making a few assumptions, for now:
         }
 
         var commands = {
-            bold : function() {
-                console.log("butt");
+            bold : function(e) {
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
+                    e.preventDefault();
                 }
             },
-            italic: function() {
+            italic: function(e) {
                 if (canFormat("i")) {
                     global.document.execCommand("italic");
+                    e.preventDefault();
                 }
             },
-            underline: function() {
+            underline: function(e) {
                 if (canFormat("u")) {
                     global.document.execCommand("underline");
+                    e.preventDefault();
                 }
             },
             strikethrough: function() {
@@ -6355,7 +6364,7 @@ Sanitize.prototype.clean_node = function(container) {
 if ( typeof define === "function" ) {
   define( "sanitize", [], function () { return Sanitize; } );
 };//     keymaster.js
-//     (c) 2011-2012 Thomas Fuchs
+//     (c) 2011-2013 Thomas Fuchs
 //     keymaster.js may be freely distributed under the MIT license.
 
 ;(function(global){

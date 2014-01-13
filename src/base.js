@@ -148,7 +148,7 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
-                    console.log("node: ", node);
+                    console.log("node: ", parentNode);
                     console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
@@ -195,6 +195,7 @@
                                 }
                                 else if (isLastChild) {
                                     // LI: At end of list, removing node
+                                    console.log("LI: At end of list, removing node");
                                     e.preventDefault();
 
                                         $(node).remove(); 
@@ -227,11 +228,17 @@
                         // need to prevent deletion of inline elements.
 
                         // If the cursor is in the first position of a paragraph, the normal ba
-                        /*
+                        
+                        //is the previous element an inline element
                         if ($(previousChildNode).hasClass("inline")) {
-                            e.preventDefault();   
+                            //is the cursor in the first position of the current node.
+                            var sel = self.selection.getSelection()
+
+                            if (sel.anchorOffset === 0 && sel.isCollapsed) {
+                                e.preventDefault();
+                            }
                         }
-                        */
+                        
                     }
                     setTimeout(isEmptyCheck, 50);
 

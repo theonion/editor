@@ -33,20 +33,22 @@
         }
 
         var commands = {
-            bold : function() {
-                console.log("butt");
+            bold : function(e) {
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
+                    e.preventDefault();
                 }
             },
-            italic: function() {
+            italic: function(e) {
                 if (canFormat("i")) {
                     global.document.execCommand("italic");
+                    e.preventDefault();
                 }
             },
-            underline: function() {
+            underline: function(e) {
                 if (canFormat("u")) {
                     global.document.execCommand("underline");
+                    e.preventDefault();
                 }
             },
             strikethrough: function() {
