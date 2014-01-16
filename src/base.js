@@ -148,8 +148,8 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
-                    console.log("node: ", parentNode);
-                    console.log("previousChildNode: ", previousChildNode);
+                    //console.log("node: ", parentNode);
+                    //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
 
@@ -178,6 +178,11 @@
                                     }
                                 */
                             }
+                            else if (parentNode.tagname == "") {
+
+                            }
+
+                            //Redo this block exclusively using dom manip, not 
                             else if (node.tagName == "LI") {
                                 if (isLastChild && isFirstChild) {
                                     e.preventDefault();
@@ -194,7 +199,7 @@
                                     e.preventDefault();
                                 }
                                 else if (isLastChild) {
-                                    // LI: At end of list, removing node
+                                    // LI: At end of list
                                     console.log("LI: At end of list, removing node");
                                     e.preventDefault();
 

@@ -27,7 +27,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
         }
 
-        
+
         self.hasFocus = function() {
             var sel = self.getSelection();
             if (sel) {
@@ -252,7 +252,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         var selectionTimeout;
         // emit a selction change event. 
         //TODO: Make it fire for a only within the  editor
-        //TODO: Need to be smarter about how this fires. Really kills performance. Maybe only do on click? 
         
         $(w.document).bind("selectionchange",
             function(e) {

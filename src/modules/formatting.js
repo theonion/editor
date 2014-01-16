@@ -1,3 +1,8 @@
+/* TODO: 
+    Can't CMD+B in Safari
+
+*/
+
     (function(global) {
     'use strict';
     var Formatting = Formatting || function(editor, options) {
@@ -7,6 +12,7 @@
         editor.on("destroy", destroy);
 
         function init() {
+
 
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);

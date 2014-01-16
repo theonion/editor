@@ -1,4 +1,4 @@
-/*! onion-editor 2014-01-13 */
+/*! onion-editor 2014-01-15 */
 (function(global){
 
     'use strict';
@@ -149,8 +149,8 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
-                    console.log("node: ", parentNode);
-                    console.log("previousChildNode: ", previousChildNode);
+                    //console.log("node: ", parentNode);
+                    //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
 
@@ -179,6 +179,11 @@
                                     }
                                 */
                             }
+                            else if (parentNode.tagname == "") {
+
+                            }
+
+                            //Redo this block exclusively using dom manip, not 
                             else if (node.tagName == "LI") {
                                 if (isLastChild && isFirstChild) {
                                     e.preventDefault();
@@ -195,7 +200,7 @@
                                     e.preventDefault();
                                 }
                                 else if (isLastChild) {
-                                    // LI: At end of list, removing node
+                                    // LI: At end of list
                                     console.log("LI: At end of list, removing node");
                                     e.preventDefault();
 
@@ -553,7 +558,12 @@ Making a few assumptions, for now:
     global.EditorModules.push(Toolbar);
 })(this)
 
-;    (function(global) {
+;/* TODO: 
+    Can't CMD+B in Safari
+
+*/
+
+    (function(global) {
     'use strict';
     var Formatting = Formatting || function(editor, options) {
         var self = this;
@@ -562,6 +572,7 @@ Making a few assumptions, for now:
         editor.on("destroy", destroy);
 
         function init() {
+
 
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);
@@ -808,7 +819,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
         }
 
-        
+
         self.hasFocus = function() {
             var sel = self.getSelection();
             if (sel) {
@@ -1033,7 +1044,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         var selectionTimeout;
         // emit a selction change event. 
         //TODO: Make it fire for a only within the  editor
-        //TODO: Need to be smarter about how this fires. Really kills performance. Maybe only do on click? 
         
         $(w.document).bind("selectionchange",
             function(e) {
@@ -1504,7 +1514,14 @@ TODO: Clean up showing/hiding stuff.
 TODO:
 
     -- -> &mdash;
+    ... -> &hellip;
+    (c)
 
+    Keep a buffer of recently pressed characters. If a portion of that buffer matches a pattern we've got stored, replace it.
+
+    Keep the cursor in right place & replace the correct characters.
+
+    Step 1: Log the last 5 characters typed in console. 
 */
 
 (function(global) {
@@ -1512,6 +1529,56 @@ TODO:
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
 
+        function replaceLast(str, find, replace) {
+            var index = str.lastIndexOf(find);
+            if (index >= 0) {
+                return str.substring(0, index) + replace + str.substring(index + find.length);
+            }
+            return str.toString();
+        }
+
+        //add this to config
+        var REPLACEMENT_MAP = {
+            "...": "…",
+            "--": "—",
+            "(c)": "©"
+        }
+
+        // editor.on("keydown", function() {setTimeout(replaceText, 10)});
+        /*  If the last characters match a string int he map, 
+            replace 'em. 
+        */
+        function replaceText() {
+            console.log("replace text");
+            var sel = editor.selection.getSelection();
+            for (var search in REPLACEMENT_MAP) { 
+            
+                
+                var text = sel.focusNode.textContent.substr(sel.focusOffset-(search.length), search.length);
+                console.log("text: ", text);
+                if (search === text) {
+                    console.log("Search matches string", text, search);
+                    var position = sel.focusNode.textContent.lastIndexOf(search);
+                    sel.focusNode.textContent = replaceLast(sel.focusNode.textContent, search, REPLACEMENT_MAP[search]);
+                    console.log(sel.focusNode);
+                    break;
+                }
+                else {
+                    //console.log("Search doesn't match string", text, search);
+                }
+                
+            }
+
+/*
+            console.log("logging chars");
+            var sel = editor.selection.getSelection();
+            console.log("Party: ",  );
+
+            var n = sel.anchorNode;
+
+            n.data = n.substr
+*/
+        }
 
         //move this to getSelection
         function _getPrecedingCharacter() {
@@ -1524,7 +1591,7 @@ TODO:
             }
         }
 
-        function replaceText(e) {
+        function replaceQuotes(e) {
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
                 var p = _getPrecedingCharacter();
                 var chr;
@@ -1548,10 +1615,13 @@ TODO:
             }
 
         }  
-        editor.on("keydown", replaceText);
+        editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
-})(this);
+})(this)
+
+
+/* Enter Handler */;
 (function(global) {
     'use strict';
     var Screensize = Screensize || function(editor, options) {

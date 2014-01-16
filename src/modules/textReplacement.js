@@ -3,7 +3,14 @@
 TODO:
 
     -- -> &mdash;
+    ... -> &hellip;
+    (c)
 
+    Keep a buffer of recently pressed characters. If a portion of that buffer matches a pattern we've got stored, replace it.
+
+    Keep the cursor in right place & replace the correct characters.
+
+    Step 1: Log the last 5 characters typed in console. 
 */
 
 (function(global) {
@@ -11,6 +18,56 @@ TODO:
     var TextReplacement = TextReplacement || function(editor, options) {
         var self = this;
 
+        function replaceLast(str, find, replace) {
+            var index = str.lastIndexOf(find);
+            if (index >= 0) {
+                return str.substring(0, index) + replace + str.substring(index + find.length);
+            }
+            return str.toString();
+        }
+
+        //add this to config
+        var REPLACEMENT_MAP = {
+            "...": "…",
+            "--": "—",
+            "(c)": "©"
+        }
+
+        // editor.on("keydown", function() {setTimeout(replaceText, 10)});
+        /*  If the last characters match a string int he map, 
+            replace 'em. 
+        */
+        function replaceText() {
+            console.log("replace text");
+            var sel = editor.selection.getSelection();
+            for (var search in REPLACEMENT_MAP) { 
+            
+                
+                var text = sel.focusNode.textContent.substr(sel.focusOffset-(search.length), search.length);
+                console.log("text: ", text);
+                if (search === text) {
+                    console.log("Search matches string", text, search);
+                    var position = sel.focusNode.textContent.lastIndexOf(search);
+                    sel.focusNode.textContent = replaceLast(sel.focusNode.textContent, search, REPLACEMENT_MAP[search]);
+                    console.log(sel.focusNode);
+                    break;
+                }
+                else {
+                    //console.log("Search doesn't match string", text, search);
+                }
+                
+            }
+
+/*
+            console.log("logging chars");
+            var sel = editor.selection.getSelection();
+            console.log("Party: ",  );
+
+            var n = sel.anchorNode;
+
+            n.data = n.substr
+*/
+        }
 
         //move this to getSelection
         function _getPrecedingCharacter() {
@@ -23,7 +80,7 @@ TODO:
             }
         }
 
-        function replaceText(e) {
+        function replaceQuotes(e) {
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
                 var p = _getPrecedingCharacter();
                 var chr;
@@ -47,7 +104,10 @@ TODO:
             }
 
         }  
-        editor.on("keydown", replaceText);
+        editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
 })(this)
+
+
+/* Enter Handler */
