@@ -71,5 +71,5 @@
         }
     }
     global.EditorModules.push(Toolbar);
-})(this)
+})(this);
 

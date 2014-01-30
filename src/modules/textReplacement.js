@@ -107,7 +107,4 @@ TODO:
         editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
-})(this)
-
-
-/* Enter Handler */
+})(this);

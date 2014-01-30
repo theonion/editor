@@ -13,4 +13,4 @@
         })
     }
     global.EditorModules.push(Screensize);
-})(this)
+})(this);

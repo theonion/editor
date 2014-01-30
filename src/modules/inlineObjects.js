@@ -1,12 +1,14 @@
 /* 
     provides a generic way to move around "inline objects" within the markup
+
+    z
 */
 
 (function(global) {
     'use strict';
     var InlineObjects = InlineObjects || function(editor, options) {
-        var self = this,
-            inlineTypes = Object.keys(options.inline || {} );
+        var self = this;
+            
 
         editor.on('init', init);
 
@@ -17,14 +19,12 @@
             }
 
             //is there an inline type defined
-            else if (inlineTypes.indexOf(name) !== -1) {
-                //insert placeholder item
+            else if (inline.hasOwnProperty(name)) {
                 editor.killFocus();
-                //call edit on placeholder
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
-                        onSuccess: function(block, values) {
+                        insertInlineItem: function(block, values) {
                             $(block).before(
                                 editor.utils.template(
                                     options.inline[name].template,
@@ -36,7 +36,6 @@
                         onError: function() {
                             //do nothing!
                         }
-                        
                     }
                 );
                 $(".embed-tools", options.element).removeClass("active");
@@ -125,7 +124,6 @@
         }
 
 
-        //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
         var actions = {
 
             inline_caption: function() {
@@ -136,15 +134,12 @@
                     $(".caption", activeElement).html(caption);
                 }
             },
-            //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).data("type")].size)
+                var l = options.inline[$(activeElement).data("type")].size;
                 toggleAttribute("size", l);
             },
             inline_crop: function() {
-                var l = options
-                    .inline[$(activeElement).data("type")]
-                    .size[$(activeElement).data("size")];
+                var l = options.inline[$(activeElement).data("type")].crop;
                 toggleAttribute("crop", l);
             },
             inline_up: function() {
@@ -179,19 +174,12 @@
                 */
                 editor.emit("inline:edit:" + $(activeElement).attr("data-type"), 
                     {
-
                         element: activeElement,
                         onChange: function(element, values) {
-                            
                             var type = $(element).attr("data-type");
-                            console.log(type);
-                            console.log(
-                                editor.utils.template(
-                                    options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
-                                ));
                             element.outerHTML = 
                                 editor.utils.template(
+                                    //TODO:
                                     options.inline[type].template,
                                     $.extend(options.inline[name].defaults, values) 
                                 )
@@ -210,12 +198,8 @@
                 .removeClass(attribute + "-" + currentValue)
                 .addClass(attribute + "-" + list[index])
                 .attr("data-" + attribute, list[index])
-            
-            if (typeof window.picturefill === "function") {
-                setTimeout(window.picturefill, 100);
-            }
             showToolbar();
         } 
     }
     global.EditorModules.push(InlineObjects);
-})(this)
+})(this);

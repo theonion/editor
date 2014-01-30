@@ -35,4 +35,4 @@
         })
     }
     global.EditorModules.push(Theme);
-})(this)
+})(this);

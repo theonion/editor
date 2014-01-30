@@ -1,9 +1,4 @@
-/* TODO: 
-    Can't CMD+B in Safari
-
-*/
-
-    (function(global) {
+(function(global) {
     'use strict';
     var Formatting = Formatting || function(editor, options) {
         var self = this;
@@ -228,5 +223,4 @@
         }
     }
     global.EditorModules.push(Formatting);
-})(this)
-
+})(this);

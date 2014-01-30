@@ -5,13 +5,18 @@
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
-        var self = this,
-        defaults = {
+        var self = this;
+        self.content = {"blocks": []};
+        self.sanitize = {};
+
+
+
+        var defaults = {
                 element: null, /* element to make Editable */
-                content: "<p><br></p>",
+                html: "",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
+                  elements: ['b', 'em', 'i', 'strong', 'u','a', 'br', 'sub', 'sup', 's', 'li'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -63,7 +68,6 @@
                 return html;
             }
         },
-        sanitize,
         domChangeTimeout;
 
         function isEmptyCheck() {
@@ -111,12 +115,10 @@
                 return false;
             });
             $(".editorPlaceholder", options.element).html(options.placeholder);
-            sanitize = new Sanitize(options.sanitize);
-
             
-            self.setContent(options.content);
+            self.sanitize = new Sanitize(options.sanitize);
 
-            self.content = options.content;
+            self.setContent(options.html);
 
             isEmptyCheck();
 
@@ -253,33 +255,17 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
-                    //prefer html, but take text if it's not avaialble
-                    if (pastedHTML === "") {
-                        pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
-                    }
-                    pastedHTML = pastedHTML.replace(/\n/g, " ");
-                    var fragment = document.createDocumentFragment();
-                    fragment.appendChild(document.createElement("div"))
-                    fragment.childNodes[0].innerHTML = pastedHTML;
-                    var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
-                    var cleanHTML = "";
-                    for (var i = 0; i < cleanFrag.childNodes.length; i++) {
-                        var node = cleanFrag.childNodes[i];
-                        if (node.nodeType == 3) {
-                            cleanHTML += node.nodeValue + "\n\n";
-                        }
-                        else if (node.nodeType == 1) {
-                            if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
-                                cleanHTML += cleanFrag.childNodes[i].outerHTML;
-                            }
-                        }
-                    }
-                    
-                    self.selection.insertOrReplace(cleanHTML)
                     e.preventDefault();
-                    self.emit("paste");
-                    
+                    var pastedContent = e.originalEvent.clipboardData.getData('text/html');
+                    console.log("Raw paste: ", pastedContent)
+                    //prefer html, but take text if it's not avaialble
+                    if (pastedContent === "") { // this is plaintext!
+                        pastedContent = e.originalEvent.clipboardData.getData('text/plain');
+                        self.blocks.insertFromText(pastedContent);
+                    }
+                    else {
+                        self.blocks.insertFromHTML(pastedContent);
+                    }
                 })
         };
 
@@ -341,6 +327,7 @@
 
 
         self.setContent = function(contentHTML) {
+            /*
             $(options.element).find(".editor").html(contentHTML);
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
@@ -356,6 +343,8 @@
             if (typeof window.picturefill === "function") {
                 window.picturefill();
             }
+            */
+            self.blocks.loadContent(contentHTML);
         }
         self.getContent = function() {
             //remove images

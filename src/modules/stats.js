@@ -17,4 +17,4 @@
         }
     }
     global.EditorModules.push(Stats);
-})(this)
+})(this);

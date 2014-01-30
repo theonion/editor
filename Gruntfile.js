@@ -11,11 +11,12 @@ module.exports = function(grunt) {
           src: [
                 'src/base.js',
                 'src/undoManager.js',
-
+                
+                'src/modules/blocks.js',
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
-                'src/modules/inline.js', 
+                'src/modules/inlineObjects.js', 
                 'src/modules/undo.js', 
                 'src/modules/link.js',
                 'src/modules/persist.js',
@@ -48,18 +49,18 @@ module.exports = function(grunt) {
         dest: 'build/<%= pkg.name %>.min.js'
       }
     },
-    copy: {
+/*    copy: {
       main: {
       files: [
         { src: 'build/onion-editor.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.js' },
         { src: 'build/onion-editor.min.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.min.js' },
       ]
       }
-    },
+    }, */
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
-        tasks: ['concat', 'uglify', 'copy'],
+        tasks: ['concat', 'uglify'/*, 'copy'*/],
       },
     },
 
@@ -70,6 +71,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
-  grunt.registerTask('default', ['concat', 'uglify', 'copy']);
+  grunt.registerTask('default', ['concat', 'uglify'/*, 'copy'*/]);
 
 };

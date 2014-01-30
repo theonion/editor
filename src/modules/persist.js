@@ -13,4 +13,4 @@
         editor.embed = {types: []};
     }
     global.EditorModules.push(Persist);
-})(this)
+})(this);

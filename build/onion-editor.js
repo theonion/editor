@@ -1,4 +1,4 @@
-/*! onion-editor 2014-01-15 */
+/*! onion-editor 2014-01-29 */
 (function(global){
 
     'use strict';
@@ -6,13 +6,18 @@
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
-        var self = this,
-        defaults = {
+        var self = this;
+        self.content = {"blocks": []};
+        self.sanitize = {};
+
+
+
+        var defaults = {
                 element: null, /* element to make Editable */
-                content: "<p><br></p>",
+                html: "",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
+                  elements: ['b', 'em', 'i', 'strong', 'u','a', 'br', 'sub', 'sup', 's', 'li'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -64,7 +69,6 @@
                 return html;
             }
         },
-        sanitize,
         domChangeTimeout;
 
         function isEmptyCheck() {
@@ -112,12 +116,10 @@
                 return false;
             });
             $(".editorPlaceholder", options.element).html(options.placeholder);
-            sanitize = new Sanitize(options.sanitize);
-
             
-            self.setContent(options.content);
+            self.sanitize = new Sanitize(options.sanitize);
 
-            self.content = options.content;
+            self.setContent(options.html);
 
             isEmptyCheck();
 
@@ -254,33 +256,17 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
-                    //prefer html, but take text if it's not avaialble
-                    if (pastedHTML === "") {
-                        pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
-                    }
-                    pastedHTML = pastedHTML.replace(/\n/g, " ");
-                    var fragment = document.createDocumentFragment();
-                    fragment.appendChild(document.createElement("div"))
-                    fragment.childNodes[0].innerHTML = pastedHTML;
-                    var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
-                    var cleanHTML = "";
-                    for (var i = 0; i < cleanFrag.childNodes.length; i++) {
-                        var node = cleanFrag.childNodes[i];
-                        if (node.nodeType == 3) {
-                            cleanHTML += node.nodeValue + "\n\n";
-                        }
-                        else if (node.nodeType == 1) {
-                            if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
-                                cleanHTML += cleanFrag.childNodes[i].outerHTML;
-                            }
-                        }
-                    }
-                    
-                    self.selection.insertOrReplace(cleanHTML)
                     e.preventDefault();
-                    self.emit("paste");
-                    
+                    var pastedContent = e.originalEvent.clipboardData.getData('text/html');
+                    console.log("Raw paste: ", pastedContent)
+                    //prefer html, but take text if it's not avaialble
+                    if (pastedContent === "") { // this is plaintext!
+                        pastedContent = e.originalEvent.clipboardData.getData('text/plain');
+                        self.blocks.insertFromText(pastedContent);
+                    }
+                    else {
+                        self.blocks.insertFromHTML(pastedContent);
+                    }
                 })
         };
 
@@ -342,6 +328,7 @@
 
 
         self.setContent = function(contentHTML) {
+            /*
             $(options.element).find(".editor").html(contentHTML);
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
@@ -357,6 +344,8 @@
             if (typeof window.picturefill === "function") {
                 window.picturefill();
             }
+            */
+            self.blocks.loadContent(contentHTML);
         }
         self.getContent = function() {
             //remove images
@@ -483,7 +472,170 @@ Making a few assumptions, for now:
     }
     global.UndoManager = UndoManager;
     return self;
-})(this);(function(global) {
+})(this);/*
+
+The editor's main data structure is a list of blocks. 
+
+There are two types of blocks: inline & html
+
+
+var htmlBlockTags = ["UL", "OL", "P", "BLOCKQUOTE"];
+var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'];
+*/
+
+
+(function(global) {
+    'use strict';
+    var Blocks = Blocks || function(editor, options) {
+        var self = this;
+
+        self.tagParsers = {
+            'P': paragraphParser,
+            'OL': listParser,
+            'UL': listParser,
+            'BLOCKQUOTE':blockquoteParser,
+            'IFRAME':iframeParser,
+            'DIV':divParser,
+        }
+
+        /* these are defined by outside modules */
+        self.inlineParsers = {}
+
+
+        /* these should be defined externally */
+        
+
+
+
+        self.loadContent = function(htmlString) {
+            htmlString = htmlString.replace(/\n/g, " ");
+            var fragment = document.createDocumentFragment();
+            fragment.appendChild(document.createElement("div"));
+            fragment.childNodes[0].innerHTML = htmlString;
+
+            editor.content.blocks = fragmentToBlocks(fragment.childNodes[0]);
+            self.blocksToFragment();
+            editor.emit("contentLoaded");
+        }
+
+        //converts a fragment of HTML into structured & sanitized blocks. 
+        function fragmentToBlocks(domFragment) {
+            var blockList = [];
+            for (var i = 0; i < domFragment.childNodes.length; i++) {
+                var node = domFragment.childNodes[i];
+                //assign an ID to the block */
+                if (!node.id) {
+                    node.id = generateID("block-");
+                }
+                if (typeof self.tagParsers[node.nodeName] === "function") {
+                    var block = self.tagParsers[node.nodeName](node)
+                    if (block) {
+                        block['id'] = node.id;
+                        blockList.push(block);
+                    }
+                    else {
+                        console.log("Failed parsing node into a block: ", node.nodeName, node);
+                    }
+                }
+                else {
+                    console.log("unknown node type: ", node.nodeName, node);
+                }
+            }
+            return blockList;
+        }
+
+        // returns a dom fragment built 
+        self.blocksToFragment = function(blocks) {
+
+            var domFragment = document.createDocumentFragment();
+            for (var i = 0; i < editor.content.blocks.length; i++) {
+                var block = editor.content.blocks[i];
+                if (block.type === "inline") {
+                    var html = "";
+                }
+                else if (block.type === "html") {
+
+                    //create an element
+                    var node = document.createElement(block.tagName);
+                    node.innerHTML = block.contents;
+                    var html = "";
+                }
+
+                $(".editor", editor.options).append(html);
+
+
+            }
+        }
+
+
+        function generateID(prefix) {
+            //TODO: check if ID already exists in blocks to prevent collisions
+            return prefix + Math.random().toString(16).substr(2);
+        }
+
+
+
+
+
+        /* Tag Parsers */
+        function paragraphParser(node) {
+             var content =  editor.sanitize.clean_node(node);
+             return {type:"html", tag:"P", content: content}; //a block in the right format
+        }
+
+        function listParser(node) {
+            var content = [];
+            for (var j = 0; j < node.childNodes.length; j++) {
+                if (node.childNodes[j].nodeType === 1 && node.childNodes[j].nodeName === "LI") {
+                    content.push(editor.sanitize.clean_node(node.childNodes[j]));
+                }
+            }            
+            return {type:"html", tagName:node.nodeName, content: content}
+        }
+
+        function iframeParser(node) {
+
+            //wrap in embed div?
+        }
+
+        function divParser(node) {
+            //one of our inline objects that has a type specified
+
+            var content = {};
+            if (node.getAttribute("data-type")) {
+                //throw all data attributes into content.
+
+                if (typeof self.inlineParsers[node.getAttribute("data-type")] === "function") {
+                    content = self.inlineParsers[node.getAttribute("data-type")](node);
+                }
+
+                for (var i=0; i < node.attributes.length; i++){
+                    var name = node.attributes[i].nodeName;
+                    if (name.indexOf("data-") === 0) {
+                        content[name.replace("data-", "")] = node.attributes[i].nodeValue;
+                    }
+                }
+                return {type:"inline", content: content}
+            }
+            else { //it could just be a paragraph. Let's parse it as such. 
+                return paragraphParser(node);
+            }
+        }
+
+        function blockquoteParser(node) {
+            /* grab all immediate children */ 
+
+            //list of dom fragments?
+        }
+
+
+
+        editor.blocks = self;
+        
+
+    }
+    global.EditorModules.push(Blocks);
+})(this);;(function(global) {
     'use strict';
     var Toolbar = Toolbar || function(editor, options) {
         var self = this;
@@ -556,14 +708,9 @@ Making a few assumptions, for now:
         }
     }
     global.EditorModules.push(Toolbar);
-})(this)
+})(this);
 
-;/* TODO: 
-    Can't CMD+B in Safari
-
-*/
-
-    (function(global) {
+;(function(global) {
     'use strict';
     var Formatting = Formatting || function(editor, options) {
         var self = this;
@@ -788,9 +935,7 @@ Making a few assumptions, for now:
         }
     }
     global.EditorModules.push(Formatting);
-})(this)
-
-;/* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
+})(this);;/* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
 whole thing be cross-browser more easily. Also, this code always looks ugly, so let's keep
 it in one place. 
 
@@ -1057,15 +1202,17 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         editor.selection = self;
     }
     global.EditorModules.push(Selection);
-})(this);/* 
+})(this);;/* 
     provides a generic way to move around "inline objects" within the markup
+
+    z
 */
 
 (function(global) {
     'use strict';
     var InlineObjects = InlineObjects || function(editor, options) {
-        var self = this,
-            inlineTypes = Object.keys(options.inline || {} );
+        var self = this;
+            
 
         editor.on('init', init);
 
@@ -1076,14 +1223,12 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
 
             //is there an inline type defined
-            else if (inlineTypes.indexOf(name) !== -1) {
-                //insert placeholder item
+            else if (inline.hasOwnProperty(name)) {
                 editor.killFocus();
-                //call edit on placeholder
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
-                        onSuccess: function(block, values) {
+                        insertInlineItem: function(block, values) {
                             $(block).before(
                                 editor.utils.template(
                                     options.inline[name].template,
@@ -1095,7 +1240,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                         onError: function() {
                             //do nothing!
                         }
-                        
                     }
                 );
                 $(".embed-tools", options.element).removeClass("active");
@@ -1184,7 +1328,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         }
 
 
-        //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
         var actions = {
 
             inline_caption: function() {
@@ -1195,15 +1338,12 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                     $(".caption", activeElement).html(caption);
                 }
             },
-            //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).data("type")].size)
+                var l = options.inline[$(activeElement).data("type")].size;
                 toggleAttribute("size", l);
             },
             inline_crop: function() {
-                var l = options
-                    .inline[$(activeElement).data("type")]
-                    .size[$(activeElement).data("size")];
+                var l = options.inline[$(activeElement).data("type")].crop;
                 toggleAttribute("crop", l);
             },
             inline_up: function() {
@@ -1238,19 +1378,12 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 */
                 editor.emit("inline:edit:" + $(activeElement).attr("data-type"), 
                     {
-
                         element: activeElement,
                         onChange: function(element, values) {
-                            
                             var type = $(element).attr("data-type");
-                            console.log(type);
-                            console.log(
-                                editor.utils.template(
-                                    options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
-                                ));
                             element.outerHTML = 
                                 editor.utils.template(
+                                    //TODO:
                                     options.inline[type].template,
                                     $.extend(options.inline[name].defaults, values) 
                                 )
@@ -1269,15 +1402,11 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 .removeClass(attribute + "-" + currentValue)
                 .addClass(attribute + "-" + list[index])
                 .attr("data-" + attribute, list[index])
-            
-            if (typeof window.picturefill === "function") {
-                setTimeout(window.picturefill, 100);
-            }
             showToolbar();
         } 
     }
     global.EditorModules.push(InlineObjects);
-})(this);/* Editor's interface to global Undo */
+})(this);;/* Editor's interface to global Undo */
 
 (function(global) {
     'use strict';
@@ -1443,7 +1572,7 @@ TODO: Clean up showing/hiding stuff.
 
     }
     global.EditorModules.push(Link);
-})(this);/* 
+})(this);;/* 
     Basecamp style autosave. 
 
     Dumps body into localstorage after the dom changes.
@@ -1458,7 +1587,7 @@ TODO: Clean up showing/hiding stuff.
         editor.embed = {types: []};
     }
     global.EditorModules.push(Persist);
-})(this);/*
+})(this);;/*
     Need a way to edit the source directly
 
     I want this to go away eventually, but I think we need it now.
@@ -1618,10 +1747,7 @@ TODO:
         editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
-})(this)
-
-
-/* Enter Handler */;
+})(this);;
 (function(global) {
     'use strict';
     var Screensize = Screensize || function(editor, options) {
@@ -1636,7 +1762,7 @@ TODO:
         })
     }
     global.EditorModules.push(Screensize);
-})(this);(function(global) {
+})(this);;(function(global) {
     'use strict';
     var Theme = Theme || function(editor, options) {
         var self = this;
@@ -1673,7 +1799,7 @@ TODO:
         })
     }
     global.EditorModules.push(Theme);
-})(this);(function(global) {
+})(this);;(function(global) {
     'use strict';
     var Youtube = Youtube || function(editor, options) {
         var self = this;
@@ -1688,7 +1814,7 @@ TODO:
             var url = prompt("Youtube URL:")
             var youtube_id  = parseYoutube(url);
             if (youtube_id) {
-                opts.onSuccess(
+                opts.insertInlineItem(
                     opts.block, 
                     {"youtube_id": youtube_id}
                 );
@@ -1726,7 +1852,7 @@ TODO:
         }
     }
     global.EditorModules.push(Youtube);
-})(this);(function(global) {
+})(this);;(function(global) {
     'use strict';
     var Stats = Stats || function(editor, options) {
         var self = this;
@@ -1745,7 +1871,7 @@ TODO:
         }
     }
     global.EditorModules.push(Stats);
-})(this);/**
+})(this);;/**
  * @license Rangy, a cross-browser JavaScript range and selection library
  * http://code.google.com/p/rangy/
  *

@@ -13,7 +13,7 @@
             var url = prompt("Youtube URL:")
             var youtube_id  = parseYoutube(url);
             if (youtube_id) {
-                opts.onSuccess(
+                opts.insertInlineItem(
                     opts.block, 
                     {"youtube_id": youtube_id}
                 );
@@ -51,4 +51,4 @@
         }
     }
     global.EditorModules.push(Youtube);
-})(this)
+})(this);

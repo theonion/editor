@@ -265,4 +265,4 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         editor.selection = self;
     }
     global.EditorModules.push(Selection);
-})(this)
+})(this);

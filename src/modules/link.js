@@ -110,4 +110,4 @@ TODO: Clean up showing/hiding stuff.
 
     }
     global.EditorModules.push(Link);
-})(this)
+})(this);
