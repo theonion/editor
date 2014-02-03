@@ -15,7 +15,7 @@
         <link href='css/cms-demo.css' rel='stylesheet' type='text/css'>
         <script>
             var IMAGE_LISTENERS_DISABLED = true;
-            var IMAGE_URL = "http://i.onionstatic.com/avclub{{id}}/{{crop}}/{{width}}.jpg"
+            var IMAGE_URL = "http://i.onionstatic.com/avclub{{id}}/{{crop}}/{{width}}.{{format}}";
         </script>
     </head>
     <body>
@@ -35,43 +35,14 @@
             </div>
         </div>
 
-        <script type="text/template">
-
-            <div data-picture class="image inline right" data-image-id="4" data-type="image" contenteditable="false">
-                <div></div>
-                <span class="caption">A gang sign?</span>
-            </div>
-            <div data-picture class="image inline right" data-image-id="6" contenteditable="false">
-                <div></div>
-                <span class="caption">Get this monkey a typewriter</span>
-            </div>
-            <div class="inline center embed" data-type="embed">
-                <div>
-                <iframe width="560" height="315" src="//www.youtube.com/embed/aO0TUI9r-So" frameborder="0" allowfullscreen></iframe>
-                </div>
-                <span class="caption">Youtube Video</span>
-            </div>
-            <div data-picture="" class="image inline full" data-image-id="3" data-type="image" contenteditable="false">
-                <div></div>
-                <span class="caption">A tall building. Looks pretty cool.</span>
-            </div>
-            <div data-picture="" class="image inline center" data-image-id="4" contenteditable="false">
-                <div></div>
-                <span class="caption"></span>
-            </div>
-            <div data-picture class="image inline full" data-image-id="3" data-type="image" contenteditable="false">
-                <div></div>
-                <span class="caption">A tall building</span>
-            </div>
-        </script>
 
         <script type="text/template" id="content">
-            <div data-type="image" class="image inline size-big crop-16x9" data-image-id="3" data-size="big" data-type="image" data-crop="16x9" contenteditable="false">
+            <div data-type="image" class="image inline size-big crop-16x9" data-image-id="501458" data-size="big" data-type="image" data-crop="16x9" contenteditable="false">
                 <div></div>
                 <span class="caption">A tall building</span>
             </div>
 
-            <div data-type="image" class="image inline size-big crop-16x9" data-image-id="3" data-size="big" data-type="image" data-crop="16x9" contenteditable="false">
+            <div data-type="bc-image" class="bc-image inline size-big crop-16x9" data-image-id="444533" data-size="big" data-type="image" data-crop="16x9" contenteditable="false">
                 <div></div>
             </div>
 
@@ -90,10 +61,20 @@
             </div>
 
             <p>Heres another pargargph</p>
+            <div data-type="embed" class="inline embed size-big crop-original" data-type="embed" data-crop="original" data-size="big">
+                <div>
+                    <blockquote class="twitter-tweet" lang="en"><p>Nanci Koschman to address court</p>&mdash; Chris Fusco (@FuscoChris) <a href="https://twitter.com/FuscoChris/statuses/429350715929010176">January 31, 2014</a></blockquote>
+                </div>
+            </div>
+            <div data-type="embed" class="inline embed size-big crop-original" data-type="embed" data-crop="original" data-size="big">
+                <div>
+                    <iframe src="http://www.coveritlive.com/index2.php/option=com_altcaster/task=viewaltcast/altcast_code=002b017a3f/height=550/width=625/entryLoc=bottom/commentLoc=bottom/titlePage=on" scrolling="no" height="550px" width="625px" frameborder="0" allowtransparency="true"></iframe>
+                </div>
+            </div>
 
             <p>While few people outside of Seattle would&#8217;ve cared about a movie like <i>Hype! </i>had it not been for the very same media attention the film rails against, Pray steadfastly focuses his attention on the dimmer lights in the city&#8217;s musical galaxy&#8212;bands like Mono Men, Seaweed, Zipgun, Love Battery, Hovercraft, and Gas Huffer&#8212;instead of its big stars. The point of Pray&#8217;s film seems pretty obvious: The popularity of grunge didn&#8217;t put Seattle music on the map; it <i>ruined </i>Seattle music, because the emphasis suddenly shifted from having fun and creating idiosyncratic records to scoring contracts and making loads of money. <i>Hype! </i>spends a lot of time exploring how the media reduced Seattle to a set of simpleminded stereotypes&#8212;lumberjack clothes! dumb-guy guitar riffage!&#8212;that didn&#8217;t do justice to the city&#8217;s spirit of adventurous, non-trendy individuality.&#160;</p>
 
-            <div  class="image inline size-medium crop-original" data-image-id="3" data-size="medium" data-type="image" data-crop="original" contenteditable="false">
+            <div  class="image inline size-medium crop-original" data-image-id="501467" data-size="medium" data-type="image" data-crop="original" contenteditable="false">
                 <div></div>
                 <span class="caption">A tall building</span>
             </div>

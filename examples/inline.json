@@ -1,5 +1,5 @@
 {
-    "onion-image": {
+    "bc-image": {
         "size": ["huge", "big", "medium", "small", "tiny"],
         "crop": ["original", "16x9", "1x1", "3x1"],
         "defaults": {
@@ -10,7 +10,7 @@
             "url": ""
         },
         "template":
-        "<div data-type=\"onion-image\" class=\"onion-image image inline size-{{size}} crop-{{crop}}\" data-image-id=\"{{image_id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"> <div><noscript><img src=\"{{url}}\" ></noscript></div><span class=\"caption\">{{caption}}</span></div>"
+        "<div data-type=\"bc-image\" class=\"bc-image image inline size-{{size}} crop-{{crop}}\" data-image-id=\"{{image-id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"> <div><noscript><img src=\"{{url}}\" ></noscript></div><span class=\"caption\">{{caption}}</span></div>"
     },
     "onion-video": {
         "size": ["big", "small"],
@@ -20,7 +20,7 @@
             "crop": "16x9"
         },
         "template":
-        "<div data-type=\"onion-video\" class=\"onion-video video inline size-{{size}} crop-{{crop}}\" data-video-id=\"{{image_id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"><iframe src=\"/videos/embed?id={{video_id}}\"></iframe></div>"
+        "<div data-type=\"onion-video\" class=\"onion-video video inline size-{{size}} crop-{{crop}}\" data-video-id=\"{{video-id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"><iframe src=\"/videos/embed?id={{video_id}}\"></iframe></div>"
     },
     "image": {
         "template":
@@ -29,12 +29,15 @@
     "embed": {
         "size": ["big", "small"],
         "crop": ["original","16x9", "4x3"],
+        "format": ["png", "jpg"],
         "defaults": {
             "size":"big",
-            "crop": "16x9"
+            "crop": "16x9",
+            "format": "jpg",
+            "source":""
         },
         "template": 
-        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{embed_code}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
+        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{body}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
     },
     "youtube": {
         "size": ["big", "small"],

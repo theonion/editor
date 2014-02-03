@@ -14,32 +14,49 @@
     var InlineObjectHandlers = InlineObjectHandlers || function(editor, options) {
         var self = this;
         
-
-        function parseInlineImage(node) {
+        editor.blocks.inlineObjectParsers["onion-image"] = function(node) {
             //grab caption & source
             console.log(node);
             return {
                 caption: $(".caption", node).html()
             }
         }
+        editor.blocks.inlineObjectRenderers["bc-image"] = function(block) {
+            return {url: editor.utils.template(IMAGE_URL, block.content)};
+        }
 
-        function parseInlineYoutube(node) {
+
+        editor.blocks.inlineObjectParsers["image"] = function(node) {
+            //grab caption & source
+            console.log(node);
+            return {
+                type:"bc-image",
+                caption: $(".caption", node).html()
+            }
+        }
+
+        editor.blocks.inlineObjectParsers["youtube"] = function(node) {
             return {
                 caption: $(".caption", node).html()
             }
         }
-        function parseInlineEmbed(node) {
+        editor.blocks.inlineObjectParsers["embed"] = function(node)  {
             return {
                 caption: $(".caption", node).html(),
                 body: $(">div", node).html().trim()
             }
         }
 
-        function parseInlineVideo(node) {
+        editor.blocks.inlineObjectParsers["onion-video"] = function(node)  {
             return {
                 caption: $(".caption", node).html()
             }
         }
+
+
+        
+
+
     }
     global.EditorModules.push(InlineObjectHandlers);
 })(this);

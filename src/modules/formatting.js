@@ -91,8 +91,6 @@
             tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
-            console.log(tagName);
-            console.log(editor.selection.getSelectedBlockNodes());
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
             // we have a list of nodes. can we wrap them?

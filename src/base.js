@@ -154,76 +154,20 @@
                     //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
+                        e.preventDefault();
+
+                        
+                        
+                        console.log(self.blocks.getCurrentBlock())
 
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
                         else if (isBlank  && !e.shiftKey) { //enter was hit in an empty node.
-                            //$(node).remove();
-                            if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
-                                // is the "P" inside something? Does it matter?
-
-                                //is there a paragraph above, that's empty? turn it into an HR.
-
-                                //is there an HR above, no more enters!
-                                /*
-                                    if (isBlank && previousChildNode.tagName == "HR") {
-                                        e.preventDefault(); 
-                                    }
-                                    else if (isBlank && node.tagName == "P") {
-                                        node.outerHTML = "<hr><p class='new-paragraph'>NEW P</p>";
-                                        window.n = node;
-                                        setTimeout(function() {
-                                            console.log("new node", node.outerHTML);
-                                        }, 5);
-                                    }
-                                */
-                            }
-                            else if (parentNode.tagname == "") {
-
-                            }
-
-                            //Redo this block exclusively using dom manip, not 
-                            else if (node.tagName == "LI") {
-                                if (isLastChild && isFirstChild) {
-                                    e.preventDefault();
-                                    $(node).remove(); // remove the li
-                                    document.execCommand("formatBlock", false, "P");
-                                    setTimeout(function() {
-                                        var nodeToRemove = self.selection.getNonInlineParent()
-                                        $(nodeToRemove).remove();
-                                    }, 5)
-                                
-                                }
-                                else if (isFirstChild) {
-                                    //LI: First item in the list, but list isn't empty. removing node & adding paragraph above"
-                                    e.preventDefault();
-                                }
-                                else if (isLastChild) {
-                                    // LI: At end of list
-                                    console.log("LI: At end of list, removing node");
-                                    e.preventDefault();
-
-                                        $(node).remove(); 
-                                        
-                                        //$(parentNode).after("<span class='tmp'></span>");
-                                        self.selection.setCaretAfter(parentNode);
-                                        setTimeout(function() {
-                                            document.execCommand("insertHtml", false, "<p><br></p>");
-                                        }, 20)
-                                }
-                                else if (!isLastChild && !isFirstChild) {
-                                    //LI: In the middle of the list
-                                    //e.preventDefault();
-                                    setTimeout(function() {
-                                        $(".editor div").remove();
-                                        document.execCommand("insertHtml", false, "<p><br></p>")
-                                    })
-                                }
-                            }
 
                         }
+
                     }
                     else if (e.keyCode === 8) {
                         self.emit("backspace");
@@ -307,7 +251,6 @@
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
-
                 }
             }, 500);
         }
@@ -325,27 +268,10 @@
                 .unbind("DOMSubtreeModified", changed )
         }
 
-
         self.setContent = function(contentHTML) {
-            /*
-            $(options.element).find(".editor").html(contentHTML);
-
-            //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
-            var firstDiv = $(".editor>div", options.element);
-            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                console.log("wrapped in a div");
-                $("#content-body .editor").html( $("#content-body .editor>div").html() )            
-            }
-
-            //add contentEditable false to any inline objects
-            $(".inline").attr("contentEditable", "false");
-
-            if (typeof window.picturefill === "function") {
-                window.picturefill();
-            }
-            */
             self.blocks.loadContent(contentHTML);
         }
+
         self.getContent = function() {
             //remove images
             var fragment = document.createDocumentFragment();

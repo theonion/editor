@@ -1,4 +1,4 @@
-/*! onion-editor 2014-01-29 */
+/*! onion-editor 2014-02-03 */
 (function(global){
 
     'use strict';
@@ -155,76 +155,20 @@
                     //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
+                        e.preventDefault();
+
+                        
+                        
+                        console.log(self.blocks.getCurrentBlock())
 
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
                         else if (isBlank  && !e.shiftKey) { //enter was hit in an empty node.
-                            //$(node).remove();
-                            if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
-                                // is the "P" inside something? Does it matter?
-
-                                //is there a paragraph above, that's empty? turn it into an HR.
-
-                                //is there an HR above, no more enters!
-                                /*
-                                    if (isBlank && previousChildNode.tagName == "HR") {
-                                        e.preventDefault(); 
-                                    }
-                                    else if (isBlank && node.tagName == "P") {
-                                        node.outerHTML = "<hr><p class='new-paragraph'>NEW P</p>";
-                                        window.n = node;
-                                        setTimeout(function() {
-                                            console.log("new node", node.outerHTML);
-                                        }, 5);
-                                    }
-                                */
-                            }
-                            else if (parentNode.tagname == "") {
-
-                            }
-
-                            //Redo this block exclusively using dom manip, not 
-                            else if (node.tagName == "LI") {
-                                if (isLastChild && isFirstChild) {
-                                    e.preventDefault();
-                                    $(node).remove(); // remove the li
-                                    document.execCommand("formatBlock", false, "P");
-                                    setTimeout(function() {
-                                        var nodeToRemove = self.selection.getNonInlineParent()
-                                        $(nodeToRemove).remove();
-                                    }, 5)
-                                
-                                }
-                                else if (isFirstChild) {
-                                    //LI: First item in the list, but list isn't empty. removing node & adding paragraph above"
-                                    e.preventDefault();
-                                }
-                                else if (isLastChild) {
-                                    // LI: At end of list
-                                    console.log("LI: At end of list, removing node");
-                                    e.preventDefault();
-
-                                        $(node).remove(); 
-                                        
-                                        //$(parentNode).after("<span class='tmp'></span>");
-                                        self.selection.setCaretAfter(parentNode);
-                                        setTimeout(function() {
-                                            document.execCommand("insertHtml", false, "<p><br></p>");
-                                        }, 20)
-                                }
-                                else if (!isLastChild && !isFirstChild) {
-                                    //LI: In the middle of the list
-                                    //e.preventDefault();
-                                    setTimeout(function() {
-                                        $(".editor div").remove();
-                                        document.execCommand("insertHtml", false, "<p><br></p>")
-                                    })
-                                }
-                            }
 
                         }
+
                     }
                     else if (e.keyCode === 8) {
                         self.emit("backspace");
@@ -308,7 +252,6 @@
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
-
                 }
             }, 500);
         }
@@ -326,27 +269,10 @@
                 .unbind("DOMSubtreeModified", changed )
         }
 
-
         self.setContent = function(contentHTML) {
-            /*
-            $(options.element).find(".editor").html(contentHTML);
-
-            //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
-            var firstDiv = $(".editor>div", options.element);
-            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                console.log("wrapped in a div");
-                $("#content-body .editor").html( $("#content-body .editor>div").html() )            
-            }
-
-            //add contentEditable false to any inline objects
-            $(".inline").attr("contentEditable", "false");
-
-            if (typeof window.picturefill === "function") {
-                window.picturefill();
-            }
-            */
             self.blocks.loadContent(contentHTML);
         }
+
         self.getContent = function() {
             //remove images
             var fragment = document.createDocumentFragment();
@@ -490,21 +416,60 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
         var self = this;
 
         self.tagParsers = {
-            'P': paragraphParser,
-            'OL': listParser,
-            'UL': listParser,
-            'BLOCKQUOTE':blockquoteParser,
-            'IFRAME':iframeParser,
-            'DIV':divParser,
+            'P': parseParagraph,
+            'OL': parseList,
+            'UL': parseList,
+            'BLOCKQUOTE':parseBlockquote,
+            'IFRAME':parseIframe,
+            'DIV':parseDiv,
         }
 
+
+        self.tagRenderers = {
+            'P': renderParagraph,
+            'OL': renderList,
+            'UL': renderList,
+            'LI': renderListItem,
+            'BLOCKQUOTE':renderBlockquote,
+            'IFRAME':renderIframe,
+            /*'DIV':renderDiv (there should be no freestanding divs in the json) */
+        }
+
+
         /* these are defined by outside modules */
-        self.inlineParsers = {}
+        self.inlineObjectParsers = {};
+
+        /* for extra pre-processing in block content data, if needed */
+        self.inlineObjectRenderers = {}
 
 
         /* these should be defined externally */
         
+        function domFragmentToHTML(fragment) {
+            var html = "";
+            for (var i=0; i < fragment.childNodes.length; i++) {
+                if (fragment.childNodes[i].nodeType === 3) {
+                    html += fragment.childNodes[i].textContent;
+                }
+                else {
+                    html += fragment.childNodes[i].outerHTML;
+                }
+            }
+            return html
+        }
 
+        
+        self.removeBlock = function(id) {
+
+        }
+        
+        self.swapBlocks = function(id1, id2) {
+
+        }
+
+        self.splitBlock = function(id1, id2, atNode, atOffset) {
+
+        }
 
 
         self.loadContent = function(htmlString) {
@@ -514,9 +479,14 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
             fragment.childNodes[0].innerHTML = htmlString;
 
             editor.content.blocks = fragmentToBlocks(fragment.childNodes[0]);
-            self.blocksToFragment();
+
+            var parsedFragment = blocksToFragment(editor.content.blocks);
+            
+            $(".editor", options.element).html(parsedFragment);
+            $(".inline", options.element).attr("contenteditable", "false");
             editor.emit("contentLoaded");
         }
+
 
         //converts a fragment of HTML into structured & sanitized blocks. 
         function fragmentToBlocks(domFragment) {
@@ -538,94 +508,141 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
                     }
                 }
                 else {
-                    console.log("unknown node type: ", node.nodeName, node);
+                   // console.log("unknown node type: ", node.nodeName, node);
                 }
             }
             return blockList;
         }
 
         // returns a dom fragment built 
-        self.blocksToFragment = function(blocks) {
+        function blocksToFragment(blockList) {
 
             var domFragment = document.createDocumentFragment();
-            for (var i = 0; i < editor.content.blocks.length; i++) {
-                var block = editor.content.blocks[i];
+            for (var i = 0; i < blockList.length; i++) {
+                var block = blockList[i];
                 if (block.type === "inline") {
-                    var html = "";
+                    if (options.inline[block.content.type]) {
+                        //merge defaults w/ values.
+                        var values = $.extend(block.content, options.inline[block.content.type].defaults);
+                        if (typeof self.inlineObjectRenderers["block.content.type"] === "function") {
+                            values = $.extend(values, self.inlineObjectRenderers["block.content.type"](block));
+                        }
+                        var html = editor.utils.template(options.inline[block.content.type].template, values);
+                        domFragment.appendChild($(html)[0]);
+                    }
+                    else {
+                        console.log("Not a valid inline block content type", block.content.type);
+                    }
                 }
                 else if (block.type === "html") {
-
                     //create an element
                     var node = document.createElement(block.tagName);
-                    node.innerHTML = block.contents;
-                    var html = "";
+                    node.id = block.id;
+                    node.innerHTML = self.tagRenderers[block.tagName](block);
+                    domFragment.appendChild(node);
                 }
-
-                $(".editor", editor.options).append(html);
-
-
             }
+            return domFragment;
         }
 
 
         function generateID(prefix) {
+            var id = prefix + Math.random().toString(16).substr(2);
             //TODO: check if ID already exists in blocks to prevent collisions
-            return prefix + Math.random().toString(16).substr(2);
+            return id;
         }
-
-
 
 
 
         /* Tag Parsers */
-        function paragraphParser(node) {
-             var content =  editor.sanitize.clean_node(node);
-             return {type:"html", tag:"P", content: content}; //a block in the right format
+        function parseParagraph(node) {
+            var contentFragment = editor.sanitize.clean_node(node)            
+            var content = domFragmentToHTML(contentFragment);
+            if (content.trim() === "") {
+                return;
+            }
+            else {
+                return {type:"html", tagName:"P", content: content}; //a block in the right format
+            }   
         }
 
-        function listParser(node) {
+        function renderParagraph(block) {
+            return block.content;
+        }
+
+        function parseList(node) {
             var content = [];
             for (var j = 0; j < node.childNodes.length; j++) {
                 if (node.childNodes[j].nodeType === 1 && node.childNodes[j].nodeName === "LI") {
-                    content.push(editor.sanitize.clean_node(node.childNodes[j]));
+                    var contentFragment = editor.sanitize.clean_node(node.childNodes[j]);
+                    content.push(domFragmentToHTML(contentFragment));
                 }
-            }            
+            }
             return {type:"html", tagName:node.nodeName, content: content}
         }
 
-        function iframeParser(node) {
+        function renderListItem(block) {
+
+        }
+
+        function renderList(block) {
+            var html = "";
+            for (var i = 0; i<block.content.length; i++) {
+                html +="<li>" + block.content[i] + "</li>";
+            }
+            return html;
+        }
+
+        function parseIframe(node) {
+
+        }
+
+        function renderIframe(block) {
 
             //wrap in embed div?
         }
 
-        function divParser(node) {
+        function parseDiv(node) {
             //one of our inline objects that has a type specified
-
             var content = {};
             if (node.getAttribute("data-type")) {
                 //throw all data attributes into content.
-
-                if (typeof self.inlineParsers[node.getAttribute("data-type")] === "function") {
-                    content = self.inlineParsers[node.getAttribute("data-type")](node);
+                if (typeof self.inlineObjectParsers[node.getAttribute("data-type")] === "function") {
+                    content = self.inlineObjectParsers[node.getAttribute("data-type")](node);
                 }
-
                 for (var i=0; i < node.attributes.length; i++){
                     var name = node.attributes[i].nodeName;
                     if (name.indexOf("data-") === 0) {
-                        content[name.replace("data-", "")] = node.attributes[i].nodeValue;
+                        //don't override if value exists already
+                        if (typeof content[name.replace("data-", "")] === "undefined") {
+                            content[name.replace("data-", "")] = node.attributes[i].nodeValue;
+                        }
                     }
                 }
                 return {type:"inline", content: content}
             }
             else { //it could just be a paragraph. Let's parse it as such. 
-                return paragraphParser(node);
+                return parseParagraph(node);
             }
         }
 
-        function blockquoteParser(node) {
-            /* grab all immediate children */ 
 
-            //list of dom fragments?
+        function parseBlockquote(node) {
+            
+            return {type:'html', tagName:"BLOCKQUOTE", content: fragmentToBlocks(node)};
+            
+        }
+
+        function renderBlockquote(block) {
+
+            console.log("renderBlockquote", block.content);
+            return domFragmentToHTML(blocksToFragment(block.content));
+        }
+
+
+
+        //returns the block where the cursor's currently at
+        self.getCurrentBlock = function() {
         }
 
 
@@ -803,8 +820,6 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
             tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
-            console.log(tagName);
-            console.log(editor.selection.getSelectedBlockNodes());
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
             // we have a list of nodes. can we wrap them?
