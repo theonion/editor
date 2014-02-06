@@ -11,8 +11,8 @@ module.exports = function(grunt) {
           src: [
                 'src/base.js',
                 'src/undoManager.js',
-                
-                'src/modules/blocks.js',
+                'src/modules/blocklist.js',
+                'src/modules/blocktools.js',
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',

@@ -24,7 +24,7 @@
     },
     "image": {
         "template":
-        "<div data-type=\"image\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-url=\"{{source}}\"><img src=\"{{url}}\"></div>"
+        "<div data-type=\"image\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-url=\"{{url}}\"><img src=\"{{url}}\"></div>"
     },
     "embed": {
         "size": ["big", "small"],
@@ -37,7 +37,7 @@
             "source":""
         },
         "template": 
-        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{body}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
+        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{body}}</div><span class=\"caption\">{{caption}}</span></div>"
     },
     "youtube": {
         "size": ["big", "small"],

@@ -26,80 +26,10 @@
                 e.preventDefault();
             }
             else if (isBlank  && !e.shiftKey) { //enter was hit in a node with no textContent
-                if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
-                    emptyParagraphEnter()
-                }
 
-                //Redo this block exclusively using dom manip, not 
-                else if (node.tagName == "LI") {
-                    emptyListItemEnter();
-                }
-
-            }
-
-            function emptyListItemEnter() {
-                state = grabState();
-                if (state.isLastChild && state.isFirstChild) {
-                    e.preventDefault();
-                    $(state.node).remove(); // remove the li
-                    document.execCommand("formatBlock", false, "P");
-                    setTimeout(function() {
-                        var nodeToRemove = self.selection.getNonInlineParent()
-                        $(nodeToRemove).remove();
-                    }, 5)
                 
-                }
-                else if (isFirstChild) {
-                    //LI: First item in the list, but list isn't empty. removing node & adding paragraph above"
-                    e.preventDefault();
-                }
-                else if (isLastChild) {
-                    // LI: At end of list
-                    console.log("LI: At end of list, removing node");
-                    e.preventDefault();
 
-                        $(state.node).remove(); 
-                        
-                        //$(parentNode).after("<span class='tmp'></span>");
-                        self.selection.setCaretAfter(state.parentNode);
-                        setTimeout(function() {
-                            document.execCommand("insertHtml", false, "<p><br></p>");
-                        }, 20)
-                }
-                else if (!isLastChild && !isFirstChild) {
-                    //LI: In the middle of the list
-                    //e.preventDefault();
-                    setTimeout(function() {
-                        $(".editor div").remove();
-                        document.execCommand("insertHtml", false, "<p><br></p>")
-                    })
-                }
             }
-            function emptyParagraphEnter() {
-
-                //is the empty paragraph in a blockquote?
-
-                // is the "P" inside something? Does it matter?
-
-                //is there a paragraph above, that's empty? turn it into an HR.
-
-                //is there an HR above, no more enters!
-                /*
-                    if (isBlank && previousChildNode.tagName == "HR") {
-                        e.preventDefault(); 
-                    }
-                    else if (isBlank && node.tagName == "P") {
-                        node.outerHTML = "<hr><p class='new-paragraph'>NEW P</p>";
-                        window.n = node;
-                        setTimeout(function() {
-                            console.log("new node", node.outerHTML);
-                        }, 5);
-                    }
-                */
-            }
-
-
-
 
         }
 

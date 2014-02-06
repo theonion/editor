@@ -14,8 +14,8 @@
                 options.undoManager.pushInitialState(
                 self,
                 {   
-                    editorInstance: options.element.id, // debug            
-                    content: editor.getContent(),
+                    editorInstance: options.element.id,         
+                    content: jQuery.extend(true, {}, editor.content),
                     selection: ""
                 
                 });
@@ -29,8 +29,8 @@
                 options.undoManager.pushState(
                 self,
                 {   
-                    editorInstance: options.element.id, // debug            
-                    content: editor.getContent(),
+                    editorInstance: options.element.id,             
+                    content: jQuery.extend(true, {}, editor.content),
                     selection: editor.serializeRange()
                 
                 });
@@ -42,7 +42,8 @@
         self.setState = function(data) {
             //STOP LISTENING FOR CHANGES. Don't want undo/redo to contiune to add to the stack!
             editor.dontListenForChanges()
-            editor.setContent(data.content)
+            editor.content = jQuery.extend(true, {}, data.content);
+            editor.renderContent();
             if (typeof window.picturefill === "function") {
                 window.picturefill();
             }

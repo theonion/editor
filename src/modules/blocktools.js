@@ -1,27 +1,24 @@
 /*
 
-The editor's main data structure is a list of blocks. 
+Tools to manipulate and build blocks.
 
-There are two types of blocks: inline & html
-
-
-var htmlBlockTags = ["UL", "OL", "P", "BLOCKQUOTE"];
-var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'];
 */
 
 
 (function(global) {
     'use strict';
-    var Blocks = Blocks || function(editor, options) {
+    var BlockTools = BlockTools || function(editor, options) {
         var self = this;
 
         self.tagParsers = {
             'P': parseParagraph,
+            'LI': parseListItem,
             'OL': parseList,
             'UL': parseList,
             'BLOCKQUOTE':parseBlockquote,
             'IFRAME':parseIframe,
             'DIV':parseDiv,
+            'HR': parseHr
         }
 
 
@@ -32,7 +29,8 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
             'LI': renderListItem,
             'BLOCKQUOTE':renderBlockquote,
             'IFRAME':renderIframe,
-            /*'DIV':renderDiv (there should be no freestanding divs in the json) */
+            'HR': renderHr
+            /*'DIV':renderDiv (there should be no freestanding divs in the blocklist) */
         }
 
 
@@ -40,7 +38,7 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
         self.inlineObjectParsers = {};
 
         /* for extra pre-processing in block content data, if needed */
-        self.inlineObjectRenderers = {}
+        self.inlineObjectRenderers = {};
 
 
         /* these should be defined externally */
@@ -58,8 +56,84 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
             return html
         }
 
+        /* i don't really like this.*/ 
+        function findBlockIndexById(id, blockList) {
+            for (var i=0;i <blockList.length;i++) {
+                if (blockList[i].id === id) {
+                    return [blockList, i];
+                }
+                else if ($.isArray(blockList[i].blocks)) {
+                    var match = findBlockIndexById(id, blockList[i].blocks);
+                    if (match) {
+                        return match;
+                    }
+                }
+            }
+        }
         
-        self.removeBlock = function(id) {
+        function findBlockById(id, blockList) {
+            for (var i=0;i <blockList.length;i++) {
+                if (blockList[i].id === id) {
+                    return blockList[i];
+                }
+                else if ($.isArray(blockList[i].blocks)) {
+                    var match = findBlockById(id, blockList[i].blocks);
+                    if (match) {
+                        return match;
+                    }
+                }
+            }
+        }
+
+        self.insertBlocksAfter = function(id, blockListA, blockListB) {
+            for (var i=0;i <blockListA.length;i++) {
+                if (blockListA[i].id === id) {
+                    for (var j=0; j<blockListB.length; j++) {
+                        blockListA.splice(i+j+1,0, blockListB[j]);
+                    }
+                    var fragment = blocksToFragment(blockListB);
+                    var el = document.getElementById(blockListA[i].id);
+                    $(el).after(fragment);                    
+                    var range = rangy.createRange();
+                    range.setStartAfter(el);
+                    var sel = rangy.getSelection();
+                    sel.setSingleRange(range);
+                    return;
+                }
+                else if ($.isArray(blockListA[i].blocks)) {
+                    self.insertBlocksAfter(id, blockListA[i].blocks, blockListB);
+                }
+            }
+        }
+
+
+
+
+        self.removeBlock = function(id, blockList) {
+            //var block = findBlockById(id, blockList);
+            var match = findBlockIndexById(id, blockList);
+            match[0].remove(match[1]);
+            //no need for a full re-render. this is a simple op.
+            $("#" + id).remove();
+        }
+
+        /* 
+
+        Takes in an existing blocklist and Id. takes a new blocklist, merges the f
+
+        */
+
+
+
+        self.mergeAdjacentBlocks = function(id1, id2, blockList) {
+            var block1 = findBlockById(id1, blockList);
+            var block2 = findBlockById(id2, blockList);
+            
+            //console.log(match1, match2);
+            //console.log(id1, id2);
+            
+            console.log(block1, block2);
+
 
         }
         
@@ -67,34 +141,20 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
 
         }
 
-        self.splitBlock = function(id1, id2, atNode, atOffset) {
-
-        }
-
-
-        self.loadContent = function(htmlString) {
-            htmlString = htmlString.replace(/\n/g, " ");
-            var fragment = document.createDocumentFragment();
-            fragment.appendChild(document.createElement("div"));
-            fragment.childNodes[0].innerHTML = htmlString;
-
-            editor.content.blocks = fragmentToBlocks(fragment.childNodes[0]);
-
-            var parsedFragment = blocksToFragment(editor.content.blocks);
-            
-            $(".editor", options.element).html(parsedFragment);
-            $(".inline", options.element).attr("contenteditable", "false");
-            editor.emit("contentLoaded");
+        //puts back changes typed into a block. Should only really apply to typing. 
+        self.syncBlockContent = function (id, blockList) {
+            var block = findBlockById(id, blockList);
+            block.content = document.getElementById(id).innerHTML;
         }
 
 
         //converts a fragment of HTML into structured & sanitized blocks. 
-        function fragmentToBlocks(domFragment) {
+        function fragmentToBlocks(domFragment, stripIDs) {
             var blockList = [];
             for (var i = 0; i < domFragment.childNodes.length; i++) {
                 var node = domFragment.childNodes[i];
                 //assign an ID to the block */
-                if (!node.id) {
+                if (!node.id || stripIDs === true) {
                     node.id = generateID("block-");
                 }
                 if (typeof self.tagParsers[node.nodeName] === "function") {
@@ -116,7 +176,6 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
 
         // returns a dom fragment built 
         function blocksToFragment(blockList) {
-
             var domFragment = document.createDocumentFragment();
             for (var i = 0; i < blockList.length; i++) {
                 var block = blockList[i];
@@ -139,6 +198,7 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
                     var node = document.createElement(block.tagName);
                     node.id = block.id;
                     node.innerHTML = self.tagRenderers[block.tagName](block);
+                    $(node).addClass("block");
                     domFragment.appendChild(node);
                 }
             }
@@ -153,44 +213,48 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
         }
 
 
-
         /* Tag Parsers */
-        function parseParagraph(node) {
-            var contentFragment = editor.sanitize.clean_node(node)            
+
+        function parseTextContent(node, tagName) {
+            var contentFragment = editor.sanitize.clean_node(node)   
             var content = domFragmentToHTML(contentFragment);
             if (content.trim() === "") {
-                return;
+                return {type:"html", tagName:tagName, content: "<BR>"};
             }
             else {
-                return {type:"html", tagName:"P", content: content}; //a block in the right format
-            }   
+                return {type:"html", tagName:tagName, content: content}; //a block in the right format
+            }
+        }
+
+        function parseParagraph(node) {
+            return parseTextContent(node, "P");
         }
 
         function renderParagraph(block) {
             return block.content;
         }
 
+
+        /* list items */
         function parseList(node) {
-            var content = [];
-            for (var j = 0; j < node.childNodes.length; j++) {
-                if (node.childNodes[j].nodeType === 1 && node.childNodes[j].nodeName === "LI") {
-                    var contentFragment = editor.sanitize.clean_node(node.childNodes[j]);
-                    content.push(domFragmentToHTML(contentFragment));
-                }
-            }
-            return {type:"html", tagName:node.nodeName, content: content}
+            return {type:'html', tagName:node.nodeName, blocks: fragmentToBlocks(node)};
         }
-
-        function renderListItem(block) {
-
+        function parseListItem(node) {
+            return parseTextContent(node, "LI");
+        }
+        function renderListItem(node) {
+            return node.content;
         }
 
         function renderList(block) {
-            var html = "";
-            for (var i = 0; i<block.content.length; i++) {
-                html +="<li>" + block.content[i] + "</li>";
-            }
-            return html;
+            return domFragmentToHTML(blocksToFragment(block.blocks));
+        }
+
+        function parseHr(node) {
+
+        }
+        function renderHr(block) {
+
         }
 
         function parseIframe(node) {
@@ -199,7 +263,6 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
 
         function renderIframe(block) {
 
-            //wrap in embed div?
         }
 
         function parseDiv(node) {
@@ -228,28 +291,21 @@ var htmlInlineTags = ['B', 'EM', 'I', 'STRONG', 'U','A', 'BR', 'SUB', 'SUP', 'S'
 
 
         function parseBlockquote(node) {
-            
-            return {type:'html', tagName:"BLOCKQUOTE", content: fragmentToBlocks(node)};
-            
+            return {type:'html', tagName:"BLOCKQUOTE", blocks: fragmentToBlocks(node)};
         }
 
         function renderBlockquote(block) {
-
-            console.log("renderBlockquote", block.content);
-            return domFragmentToHTML(blocksToFragment(block.content));
+            return domFragmentToHTML(blocksToFragment(block.blocks));
         }
 
 
+        self.fragmentToBlocks = fragmentToBlocks;
+        self.blocksToFragment = blocksToFragment;
+        self.domFragmentToHTML = domFragmentToHTML;
 
-        //returns the block where the cursor's currently at
-        self.getCurrentBlock = function() {
-        }
-
-
-
-        editor.blocks = self;
+        editor.blockTools = self;
         
 
     }
-    global.EditorModules.push(Blocks);
+    global.EditorModules.push(BlockTools);
 })(this);

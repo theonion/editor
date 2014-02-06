@@ -4,8 +4,17 @@
 
     global.EditorModules = []; //a place to keep track of modules
 
+    /* from http://ejohn.org/blog/javascript-array-remove/ */
+    Array.prototype.remove = function(from, to) {
+      var rest = this.slice((to || from) + 1 || this.length);
+      this.length = from < 0 ? this.length + from : from;
+      return this.push.apply(this, rest);
+    };
+
     var Editor = Editor || function(options) {
         var self = this;
+
+        
         self.content = {"blocks": []};
         self.sanitize = {};
 
@@ -135,62 +144,96 @@
                     e.preventDefault();
                 })
                 .bind("keydown", function(e) {
-                    
                     /*  This type of stuff should move into formatting, but not sure how yet. */
+                    var sel = rangy.getSelection();
+                    var block = $(sel.anchorNode).closest(".block")[0];
+                    var endBlock = $(sel.focusNode).closest(".block")[0];
 
-                    var node = self.selection.getNonInlineParent();
-                    
-                    var previousChildNode = $(node).prev()[0];
+                    //make sure there is something actually selected in the start & endblock
 
-                    var parentNode = node.parentNode || node;
-                    var isParentRoot = $( parentNode).hasClass("editor");
-                    var isBlank = ($(node).text() === "");
-                    var isPreviousChildBlank = ($(previousChildNode).text() === "");
-                    var isFirstChild = (typeof previousChildNode === "undefined");
-                    var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
+                    //console.log(block);
 
-                    //console.log("node: ", parentNode);
-                    //console.log("previousChildNode: ", previousChildNode);
-                    // handle enter key shit. 
+
+                    var selectedBlockNodes = self.selection.getSelectedBlockNodes();
+                    var endPoints = self.selection.getEndPoints();
+
+                    console.log(selectedBlockNodes);
+                    //get a list of blocks, in order within the selection. Check for backwards selection
+
+
                     if (e.keyCode === 13) {
                         e.preventDefault();
-
-                        
-                        
-                        console.log(self.blocks.getCurrentBlock())
 
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
-                        else if (isBlank  && !e.shiftKey) { //enter was hit in an empty node.
+                        else {
+                            var range = rangy.createRange();
+                            //to the end of the current block
+                            
+                            //select from the current position of the node
+                            range.setStart(sel.anchorNode, sel.anchorOffset);
+                            range.setEndAfter(block);
+                            var newFragment = range.cloneContents();
+                            range.deleteContents();
+
+                            self.blockTools.insertBlocksAfter(block.id, 
+                                self.content.blocks, self.blockTools.fragmentToBlocks(newFragment, true)
+                            );
 
                         }
-
                     }
                     else if (e.keyCode === 8) {
-                        self.emit("backspace");
-                        var sel = window.getSelection()
-                        //this happens when the cursor is in the last remaining empty paragraph. 
-                        if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
+                        if (selectedBlockNodes.length > 1) {                            
+                            console.log("deleting across blocks.")
+                            for (var i=0;i<selectedBlockNodes.length;i++) {
+
+                                // there will be an opportunity to abstract this range manipulation. But for now...
+                                if ($.contains(selectedBlockNodes[i], endPoints.startNode)) { 
+                                    var range = rangy.createRange();
+                                    range.setStart(endPoints.startNode, endPoints.startOffset);
+                                    range.setEndAfter(selectedBlockNodes[i]);
+                                    range.deleteContents();
+                                }
+                                else if ($.contains(selectedBlockNodes[i], endPoints.endNode)) {
+                                    var range = rangy.createRange();
+                                    range.setStartBefore(selectedBlockNodes[i]);
+                                    range.setEnd(endPoints.endNode, endPoints.endOffset);
+                                    range.deleteContents();
+                                }
+                                else {
+                                    self.blockTools.removeBlock(selectedBlockNodes[i].id, self.content.blocks);
+                                }
+                            }
+                            console.log(selectedBlockNodes);
+                            self.blockTools.mergeAdjacentBlocks(
+                                selectedBlockNodes[0].id,
+                                selectedBlockNodes[selectedBlockNodes.length - 1].id,
+                                self.content.blocks
+                            );
+
                             e.preventDefault();
                         }
-                        // need to prevent deletion of inline elements.
-
-                        // If the cursor is in the first position of a paragraph, the normal ba
-                        
-                        //is the previous element an inline element
-                        if ($(previousChildNode).hasClass("inline")) {
-                            //is the cursor in the first position of the current node.
-                            var sel = self.selection.getSelection()
-
-                            if (sel.anchorOffset === 0 && sel.isCollapsed) {
-                                e.preventDefault();
-                            }
+                        else if (sel.anchorOffset === 0) {
+                            e.preventDefault();
+                            console.log("anchorOffset is zero");
                         }
-                        
                     }
+                    else {
+                        if (block !== endBlock) {
+                            e.preventDefault();
+                        }
+                        else {
+                            setTimeout(function() {
+                                self.blockTools.syncBlockContent(block.id, self.content.blocks);
+                            }, 50);                        
+                        }
+
+                    }
+
+
                     setTimeout(isEmptyCheck, 50);
 
                     self.emit("keydown", e);
@@ -234,7 +277,6 @@
         }
 
         self.deserializeRange = function(serializedRange) {
-            console.log("range", serializedRange);
             if (serializedRange !== "") {
                 rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
             }
@@ -268,28 +310,30 @@
                 .unbind("DOMSubtreeModified", changed )
         }
 
-        self.setContent = function(contentHTML) {
-            self.blocks.loadContent(contentHTML);
+        //takes re
+        self.renderContent = function() {
+            var parsedFragment = self.blockTools.blocksToFragment(self.content.blocks);
+            $(".editor", options.element).html(parsedFragment);
+            $(".inline", options.element).attr("contenteditable", "false");
         }
 
-        self.getContent = function() {
-            //remove images
+        /* FOR EXTERNAL USE ONLY undo/redo should use blocklists*/
+        //sets content from HTML
+        self.setContent = function(contentHTML) {
+            contentHTML = contentHTML.replace(/\n/g, " ");
             var fragment = document.createDocumentFragment();
-            fragment.appendChild(document.createElement("div"))
-            fragment.childNodes[0].innerHTML = $(options.element).find(".editor").html();
-            $(".image>div>img", fragment.childNodes[0]).remove();
-            $(".image", fragment.childNodes[0]).removeClass("new");
+            fragment.appendChild(document.createElement("div"));
+            fragment.childNodes[0].innerHTML = contentHTML;
 
-            //let's strip out any contentEditable attributes
-            $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
-            
-            var html = fragment.childNodes[0].innerHTML;
+            self.content.blocks = self.blockTools.fragmentToBlocks(fragment.childNodes[0]);
 
-            //remove nbsp, if not permitted.
-            if (options.allowNbsp === false) {
-                html = html.replace(/&nbsp;/g, " ").trim();
-            }
-            return html;
+            self.renderContent();
+        }
+
+        //returns content as HTML
+        self.getContent = function() {
+            //this looks dumb.
+            return self.blockTools.domFragmentToHTML(self.blockTools.blocksToFragment(self.content.blocks));
         }
         options = $.extend(defaults, options);
 

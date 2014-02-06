@@ -14,6 +14,43 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         var s = w.getSelection();
 
 
+        self.getSelectedBlockNodes = function() {
+            //look at
+            var sel = rangy.getSelection();
+            var nodes = sel._ranges[0].getNodes();
+            console.log(nodes);
+            var blockNodes = [];
+            for (var i=0;i<nodes.length;i++) {
+                if ($(nodes[i]).hasClass("block")) {
+                    blockNodes.push(nodes[i]);
+                }
+            }
+            return blockNodes;
+        }
+
+        
+        self.getEndPoints = function() {
+            var sel = rangy.getSelection();
+            if (sel.isBackwards()) {
+                return {
+                    startNode: sel.focusNode,
+                    startOffset: sel.focusOffset,
+                    endNode: sel.anchorNode, 
+                    endOffset: sel.anchorOffset
+                }
+            }
+            else {                    
+                return {
+                    startNode: sel.anchorNode,
+                    startOffset: sel.anchorOffset,
+                    endNode: sel.focusNode,
+                    endOffset: sel.focusOffset
+                }
+            }
+        }
+
+
+
         // TODO: REWRITE USING ONLY RANGY CALLS
 
         self.insertOrReplace = function(html) {

@@ -14,48 +14,44 @@
     var InlineObjectHandlers = InlineObjectHandlers || function(editor, options) {
         var self = this;
         
-        editor.blocks.inlineObjectParsers["onion-image"] = function(node) {
+        editor.blockTools.inlineObjectParsers["onion-image"] = function(node) {
             //grab caption & source
             console.log(node);
             return {
-                caption: $(".caption", node).html()
+                caption: $(".caption", node).html() || ""
             }
         }
-        editor.blocks.inlineObjectRenderers["bc-image"] = function(block) {
+        editor.blockTools.inlineObjectRenderers["bc-image"] = function(block) {
             return {url: editor.utils.template(IMAGE_URL, block.content)};
         }
 
-
-        editor.blocks.inlineObjectParsers["image"] = function(node) {
+        editor.blockTools.inlineObjectParsers["image"] = function(node) {
             //grab caption & source
             console.log(node);
             return {
                 type:"bc-image",
-                caption: $(".caption", node).html()
+                caption: $(".caption", node).html() || ""
             }
         }
 
-        editor.blocks.inlineObjectParsers["youtube"] = function(node) {
+        editor.blockTools.inlineObjectParsers["youtube"] = function(node) {
             return {
-                caption: $(".caption", node).html()
+                caption: $(".caption", node).html() || ""
             }
         }
-        editor.blocks.inlineObjectParsers["embed"] = function(node)  {
+        
+        editor.blockTools.inlineObjectParsers["embed"] = function(node)  {
             return {
-                caption: $(".caption", node).html(),
+                caption: $(".caption", node).html() || "",
                 body: $(">div", node).html().trim()
             }
         }
 
-        editor.blocks.inlineObjectParsers["onion-video"] = function(node)  {
+        editor.blockTools.inlineObjectParsers["onion-video"] = function(node)  {
             return {
-                caption: $(".caption", node).html()
+                caption: $(".caption", node).html() || ""
             }
         }
-
-
-        
-
 
     }
     global.EditorModules.push(InlineObjectHandlers);
