@@ -17,7 +17,7 @@ module.exports = function(grunt) {
                 'src/modules/selection.js',
                 'src/modules/inline.js', 
                 'src/modules/undo.js', 
-                /*'src/modules/link.js',*/
+                'src/modules/link.js',
                 'src/modules/persist.js',
                 'src/modules/editSource.js',
                 'src/modules/textReplacement.js',
