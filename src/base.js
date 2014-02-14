@@ -200,16 +200,13 @@
                                 }
                                 else if (isLastChild) {
                                     // LI: At end of list
-                                    console.log("LI: At end of list, removing node");
                                     e.preventDefault();
-
-                                        $(node).remove(); 
-                                        
-                                        //$(parentNode).after("<span class='tmp'></span>");
-                                        self.selection.setCaretAfter(parentNode);
-                                        setTimeout(function() {
-                                            document.execCommand("insertHtml", false, "<p><br></p>");
-                                        }, 20)
+                                    $(parentNode).after("<p><br></p>");
+                                    $(node).remove(); 
+                                    self.selection.setCaretAfter(parentNode);
+                                    setTimeout(function() {
+                                        //document.execCommand("insertHtml", false, "<p><br></p>");
+                                    }, 20)
                                 }
                                 else if (!isLastChild && !isFirstChild) {
                                     //LI: In the middle of the list
