@@ -35,8 +35,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
             else {
                 return false;
+                }
             }
-        }
 
         // returns true there is selected text in the editor
         self.hasSelection = function() {
@@ -45,7 +45,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 if ($.contains(options.element, sel.focusNode)) {
                     return true;
                 }
-            }
+            }   
             return false
         }
 

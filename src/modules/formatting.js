@@ -12,8 +12,6 @@
         editor.on("destroy", destroy);
 
         function init() {
-
-
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);
             key('⌘+u, ctrl+u', commands["underline"]);
@@ -223,10 +221,7 @@
                     }
                 }
             }
-
-
         }
     }
     global.EditorModules.push(Formatting);
 })(this)
-

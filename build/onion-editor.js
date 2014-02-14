@@ -1,4 +1,4 @@
-/*! onion-editor 2014-01-15 */
+/*! onion-editor 2014-02-14 */
 (function(global){
 
     'use strict';
@@ -217,6 +217,7 @@
                                     //e.preventDefault();
                                     setTimeout(function() {
                                         $(".editor div").remove();
+                                        //this sucks, but it kind of works.
                                         document.execCommand("insertHtml", false, "<p><br></p>")
                                     })
                                 }
@@ -342,7 +343,16 @@
 
 
         self.setContent = function(contentHTML) {
-            $(options.element).find(".editor").html(contentHTML);
+            var fragment = document.createDocumentFragment();
+            fragment.appendChild(document.createElement("div"))
+            fragment.childNodes[0].innerHTML = contentHTML;
+
+            var embeds = $(".embed", fragment.childNodes[0]);
+            for (var i = 0; i < embeds.length; i++) {
+                $(embeds[i]).attr("data-body", escape($(">div", embeds[i]).html()));
+            }
+
+            $(options.element).find(".editor").html(fragment.childNodes[0].innerHTML);
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
@@ -358,13 +368,25 @@
                 window.picturefill();
             }
         }
+
         self.getContent = function() {
             //remove images
             var fragment = document.createDocumentFragment();
             fragment.appendChild(document.createElement("div"))
             fragment.childNodes[0].innerHTML = $(options.element).find(".editor").html();
+            
             $(".image>div>img", fragment.childNodes[0]).remove();
             $(".image", fragment.childNodes[0]).removeClass("new");
+
+            //revert embeds back to original state
+            var embeds = $(".embed", fragment.childNodes[0]);
+            for (var i = 0; i < embeds.length; i++) {
+                if ($(embeds[i]).is("[data-body]")) {
+                    $(">div", embeds[i]).html(unescape($(embeds[i]).attr("data-body")));
+                    //don't save with the data-body attribute set. 
+                    $(embeds[i]).removeAttr("data-body");
+                }
+            }
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
@@ -572,8 +594,6 @@ Making a few assumptions, for now:
         editor.on("destroy", destroy);
 
         function init() {
-
-
             key('⌘+b, ctrl+b', commands["bold"]);
             key('⌘+i, ctrl+i', commands["italic"]);
             key('⌘+u, ctrl+u', commands["underline"]);
@@ -783,14 +803,10 @@ Making a few assumptions, for now:
                     }
                 }
             }
-
-
         }
     }
     global.EditorModules.push(Formatting);
-})(this)
-
-;/* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
+})(this);/* This deals with all Range & Selection stuff. Keeping it all in one place will help make this 
 whole thing be cross-browser more easily. Also, this code always looks ugly, so let's keep
 it in one place. 
 
@@ -827,8 +843,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
             else {
                 return false;
+                }
             }
-        }
 
         // returns true there is selected text in the editor
         self.hasSelection = function() {
@@ -837,7 +853,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 if ($.contains(options.element, sel.focusNode)) {
                     return true;
                 }
-            }
+            }   
             return false
         }
 
@@ -1080,10 +1096,12 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 //insert placeholder item
                 editor.killFocus();
                 //call edit on placeholder
+                console.log("inline:insert:" + name);
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
                         onSuccess: function(block, values) {
+                            console.log("inline onsuccess");
                             $(block).before(
                                 editor.utils.template(
                                     options.inline[name].template,
@@ -1091,6 +1109,8 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                                 )
                             );
                             $(".inline").attr("contentEditable", "false");
+                            return $(block).prev()[0];
+                            
                         },
                         onError: function() {
                             //do nothing!
@@ -1197,13 +1217,24 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).data("type")].size)
+                var l = Object.keys(options.inline[$(activeElement).attr("data-type")].size);
                 toggleAttribute("size", l);
+
+                var currentCrop = $(activeElement).attr("data-crop");
+                var cropOptions = options
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
+
+                //this crop isn't available for the new size option
+                if (cropOptions.indexOf(currentCrop) === -1) {
+                    setValue("crop", cropOptions[0]);
+                }
+
             },
             inline_crop: function() {
                 var l = options
-                    .inline[$(activeElement).data("type")]
-                    .size[$(activeElement).data("size")];
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
                 toggleAttribute("crop", l);
             },
             inline_up: function() {
@@ -1229,7 +1260,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             inline_remove: function () {
                 $(activeElement).remove();
                 hideToolbar();
-            },
+            },  
             inline_edit: function () {
                 /* I think this should be a bit more like insert.
                 We establish an onChange callback where we update the template with new values. 
@@ -1238,21 +1269,13 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 */
                 editor.emit("inline:edit:" + $(activeElement).attr("data-type"), 
                     {
-
                         element: activeElement,
                         onChange: function(element, values) {
-                            
                             var type = $(element).attr("data-type");
-                            console.log(type);
-                            console.log(
-                                editor.utils.template(
-                                    options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
-                                ));
                             element.outerHTML = 
                                 editor.utils.template(
                                     options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
+                                    $.extend(options.inline[type].defaults, values) 
                                 )
                         }
                     }
@@ -1265,16 +1288,22 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             var index = list.indexOf(currentValue) + 1;
             if (index >= list.length)
                 index = 0;
-            $(activeElement)
-                .removeClass(attribute + "-" + currentValue)
-                .addClass(attribute + "-" + list[index])
-                .attr("data-" + attribute, list[index])
-            
+
+            setValue(attribute, list[index]);
             if (typeof window.picturefill === "function") {
                 setTimeout(window.picturefill, 100);
             }
-            showToolbar();
+           
         } 
+
+        function setValue(attribute, value) {
+            var currentValue = $(activeElement).attr("data-" + attribute);
+            $(activeElement)
+                .removeClass(attribute + "-" + currentValue)
+                .addClass(attribute + "-" + value)
+                .attr("data-" + attribute, value)
+             showToolbar();
+        }
     }
     global.EditorModules.push(InlineObjects);
 })(this);/* Editor's interface to global Undo */
@@ -1332,118 +1361,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
     }
     global.EditorModules.push(EditorUndo);
 })(this);;/* 
-
-TODO: Clean up showing/hiding stuff. 
-
-*/
-
-(function(global) {
-    'use strict';
-    var Link = Link || function(editor, options) {
-        var self = this;
-        editor.on("init", init);
-        editor.on("destroy", destroy);
-        
-
-        var activeLinkElement; 
-
-        function init() {
-            key('⌘+k, ctrl+k', makeLink);
-            editor.on("toolbar:click", function(name) {
-                if (name === "link") 
-                    makeLink();
-            })
-            
-            //register dialog events:
-            $(".editor", options.element).click( function(e) {
-                var link = $(e.target).closest("A");
-                if (link.length === 1) {
-                    //Show link info
-                    activeLinkElement = link[0];
-                    showViewLinkDialog();
-                }
-                else {
-                    //HIDE 
-                    $(".link-tools", options.element).hide();                       
-                }
-            });
-
-            $(".link-change", options.element).click(showEditLinkDialog);
-            $(".link-remove", options.element).click(removeLink);
-            $(".link-apply", options.element).click(applyLinkEdits);
-        }
-
-        function destroy() {
-            key.unbind('⌘+k, ctrl+k');
-        }
-
-        function removeLink() {
-            activeLinkElement.outerHTML = activeLinkElement.innerHTML;
-            $(".link-tools", options.element).hide();
-        }
-
-
-        function setURL() {
-            var url = $(activeLinkElement).attr("href");
-            $(".link-url", options.element).html(url);
-            $(".link-url", options.element).attr("href", url);
-
-            if (url !== "#") {
-                $(".link-input-textbox", options.element).val(url);
-            }
-            else {
-                $(".link-input-textbox", options.element).val("");
-            }
-        }
-
-        function positionDialog() {
-            var pos = editor.selection.getCoordinates();
-            $(".link-tools", options.element).css({top: pos.top + 20, left: pos.left})
-
-        }
-        function showViewLinkDialog() {
-            //shows the url, change & remove buttons
-            //only shows up on click
-            setURL();
-            positionDialog();
-            $(".link-tools", options.element).show();
-            $(".link-edit-dialog", options.element).hide();
-            $(".link-view-dialog", options.element).show();
-        }
-
-        function showEditLinkDialog() {
-            positionDialog();
-            $(".link-tools", options.element).show();
-            $(".link-edit-dialog", options.element).show();
-            $(".link-view-dialog", options.element).hide();
-            $(".link-input-textbox", options.element).focus();
-
-        }
-        function canDoLink() {
-            return options.sanitize.elements.indexOf("a") !== -1;
-        }
-
-        function makeLink() {
-            //make a link, then throw open the edit dialog.
-            if (editor.selection.hasSelection() && canDoLink() ) {
-                global.document.execCommand("CREATELINK", false, "#");
-                activeLinkElement = rangy.getSelection().anchorNode.parentNode;
-                setTimeout(function() {
-                    setURL();
-                    showEditLinkDialog();
-                }, 5);
-            }
-        }
-        function applyLinkEdits() {
-            activeLinkElement.setAttribute("href", $(".link-input-textbox", options.element).val())
-            $(".link-tools", options.element).hide();
-        }
-
-
-
-    }
-    global.EditorModules.push(Link);
-})(this);/* 
     Basecamp style autosave. 
 
     Dumps body into localstorage after the dom changes.
@@ -1569,15 +1486,6 @@ TODO:
                 
             }
 
-/*
-            console.log("logging chars");
-            var sel = editor.selection.getSelection();
-            console.log("Party: ",  );
-
-            var n = sel.anchorNode;
-
-            n.data = n.substr
-*/
         }
 
         //move this to getSelection
@@ -1731,8 +1639,10 @@ TODO:
     var Stats = Stats || function(editor, options) {
         var self = this;
 
-        editor.on("contentchanged", updateStats);
-
+        if (options.statsContainer) {
+            editor.on("init", updateStats);
+            editor.on("contentchanged", updateStats);
+        }
         function updateStats() {
             var text = $(".editor", options.element)[0].innerText;
             var wordcount = text.split(/\s+/).length - 1;
@@ -1741,7 +1651,7 @@ TODO:
                 characters: text.length,
                 readingtime: wordcount / 225
             }
-            $(".wordcount").html(wordcount);
+            $(options.statsContainer).html(wordcount);
         }
     }
     global.EditorModules.push(Stats);

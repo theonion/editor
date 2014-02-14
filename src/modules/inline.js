@@ -21,10 +21,12 @@
                 //insert placeholder item
                 editor.killFocus();
                 //call edit on placeholder
+                console.log("inline:insert:" + name);
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
                         onSuccess: function(block, values) {
+                            console.log("inline onsuccess");
                             $(block).before(
                                 editor.utils.template(
                                     options.inline[name].template,
@@ -32,6 +34,8 @@
                                 )
                             );
                             $(".inline").attr("contentEditable", "false");
+                            return $(block).prev()[0];
+                            
                         },
                         onError: function() {
                             //do nothing!
@@ -138,13 +142,24 @@
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).data("type")].size)
+                var l = Object.keys(options.inline[$(activeElement).attr("data-type")].size);
                 toggleAttribute("size", l);
+
+                var currentCrop = $(activeElement).attr("data-crop");
+                var cropOptions = options
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
+
+                //this crop isn't available for the new size option
+                if (cropOptions.indexOf(currentCrop) === -1) {
+                    setValue("crop", cropOptions[0]);
+                }
+
             },
             inline_crop: function() {
                 var l = options
-                    .inline[$(activeElement).data("type")]
-                    .size[$(activeElement).data("size")];
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
                 toggleAttribute("crop", l);
             },
             inline_up: function() {
@@ -170,7 +185,7 @@
             inline_remove: function () {
                 $(activeElement).remove();
                 hideToolbar();
-            },
+            },  
             inline_edit: function () {
                 /* I think this should be a bit more like insert.
                 We establish an onChange callback where we update the template with new values. 
@@ -179,21 +194,13 @@
                 */
                 editor.emit("inline:edit:" + $(activeElement).attr("data-type"), 
                     {
-
                         element: activeElement,
                         onChange: function(element, values) {
-                            
                             var type = $(element).attr("data-type");
-                            console.log(type);
-                            console.log(
-                                editor.utils.template(
-                                    options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
-                                ));
                             element.outerHTML = 
                                 editor.utils.template(
                                     options.inline[type].template,
-                                    $.extend(options.inline[name].defaults, values) 
+                                    $.extend(options.inline[type].defaults, values) 
                                 )
                         }
                     }
@@ -206,16 +213,22 @@
             var index = list.indexOf(currentValue) + 1;
             if (index >= list.length)
                 index = 0;
-            $(activeElement)
-                .removeClass(attribute + "-" + currentValue)
-                .addClass(attribute + "-" + list[index])
-                .attr("data-" + attribute, list[index])
-            
+
+            setValue(attribute, list[index]);
             if (typeof window.picturefill === "function") {
                 setTimeout(window.picturefill, 100);
             }
-            showToolbar();
+           
         } 
+
+        function setValue(attribute, value) {
+            var currentValue = $(activeElement).attr("data-" + attribute);
+            $(activeElement)
+                .removeClass(attribute + "-" + currentValue)
+                .addClass(attribute + "-" + value)
+                .attr("data-" + attribute, value)
+             showToolbar();
+        }
     }
     global.EditorModules.push(InlineObjects);
 })(this)

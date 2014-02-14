@@ -58,15 +58,6 @@ TODO:
                 
             }
 
-/*
-            console.log("logging chars");
-            var sel = editor.selection.getSelection();
-            console.log("Party: ",  );
-
-            var n = sel.anchorNode;
-
-            n.data = n.substr
-*/
         }
 
         //move this to getSelection

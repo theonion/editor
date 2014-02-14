@@ -216,6 +216,7 @@
                                     //e.preventDefault();
                                     setTimeout(function() {
                                         $(".editor div").remove();
+                                        //this sucks, but it kind of works.
                                         document.execCommand("insertHtml", false, "<p><br></p>")
                                     })
                                 }
@@ -341,7 +342,16 @@
 
 
         self.setContent = function(contentHTML) {
-            $(options.element).find(".editor").html(contentHTML);
+            var fragment = document.createDocumentFragment();
+            fragment.appendChild(document.createElement("div"))
+            fragment.childNodes[0].innerHTML = contentHTML;
+
+            var embeds = $(".embed", fragment.childNodes[0]);
+            for (var i = 0; i < embeds.length; i++) {
+                $(embeds[i]).attr("data-body", escape($(">div", embeds[i]).html()));
+            }
+
+            $(options.element).find(".editor").html(fragment.childNodes[0].innerHTML);
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
@@ -357,13 +367,25 @@
                 window.picturefill();
             }
         }
+
         self.getContent = function() {
             //remove images
             var fragment = document.createDocumentFragment();
             fragment.appendChild(document.createElement("div"))
             fragment.childNodes[0].innerHTML = $(options.element).find(".editor").html();
+            
             $(".image>div>img", fragment.childNodes[0]).remove();
             $(".image", fragment.childNodes[0]).removeClass("new");
+
+            //revert embeds back to original state
+            var embeds = $(".embed", fragment.childNodes[0]);
+            for (var i = 0; i < embeds.length; i++) {
+                if ($(embeds[i]).is("[data-body]")) {
+                    $(">div", embeds[i]).html(unescape($(embeds[i]).attr("data-body")));
+                    //don't save with the data-body attribute set. 
+                    $(embeds[i]).removeAttr("data-body");
+                }
+            }
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
