@@ -357,6 +357,7 @@
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )            
             }
 
+
             //add contentEditable false to any inline objects
             $(".inline").attr("contentEditable", "false");
 
@@ -374,6 +375,8 @@
             $(".image>div>img", fragment.childNodes[0]).remove();
             $(".image", fragment.childNodes[0]).removeClass("new");
 
+            /* hacks that will hang out until the new block architecture is ready */
+
             //revert embeds back to original state
             var embeds = $(".embed", fragment.childNodes[0]);
             for (var i = 0; i < embeds.length; i++) {
@@ -383,6 +386,15 @@
                     $(embeds[i]).removeAttr("data-body");
                 }
             }
+
+            //clear out spans out of paragraphs
+            var spans = $("p span", fragment.childNodes[0]);
+            for (var i = 0; i < spans.length; i++) {
+                spans[i].outerHTML = spans[i].innerHTML;
+            }
+            //remove all other style attributes
+            $("p [style]", fragment.childNodes[0]).removeAttr("style");
+
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
