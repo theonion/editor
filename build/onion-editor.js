@@ -153,36 +153,29 @@
                     //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
-
+                        console.log(parentNode, $(node).next()[0], isLastChild);
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
                         else if (isBlank  && !e.shiftKey) { //enter was hit in an empty node.
-                            //$(node).remove();
-                            if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
-                                // is the "P" inside something? Does it matter?
 
-                                //is there a paragraph above, that's empty? turn it into an HR.
+                            if (parentNode.tagName === "BLOCKQUOTE") {
+                                if (isLastChild && isFirstChild) {
 
-                                //is there an HR above, no more enters!
-                                /*
-                                    if (isBlank && previousChildNode.tagName == "HR") {
-                                        e.preventDefault(); 
-                                    }
-                                    else if (isBlank && node.tagName == "P") {
-                                        node.outerHTML = "<hr><p class='new-paragraph'>NEW P</p>";
-                                        window.n = node;
-                                        setTimeout(function() {
-                                            console.log("new node", node.outerHTML);
-                                        }, 5);
-                                    }
-                                */
-                            }
-                            else if (parentNode.tagname == "") {
+                                }
+                                else if (isLastChild) {
+                                   // LI: At end of list
+                                    e.preventDefault();
+                                    $(parentNode).after("<p><br></p>");
+                                    $(node).remove(); 
+                                    self.selection.setCaretAfter(parentNode);
+                                }
 
                             }
+                            else if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
 
+                            }
                             //Redo this block exclusively using dom manip, not 
                             else if (node.tagName == "LI") {
                                 if (isLastChild && isFirstChild) {
@@ -196,7 +189,6 @@
                                 
                                 }
                                 else if (isFirstChild) {
-                                    //LI: First item in the list, but list isn't empty. removing node & adding paragraph above"
                                     e.preventDefault();
                                 }
                                 else if (isLastChild) {
@@ -205,9 +197,6 @@
                                     $(parentNode).after("<p><br></p>");
                                     $(node).remove(); 
                                     self.selection.setCaretAfter(parentNode);
-                                    setTimeout(function() {
-                                        //document.execCommand("insertHtml", false, "<p><br></p>");
-                                    }, 20)
                                 }
                                 else if (!isLastChild && !isFirstChild) {
                                     //LI: In the middle of the list
@@ -226,12 +215,9 @@
                         self.emit("backspace");
                         var sel = window.getSelection()
                         //this happens when the cursor is in the last remaining empty paragraph. 
-                        if (sel.focusNode.tagName === "P" && $(".editor>*").length == 1) {
+                        if (sel.focusNode.tagName === "P" && $(".editor>P").length == 1) {
                             e.preventDefault();
                         }
-                        // need to prevent deletion of inline elements.
-
-                        // If the cursor is in the first position of a paragraph, the normal ba
                         
                         //is the previous element an inline element
                         if ($(previousChildNode).hasClass("inline")) {
