@@ -1,4 +1,4 @@
-/*! onion-editor 2014-02-19 */
+/*! onion-editor 2014-02-20 */
 (function(global){
 
     'use strict';
@@ -253,32 +253,43 @@
                 })
                 .bind("paste", function(e) {
                     //application/x-webarchive
-                    var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
 
-                    //prefer html, but take text if it's not avaialble
-                    if (pastedHTML === "") {
-                        pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
-                    }
-                    pastedHTML = pastedHTML.replace(/\n/g, " ");
-                    var fragment = document.createDocumentFragment();
-                    fragment.appendChild(document.createElement("div"))
-                    fragment.childNodes[0].innerHTML = pastedHTML;
-                    var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
-                    var cleanHTML = "";
-                    for (var i = 0; i < cleanFrag.childNodes.length; i++) {
-                        var node = cleanFrag.childNodes[i];
-                        if (node.nodeType == 3) {
-                            cleanHTML += node.nodeValue + "\n\n";
-                        }
-                        else if (node.nodeType == 1) {
-                            if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
-                                cleanHTML += cleanFrag.childNodes[i].outerHTML;
+                    /* hack for safari pasting. can't use clipboardData */
+                    $("<div>")
+                        .attr("contenteditable", "true")
+                        .attr("id", "paste-bucket")
+                        .css("position:absolute;z-index:10000;")
+                        .appendTo("body")
+                        .focus();
+
+                    //handle paste, defer to give time to focus & paste
+                    setTimeout(function() {
+                        var pastedHTML = $("#paste-bucket").html();
+                        $("#paste-bucket").remove();
+                        pastedHTML = pastedHTML.replace(/\n/g, " ");
+                        var fragment = document.createDocumentFragment();
+                        fragment.appendChild(document.createElement("div"))
+                        fragment.childNodes[0].innerHTML = pastedHTML;
+                        var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
+                        var cleanHTML = "";
+                        for (var i = 0; i < cleanFrag.childNodes.length; i++) {
+                            var node = cleanFrag.childNodes[i];
+                            if (node.nodeType == 3) {
+                                cleanHTML += node.nodeValue + "\n\n";
+                            }
+                            else if (node.nodeType == 1) {
+                                if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
+                                    cleanHTML += cleanFrag.childNodes[i].outerHTML;
+                                }
                             }
                         }
-                    }
-                    self.selection.insertOrReplace(cleanHTML);
-                    e.preventDefault();
-                    self.emit("paste");
+
+                        $(".editor", options.element).focus();
+                        self.selection.insertOrReplace(cleanHTML);
+                        isEmptyCheck();
+                        self.emit("paste");
+                    }, 50);
+                   
                 })
         };
 
