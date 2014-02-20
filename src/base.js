@@ -148,11 +148,8 @@
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
 
-                    //console.log("node: ", parentNode);
-                    //console.log("previousChildNode: ", previousChildNode);
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
-                        console.log(parentNode, $(node).next()[0], isLastChild);
                         if (isTextSelected || !options.allowNewline) {  
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
