@@ -254,17 +254,22 @@
                 .bind("paste", function(e) {
                     //application/x-webarchive
 
+                    //save range info
+                    var range = self.serializeRange()
+
+
                     /* hack for safari pasting. can't use clipboardData */
                     $("<div>")
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
-                        .css("position:absolute;z-index:10000;")
+                        .css({"position":"fixed","top":0, "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
                         .appendTo("body")
                         .focus();
 
                     //handle paste, defer to give time to focus & paste
                     setTimeout(function() {
                         var pastedHTML = $("#paste-bucket").html();
+                        console.log(pastedHTML);
                         $("#paste-bucket").remove();
                         pastedHTML = pastedHTML.replace(/\n/g, " ");
                         var fragment = document.createDocumentFragment();
@@ -285,6 +290,9 @@
                         }
 
                         $(".editor", options.element).focus();
+
+                        self.deserializeRange(range);
+                        //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(cleanHTML);
                         isEmptyCheck();
                         self.emit("paste");
@@ -875,8 +883,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 }
             }   
             return false
-        }
-
+        },
         
         self.getCoordinates = function () {
             //console.log("DEPRECATED: getCoordinates");
