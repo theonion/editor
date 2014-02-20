@@ -61,7 +61,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                     if (range.getClientRects) {
                         range.collapse(true);
                         //these are relative to the viewport
-                        var rect = range.getClientRects()[0];
+                        var rect = range.getClientBoundingRects();
 
                         //let's find position relative to page.
                         left = rect.left + document.body.scrollLeft - $(options.element).position().left;

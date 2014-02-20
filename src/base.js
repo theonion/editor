@@ -251,7 +251,9 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
+                    //application/x-webarchive
                     var pastedHTML = e.originalEvent.clipboardData.getData('text/html');
+
                     //prefer html, but take text if it's not avaialble
                     if (pastedHTML === "") {
                         pastedHTML = e.originalEvent.clipboardData.getData('text/plain');
@@ -273,11 +275,9 @@
                             }
                         }
                     }
-                    
-                    self.selection.insertOrReplace(cleanHTML)
+                    self.selection.insertOrReplace(cleanHTML);
                     e.preventDefault();
                     self.emit("paste");
-                    
                 })
         };
 
@@ -388,12 +388,12 @@
             }
 
             //clear out spans out of paragraphs
-            var spans = $("p span", fragment.childNodes[0]);
+            var spans = $(">p span", fragment.childNodes[0]);
             for (var i = 0; i < spans.length; i++) {
                 spans[i].outerHTML = spans[i].innerHTML;
             }
             //remove all other style attributes
-            $("p [style]", fragment.childNodes[0]).removeAttr("style");
+            $(">p [style]", fragment.childNodes[0]).removeAttr("style");
 
 
             //let's strip out any contentEditable attributes
