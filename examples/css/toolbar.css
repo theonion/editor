@@ -256,3 +256,15 @@
     margin-left: -96px;
 }
 
+
+
+.find-replace-dialog {
+    position:fixed;
+    bottom:0px;
+    height: 40px;
+    background-color:#D4D4D4;
+    border-top:1px #C0C0C0 solid;
+    z-index:10000;
+}
+
+

@@ -25,7 +25,8 @@ module.exports = function(grunt) {
                 'src/modules/theme.js',
                 'src/modules/youtube.js',
                 'src/modules/stats.js',
-
+                'src/modules/findReplace.js',
+                
                 'src/lib/rangy/rangy-core.js',
                 'src/lib/rangy/rangy-cssclassapplier.js',
                 'src/lib/rangy/rangy-selectionsaverestore.js',

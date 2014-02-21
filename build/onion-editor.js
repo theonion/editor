@@ -252,7 +252,6 @@
                     //handle paste, defer to give time to focus & paste
                     setTimeout(function() {
                         var pastedHTML = $("#paste-bucket").html();
-                        console.log(pastedHTML);
                         $("#paste-bucket").remove();
                         pastedHTML = pastedHTML.replace(/\n/g, " ");
                         var fragment = document.createDocumentFragment();
@@ -285,9 +284,7 @@
         };
 
         self.destroy = function() {
-            console.log("Emitting Destroy");
             self.emit("destroy");
-            //delete self;
         }
 
         utils.enableEvents(self);
@@ -305,7 +302,6 @@
         }
 
         self.deserializeRange = function(serializedRange) {
-            console.log("range", serializedRange);
             if (serializedRange !== "") {
                 rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
             }
@@ -356,7 +352,6 @@
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
             if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                console.log("wrapped in a div");
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )            
             }
 
@@ -1681,7 +1676,46 @@ TODO:
         }
     }
     global.EditorModules.push(Stats);
-})(this);/**
+})(this);/*
+    Find & Replace
+
+*/
+
+(function(global) {
+    'use strict';
+    var FindReplace = FindReplace || function(editor, options) {
+        var self = this;
+        editor.on("init", init);
+        editor.on("destroy", destroy);
+        
+
+        function init() {
+            key('⌘+f, ctrl+f', find);
+
+            if ($(".find-replace-dialog").length === 0) {
+                var html = $("#find-replace-template").html();
+                $("body").append(html);
+            }
+            self.dialog = $(".find-replace-dialog");
+        }
+
+        function destroy() {
+            key.unbind('⌘+f, ctrl+f');
+        }
+
+
+        function find(e) {
+            if (editor.selection.hasFocus()) {
+                self.dialog.show();
+                console.log("search dialog");
+                e.preventDefault();
+            }
+        }
+    }
+    global.EditorModules.push(FindReplace);
+})(this)
+
+;/**
  * @license Rangy, a cross-browser JavaScript range and selection library
  * http://code.google.com/p/rangy/
  *

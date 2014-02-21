@@ -251,7 +251,6 @@
                     //handle paste, defer to give time to focus & paste
                     setTimeout(function() {
                         var pastedHTML = $("#paste-bucket").html();
-                        console.log(pastedHTML);
                         $("#paste-bucket").remove();
                         pastedHTML = pastedHTML.replace(/\n/g, " ");
                         var fragment = document.createDocumentFragment();
@@ -284,9 +283,7 @@
         };
 
         self.destroy = function() {
-            console.log("Emitting Destroy");
             self.emit("destroy");
-            //delete self;
         }
 
         utils.enableEvents(self);
@@ -304,7 +301,6 @@
         }
 
         self.deserializeRange = function(serializedRange) {
-            console.log("range", serializedRange);
             if (serializedRange !== "") {
                 rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
             }
@@ -355,7 +351,6 @@
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
             if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                console.log("wrapped in a div");
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )            
             }
 
