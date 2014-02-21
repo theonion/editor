@@ -75,7 +75,6 @@ TODO:
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
                 var p = _getPrecedingCharacter();
                 var chr;
-                console.log(p);
                 switch (p) {
                     //double quote
                     case 8220:
@@ -94,8 +93,7 @@ TODO:
                     case -1:  //no character
                     case 32:  //space
                     case 160: //nbsp
-                    case 73:
-                        if (e.shiftKey) 
+                    if (e.shiftKey) 
                             chr = "&ldquo;";
                         else
                             chr = "&lsquo;";
