@@ -1,4 +1,4 @@
-/*! onion-editor 2014-02-21 */
+/*! onion-editor 2014-02-24 */
 (function(global){
 
     'use strict';
