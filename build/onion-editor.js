@@ -1,4 +1,4 @@
-/*! onion-editor 2014-02-20 */
+/*! onion-editor 2014-02-24 */
 (function(global){
 
     'use strict';
@@ -235,17 +235,15 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    //application/x-webarchive
 
                     //save range info
                     var range = self.serializeRange()
-
 
                     /* hack for safari pasting. can't use clipboardData */
                     $("<div>")
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
-                        .css({"position":"fixed","top":0, "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
+                        .css({"position":"fixed", "top":"0px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
                         .appendTo("body")
                         .focus();
 
@@ -270,10 +268,9 @@
                                 }
                             }
                         }
-
+                        self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
-                        self.deserializeRange(range);
                         //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(cleanHTML);
                         isEmptyCheck();
@@ -1508,7 +1505,6 @@ TODO:
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
                 var p = _getPrecedingCharacter();
                 var chr;
-                console.log(p);
                 switch (p) {
                     //double quote
                     case 8220:
@@ -1527,8 +1523,7 @@ TODO:
                     case -1:  //no character
                     case 32:  //space
                     case 160: //nbsp
-                    case 73:
-                        if (e.shiftKey) 
+                    if (e.shiftKey) 
                             chr = "&ldquo;";
                         else
                             chr = "&lsquo;";

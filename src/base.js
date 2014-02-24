@@ -234,17 +234,15 @@
                     self.emit("keyup", e);
                 })
                 .bind("paste", function(e) {
-                    //application/x-webarchive
 
                     //save range info
                     var range = self.serializeRange()
-
 
                     /* hack for safari pasting. can't use clipboardData */
                     $("<div>")
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
-                        .css({"position":"fixed","top":0, "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
+                        .css({"position":"fixed", "top":"0px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
                         .appendTo("body")
                         .focus();
 
@@ -269,10 +267,9 @@
                                 }
                             }
                         }
-
+                        self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
-                        self.deserializeRange(range);
                         //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(cleanHTML);
                         isEmptyCheck();

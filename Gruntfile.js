@@ -60,7 +60,7 @@ module.exports = function(grunt) {
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
-        tasks: ['concat', 'uglify', 'copy'],
+        tasks: ['concat', 'uglify'],
       },
     },
 
@@ -71,6 +71,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
-  grunt.registerTask('default', ['concat', 'uglify', 'copy']);
+  grunt.registerTask('default', ['concat', 'uglify']);
 
 };
