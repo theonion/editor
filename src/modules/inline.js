@@ -21,7 +21,6 @@
                 //insert placeholder item
                 editor.killFocus();
                 //call edit on placeholder
-                console.log("inline:insert:" + name);
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
@@ -110,12 +109,13 @@
             var pos = el.position();
             $(options.element).addClass("inline-active");
             
-            //set size
-            $(".inline-tools .size", options.element)
+            //set size buttons.
+
+            $(".inline-tools [name=size]", options.element)
                 .html($(activeElement).attr("data-size"));
 
             //set crop
-            $(".inline-tools .crop", options.element)
+            $(".inline-tools [name=crop]", options.element)
                 .html($(activeElement).attr("data-crop"));
 
             $(".inline-tools", options.element)
@@ -128,6 +128,16 @@
                 .show();
         }
 
+
+        function getSizes() {
+            return  Object.keys(options.inline[$(activeElement).attr("data-type")].size);
+        }
+
+        function getCrops() {
+            return options
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
+        }
 
         //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
         var actions = {
@@ -142,14 +152,11 @@
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).attr("data-type")].size);
+                var l = getSizes();
                 toggleAttribute("size", l);
 
                 var currentCrop = $(activeElement).attr("data-crop");
-                var cropOptions = options
-                    .inline[$(activeElement).attr("data-type")]
-                    .size[$(activeElement).attr("data-size")];
-
+                var cropOptions = getCrops();
                 //this crop isn't available for the new size option
                 if (cropOptions.indexOf(currentCrop) === -1) {
                     setValue("crop", cropOptions[0]);

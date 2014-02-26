@@ -33,7 +33,7 @@ TODO:
             "(c)": "©"
         }
 
-        // editor.on("keydown", function() {setTimeout(replaceText, 10)});
+        editor.on("keydown", function() {setTimeout(replaceText, 10)});
         /*  If the last characters match a string int he map, 
             replace 'em. 
         */

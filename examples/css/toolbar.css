@@ -216,7 +216,7 @@
     width:auto;
 }
 
-.inline-tools  button.inline-attribute {
+.inline-tools  span.inline-attribute {
     font-size: 11px;
     text-transform:uppercase;
 }
@@ -257,14 +257,35 @@
 }
 
 
+span.highlight {
+    background-color: #EC7000;
+}
 
 .find-replace-dialog {
     position:fixed;
-    bottom:0px;
-    height: 40px;
-    background-color:#D4D4D4;
-    border-top:1px #C0C0C0 solid;
+    width: 820px;
+    margin: 0 auto;
+    height: 56px; 
+    top:0px;
+    left: 50%;
+    margin-left: -410px;
+    background-color:#EEEEEE;
+    border:1px #DADADA solid;
+    border-radius: 4px;
     z-index:10000;
+    padding: 10px 20px;
+    box-shadow: 1px 3px 5px 0px rgba(50, 50, 50, 0.3);
+}
+.find-replace-dialog .close {
+
 }
 
+.find-replace-dialog>.btn {
+    margin-top:-3px;
+}
 
+.find-replace-dialog input {
+    width: 200px;
+    font-size: 14px; 
+    padding: 3px;
+}

@@ -255,6 +255,7 @@
                         fragment.appendChild(document.createElement("div"))
                         fragment.childNodes[0].innerHTML = pastedHTML;
                         var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
+                        
                         var cleanHTML = "";
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                             var node = cleanFrag.childNodes[i];
@@ -267,13 +268,18 @@
                                 }
                             }
                         }
+                        fragment.childNodes[0].innerHTML = cleanHTML;
+
+                        //allow something else to make changes to the fragment
+                        self.emit("paste", fragment);
+
                         self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
                         //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(cleanHTML);
                         isEmptyCheck();
-                        self.emit("paste");
+                        
                     }, 50);
                    
                 })
@@ -314,7 +320,6 @@
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
-
                 }
             }, 500);
         }
@@ -380,7 +385,6 @@
                     $(embeds[i]).removeAttr("data-body");
                 }
             }
-
             //clear out spans out of paragraphs
             var spans = $(">p span", fragment.childNodes[0]);
             for (var i = 0; i < spans.length; i++) {
@@ -388,7 +392,6 @@
             }
             //remove all other style attributes
             $(">p [style]", fragment.childNodes[0]).removeAttr("style");
-
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");

@@ -4,6 +4,7 @@
         <meta charset="UTF-8">
         <title>CMS Demo</title>
         <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+        <link href="//netdna.bootstrapcdn.com/bootstrap/3.1.1/css/bootstrap.min.css" rel="stylesheet">
 
         <!-- Latest compiled and minified CSS -->
         <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">-->
@@ -139,8 +140,14 @@
                     <div>
                         <button name="inline_up" class="icon-arrow-up"></button>
                         <button name="inline_down" class="icon-arrow-down"></button>
-                        <button class="size inline-attribute" name="inline_size"></button>
-                        <button class="crop inline-attribute" name="inline_crop"></button>
+                        
+                        <span class="inline-attribute" name="size">
+                            
+                        </span>
+                        <span class="inline-attribute" name="crop">
+                            
+                        </span>
+
                     </div>
                 </div>
                <div class="remove">
@@ -166,11 +173,12 @@
 
         <script type="text/template" id="find-replace-template">
                 <div class="find-replace-dialog" style="display:none">
-                    <input type="text" class="editor-find">
-                    <input type="text" class="editor-replace">
-                    <button>Find</button>
-                    <button>Replace</button>
-                    <button>Replace All</button>
+                    <input type="text" class="editor-find" placeholder="Find">
+                    <input type="text" class="editor-replace" placeholder="Replace">
+                    <button class="btn btn-default">Find</button>
+                    <button class="btn btn-default">Replace</button>
+                    <button class="btn btn-default">Replace All</button>
+                    <button class="close">&times;</button>
                 </div>
         </script>
 

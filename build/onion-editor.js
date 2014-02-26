@@ -1,4 +1,4 @@
-/*! onion-editor 2014-02-24 */
+/*! onion-editor 2014-02-26 */
 (function(global){
 
     'use strict';
@@ -256,6 +256,7 @@
                         fragment.appendChild(document.createElement("div"))
                         fragment.childNodes[0].innerHTML = pastedHTML;
                         var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
+                        
                         var cleanHTML = "";
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                             var node = cleanFrag.childNodes[i];
@@ -268,13 +269,18 @@
                                 }
                             }
                         }
+                        fragment.childNodes[0].innerHTML = cleanHTML;
+
+                        //allow something else to make changes to the fragment
+                        self.emit("paste", fragment);
+
                         self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
                         //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(cleanHTML);
                         isEmptyCheck();
-                        self.emit("paste");
+                        
                     }, 50);
                    
                 })
@@ -315,7 +321,6 @@
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
-
                 }
             }, 500);
         }
@@ -381,7 +386,6 @@
                     $(embeds[i]).removeAttr("data-body");
                 }
             }
-
             //clear out spans out of paragraphs
             var spans = $(">p span", fragment.childNodes[0]);
             for (var i = 0; i < spans.length; i++) {
@@ -389,7 +393,6 @@
             }
             //remove all other style attributes
             $(">p [style]", fragment.childNodes[0]).removeAttr("style");
-
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
@@ -1098,7 +1101,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 //insert placeholder item
                 editor.killFocus();
                 //call edit on placeholder
-                console.log("inline:insert:" + name);
                 editor.emit("inline:insert:" + name, 
                     {
                         block: activeBlock, 
@@ -1187,12 +1189,13 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             var pos = el.position();
             $(options.element).addClass("inline-active");
             
-            //set size
-            $(".inline-tools .size", options.element)
+            //set size buttons.
+
+            $(".inline-tools [name=size]", options.element)
                 .html($(activeElement).attr("data-size"));
 
             //set crop
-            $(".inline-tools .crop", options.element)
+            $(".inline-tools [name=crop]", options.element)
                 .html($(activeElement).attr("data-crop"));
 
             $(".inline-tools", options.element)
@@ -1205,6 +1208,16 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 .show();
         }
 
+
+        function getSizes() {
+            return  Object.keys(options.inline[$(activeElement).attr("data-type")].size);
+        }
+
+        function getCrops() {
+            return options
+                    .inline[$(activeElement).attr("data-type")]
+                    .size[$(activeElement).attr("data-size")];
+        }
 
         //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
         var actions = {
@@ -1219,14 +1232,11 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
-                var l = Object.keys(options.inline[$(activeElement).attr("data-type")].size);
+                var l = getSizes();
                 toggleAttribute("size", l);
 
                 var currentCrop = $(activeElement).attr("data-crop");
-                var cropOptions = options
-                    .inline[$(activeElement).attr("data-type")]
-                    .size[$(activeElement).attr("data-size")];
-
+                var cropOptions = getCrops();
                 //this crop isn't available for the new size option
                 if (cropOptions.indexOf(currentCrop) === -1) {
                     setValue("crop", cropOptions[0]);
@@ -1463,7 +1473,7 @@ TODO:
             "(c)": "©"
         }
 
-        // editor.on("keydown", function() {setTimeout(replaceText, 10)});
+        editor.on("keydown", function() {setTimeout(replaceText, 10)});
         /*  If the last characters match a string int he map, 
             replace 'em. 
         */
