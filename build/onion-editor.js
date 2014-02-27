@@ -1519,7 +1519,7 @@ TODO:
                     var charCode  = p.charCodeAt(0);
                 }
                 var chr;
-                switch (p) {
+                switch (charCode) {
                     //double quote
                     case 8220:
                         if (e.shiftKey) 
