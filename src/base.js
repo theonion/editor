@@ -254,35 +254,38 @@
                         var fragment = document.createDocumentFragment();
                         fragment.appendChild(document.createElement("div"))
                         fragment.childNodes[0].innerHTML = pastedHTML;
-                        var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
-                        var cleanHTML = "";
+                        var cleanFrag = sanitize.clean_node(fragment.childNodes[0]);
+                        
+                        window.frag = cleanFrag;
+                        //allow something else to make changes to the fragment
+                        self.emit("paste", cleanFrag);
+
+                        var htmlString = "";    
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                             var node = cleanFrag.childNodes[i];
-                            if (node.nodeType == 3) {
-                                cleanHTML += node.nodeValue + "\n\n";
+                            if (node.nodeType === 3) {
+                                //pass on text nodes.
+                                htmlString += node.nodeValue;
                             }
-                            else if (node.nodeType == 1) {
+                            else if (node.nodeType === 1) {
                                 if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
-                                    cleanHTML += cleanFrag.childNodes[i].outerHTML;
+                                    htmlString += cleanFrag.childNodes[i].outerHTML;
                                 }
                             }
                         }
                         self.deserializeRange(range);
                         $(".editor", options.element).focus();
-
                         //TODO: stop using this insertorreplace thing
-                        self.selection.insertOrReplace(cleanHTML);
-                        isEmptyCheck();
-                        self.emit("paste");
+                        self.selection.insertOrReplace(htmlString);
+                        isEmptyCheck(); 
+                        
                     }, 50);
                    
                 })
         };
 
         self.destroy = function() {
-            console.log("Emitting Destroy");
             self.emit("destroy");
-            //delete self;
         }
 
         utils.enableEvents(self);
@@ -300,7 +303,6 @@
         }
 
         self.deserializeRange = function(serializedRange) {
-            console.log("range", serializedRange);
             if (serializedRange !== "") {
                 rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
             }
@@ -317,7 +319,6 @@
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
-
                 }
             }, 500);
         }
@@ -351,10 +352,8 @@
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
             if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                console.log("wrapped in a div");
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )            
             }
-
 
             //add contentEditable false to any inline objects
             $(".inline").attr("contentEditable", "false");
@@ -384,7 +383,6 @@
                     $(embeds[i]).removeAttr("data-body");
                 }
             }
-
             //clear out spans out of paragraphs
             var spans = $(">p span", fragment.childNodes[0]);
             for (var i = 0; i < spans.length; i++) {
@@ -392,7 +390,6 @@
             }
             //remove all other style attributes
             $(">p [style]", fragment.childNodes[0]).removeAttr("style");
-
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
