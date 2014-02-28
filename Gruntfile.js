@@ -30,6 +30,8 @@ module.exports = function(grunt) {
                 'src/lib/rangy/rangy-cssclassapplier.js',
                 'src/lib/rangy/rangy-selectionsaverestore.js',
                 'src/lib/rangy/rangy-serializer.js',
+                'src/lib/rangy/rangy-highlighter.js',
+                'src/lib/rangy/rangy-textrange.js',
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
                 //'src/lib/image.js',

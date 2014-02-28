@@ -1,18 +1,3 @@
-/* 
-
-TODO:
-
-    -- -> &mdash;
-    ... -> &hellip;
-    (c)
-
-    Keep a buffer of recently pressed characters. If a portion of that buffer matches a pattern we've got stored, replace it.
-
-    Keep the cursor in right place & replace the correct characters.
-
-    Step 1: Log the last 5 characters typed in console. 
-*/
-
 (function(global) {
     'use strict';
     var TextReplacement = TextReplacement || function(editor, options) {
@@ -57,13 +42,8 @@ TODO:
                     document.execCommand("InsertHTML", false, REPLACEMENT_MAP[search]);
 
                     break;
-                }
-                else {
-                    //console.log("Search doesn't match string", text, search);
-                }
-                
+                }                
             }
-
         }
 
         //move this to getSelection
@@ -120,12 +100,8 @@ TODO:
                 document.execCommand("InsertHTML", false, chr);
                 e.preventDefault();
             }
-
         }  
         editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
 })(this)
-
-
-/* Enter Handler */
