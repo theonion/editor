@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-03 */
+/*! onion-editor 2014-03-04 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -9915,7 +9915,7 @@ if ( typeof define === "function" ) {
 
         function init() {
 
-            if ($().length === 0) {
+            if ($(".find-replace-dialog").length === 0) {
                 var html = $("#find-replace-template").html();
                 $("body").append(html);
 
@@ -9929,12 +9929,12 @@ if ( typeof define === "function" ) {
                 findBox.bind("keyup", find);
                 $(".replace-all", dialog).click(replaceAll);
             }
-            key('⌘+f, ctrl+f', showDialog);
+            key('ctrl+r', showDialog);
             window.contextRange = contextRange;
         }
 
         function destroy() {
-            key.unbind('⌘+f, ctrl+f');
+            key.unbind('ctrl+r');
         }
 
         function showDialog(e) {
@@ -9994,7 +9994,7 @@ if ( typeof define === "function" ) {
         }
 
 
-        function replace() {
+        function replaceAll() {
             var results = $(".searchResult");
             for (var i=0;i<results.length;i++) {
                 if (isContentEditable(results[i])) {

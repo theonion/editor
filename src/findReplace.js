@@ -31,7 +31,7 @@
 
         function init() {
 
-            if ($().length === 0) {
+            if ($(".find-replace-dialog").length === 0) {
                 var html = $("#find-replace-template").html();
                 $("body").append(html);
 
@@ -45,12 +45,12 @@
                 findBox.bind("keyup", find);
                 $(".replace-all", dialog).click(replaceAll);
             }
-            key('⌘+f, ctrl+f', showDialog);
+            key('ctrl+r', showDialog);
             window.contextRange = contextRange;
         }
 
         function destroy() {
-            key.unbind('⌘+f, ctrl+f');
+            key.unbind('ctrl+r');
         }
 
         function showDialog(e) {
@@ -110,7 +110,7 @@
         }
 
 
-        function replace() {
+        function replaceAll() {
             var results = $(".searchResult");
             for (var i=0;i<results.length;i++) {
                 if (isContentEditable(results[i])) {
