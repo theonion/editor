@@ -97,4 +97,4 @@ Making a few assumptions, for now:
     }
     global.UndoManager = UndoManager;
     return self;
-})(this)
+})(this);

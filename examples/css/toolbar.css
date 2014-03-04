@@ -289,3 +289,10 @@ span.highlight {
     font-size: 14px; 
     padding: 3px;
 }
+
+.editor span.searchResult {
+    background-color: #FFBB03;
+}
+.editor [contenteditable=false] span.searchResult {
+    background-color:transparent;
+}

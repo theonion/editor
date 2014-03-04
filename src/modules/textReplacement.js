@@ -1,18 +1,3 @@
-/* 
-
-TODO:
-
-    -- -> &mdash;
-    ... -> &hellip;
-    (c)
-
-    Keep a buffer of recently pressed characters. If a portion of that buffer matches a pattern we've got stored, replace it.
-
-    Keep the cursor in right place & replace the correct characters.
-
-    Step 1: Log the last 5 characters typed in console. 
-*/
-
 (function(global) {
     'use strict';
     var TextReplacement = TextReplacement || function(editor, options) {
@@ -38,44 +23,52 @@ TODO:
             replace 'em. 
         */
         function replaceText() {
-            console.log("replace text");
-            var sel = editor.selection.getSelection();
-            for (var search in REPLACEMENT_MAP) { 
             
+            var sel = rangy.getSelection();
+            for (var search in REPLACEMENT_MAP) { 
                 
-                var text = sel.focusNode.textContent.substr(sel.focusOffset-(search.length), search.length);
-                console.log("text: ", text);
+                var node = sel.focusNode;
+                var offset = sel.focusOffset;
+                var text = getPrecedingCharacters(search.length);
+                
                 if (search === text) {
-                    console.log("Search matches string", text, search);
-                    var position = sel.focusNode.textContent.lastIndexOf(search);
-                    sel.focusNode.textContent = replaceLast(sel.focusNode.textContent, search, REPLACEMENT_MAP[search]);
-                    console.log(sel.focusNode);
-                    break;
-                }
-                else {
-                    //console.log("Search doesn't match string", text, search);
-                }
-                
-            }
 
+                    /* create a new selection from the offset - search length to offset */
+                    var newRange = rangy.createRange()
+                    newRange.setStart(node, offset - search.length);
+                    newRange.setEnd(node, offset);
+                    newRange.deleteContents();
+
+                    document.execCommand("InsertHTML", false, REPLACEMENT_MAP[search]);
+
+                    break;
+                }                
+            }
         }
 
         //move this to getSelection
-        function _getPrecedingCharacter() {
-            var sel = window.getSelection();
+        function getPrecedingCharacters(number) {
+            var sel = rangy.getSelection();
             if (sel.focusOffset == 0) {
-                return -1
+                return "";
             }
             else {
-                return sel.focusNode.textContent.substr(sel.focusOffset-1, 1).charCodeAt(0);
+                return sel.focusNode.textContent.substr(sel.focusOffset - number, number);
             }
         }
 
         function replaceQuotes(e) {
             if (e.keyCode == 222) { //either a single quote or double quote was pressed                
-                var p = _getPrecedingCharacter();
+                var p = getPrecedingCharacters(1);
+
+                if (p === "") {
+                    var charCode = -1;
+                }
+                else {
+                    var charCode  = p.charCodeAt(0);
+                }
                 var chr;
-                switch (p) {
+                switch (charCode) {
                     //double quote
                     case 8220:
                         if (e.shiftKey) 
@@ -107,12 +100,8 @@ TODO:
                 document.execCommand("InsertHTML", false, chr);
                 e.preventDefault();
             }
-
         }  
         editor.on("keydown", replaceQuotes);
     }
     global.EditorModules.push(TextReplacement);
 })(this)
-
-
-/* Enter Handler */

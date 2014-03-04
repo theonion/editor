@@ -1,7 +1,6 @@
 (function(global){
-
     'use strict';
-
+    global.EditorInstances = global.EditorInstances || []; 
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
@@ -85,7 +84,7 @@
             global.localStorage.editorSettings = JSON.stringify(options.settings);
         }
 
-        function init(options) {  
+        function init(options) {
             loadSettings();
             for (var i=0;i<global.EditorModules.length;i++) {
                 moduleInstances.push(new global.EditorModules[i](self, options));
@@ -254,32 +253,33 @@
                         var fragment = document.createDocumentFragment();
                         fragment.appendChild(document.createElement("div"))
                         fragment.childNodes[0].innerHTML = pastedHTML;
-                        var cleanFrag =  sanitize.clean_node(fragment.childNodes[0]);
+
+                        var cleanFrag = sanitize.clean_node(fragment.childNodes[0]);
                         
-                        var cleanHTML = "";
+                        window.frag = cleanFrag;
+                        //allow something else to make changes to the fragment
+                        self.emit("paste", cleanFrag);
+
+                        var htmlString = "";    
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                             var node = cleanFrag.childNodes[i];
-                            if (node.nodeType == 3) {
-                                cleanHTML += node.nodeValue + "\n\n";
+                            if (node.nodeType === 3) {
+                                //pass on text nodes.
+                                htmlString += node.nodeValue;
                             }
-                            else if (node.nodeType == 1) {
+                            else if (node.nodeType === 1) {
                                 if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
-                                    cleanHTML += cleanFrag.childNodes[i].outerHTML;
+                                    htmlString += cleanFrag.childNodes[i].outerHTML;
                                 }
                             }
                         }
-                        fragment.childNodes[0].innerHTML = cleanHTML;
-
-                        //allow something else to make changes to the fragment
-                        self.emit("paste", fragment);
 
                         self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
                         //TODO: stop using this insertorreplace thing
-                        self.selection.insertOrReplace(cleanHTML);
-                        isEmptyCheck();
-                        
+                        self.selection.insertOrReplace(htmlString);
+                        isEmptyCheck(); 
                     }, 50);
                    
                 })
@@ -356,7 +356,6 @@
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )            
             }
 
-
             //add contentEditable false to any inline objects
             $(".inline").attr("contentEditable", "false");
 
@@ -404,11 +403,10 @@
             }
             return html;
         }
+
         options = $.extend(defaults, options);
-
-
         init(options);
+        global.EditorInstances.push(self);
     }
     global.Editor = Editor;
-
-})(this)
+})(this);

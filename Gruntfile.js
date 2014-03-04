@@ -11,7 +11,6 @@ module.exports = function(grunt) {
           src: [
                 'src/base.js',
                 'src/undoManager.js',
-
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
@@ -25,15 +24,18 @@ module.exports = function(grunt) {
                 'src/modules/theme.js',
                 'src/modules/youtube.js',
                 'src/modules/stats.js',
-                'src/modules/findReplace.js',
+
                 
                 'src/lib/rangy/rangy-core.js',
                 'src/lib/rangy/rangy-cssclassapplier.js',
                 'src/lib/rangy/rangy-selectionsaverestore.js',
                 'src/lib/rangy/rangy-serializer.js',
+                'src/lib/rangy/rangy-highlighter.js',
+                'src/lib/rangy/rangy-textrange.js',
                 'src/lib/sanitize.js',
                 'src/lib/keymaster.js',
                 //'src/lib/image.js',
+                'src/findReplace.js',
 
                 ],
           dest: 'build/<%= pkg.name %>.js'
