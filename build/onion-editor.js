@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-04 */
+/*! onion-editor 2014-03-10 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -1189,11 +1189,11 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             
             //set size buttons.
 
-            $(".inline-tools [name=size]", options.element)
+            $(".inline-tools .size", options.element)
                 .html($(activeElement).attr("data-size"));
 
             //set crop
-            $(".inline-tools [name=crop]", options.element)
+            $(".inline-tools .crop", options.element)
                 .html($(activeElement).attr("data-crop"));
 
             $(".inline-tools", options.element)
