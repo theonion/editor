@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-04 */
+/*! onion-editor 2014-03-10 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -517,16 +517,21 @@ Making a few assumptions, for now:
         editor.on("init", init);
 
         //TODO: localize these events just to the editor instance
-        
         editor.on("selection:change", update);
-
 
         function update(e) {
 
             var tagNames = editor.selection.getTagnamesInRange();
-            $(".document-tools button", options.element).removeClass("active");
+            $(".document-tools button", options.element)
+                .removeClass("active")
+                .each(function(index, el) {
+                    el.className = el.className.replace(/tag-\S+/g, "").trim()
+                })
+
             for (var i = 0; i<tagNames.length; i++) {
-                $(".document-tools button[tag=" + tagNames[i] + "]", options.element).addClass("active");
+                $(".document-tools button[tag*='" + tagNames[i] + ";']", options.element)
+                    .addClass("active")
+                    .addClass("tag-" + tagNames[i]);
             }
         }
 
@@ -547,8 +552,6 @@ Making a few assumptions, for now:
             if (options.toolbar.inlineTools) {
                 $(".inline-tools", options.element).html(options.toolbar.inlineTools);
             }
-
-
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 
@@ -656,6 +659,12 @@ Making a few assumptions, for now:
                     global.document.execCommand("subscript");
                 }
             },
+            heading: function() {
+                doHeading("H3");
+            },
+            subheading: function() {
+                doHeading("H4");
+            },
             /* structural formatting */
             unorderedlist: function() {
                 doList("UL")
@@ -680,8 +689,6 @@ Making a few assumptions, for now:
             tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
-            console.log(tagName);
-            console.log(editor.selection.getSelectedBlockNodes());
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
             // we have a list of nodes. can we wrap them?
@@ -726,20 +733,11 @@ Making a few assumptions, for now:
             }
         }
 
-        function canDoList() {
 
-            //use this in doList, also use this when to show whether or not a button can be clicked
-            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
-
-            }
-
-            //Not sure how to have these modules provide actual feedback to the toolbar to give the user a hint that a button can't be pushed. 
-            /* Options: 
-                1) put names of "action validators" in the markup. call these on hover.
-                2) 
-
-            */
+        function doHeading(tagName){
+            wrap(tagName);
         }
+
 
         function doList(tagName) {
             var nodes = editor.selection.getSelectedBlockNodes();

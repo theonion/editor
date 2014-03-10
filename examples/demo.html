@@ -67,13 +67,12 @@
         </script>
 
         <script type="text/template" id="content">
-
-            <div data-type="image" class="image inline size-big crop-16x9"  data-image-id="502586" data-crop="16x9" data-size="big" contenteditable="false">
-                    <div></div>
-            </div>
-
+            <h3>This is an h3. It is a big bigger</h3>
+            <h4>This is an h4. It is a bit smaller.</h4>
             <p>Youtube While few people outside of Seattle would&#8217;ve cared about a movie like <i>Hype! </i>had it not been for the very same media attention the film rails against, Pray steadfastly focuses his attention on the dimmer lights in the city&#8217;s musical galaxy&#8212;bands like Mono Men, Seaweed, Zipgun, Love Battery, Hovercraft, and Gas Huffer&#8212;instead of its big stars. The point of Pray&#8217;s film seems pretty obvious: The popularity of grunge didn&#8217;t put Seattle music on the map; it <i>ruined </i>Seattle music, because the emphasis suddenly shifted from having fun and creating idiosyncratic records to scoring contracts and making loads of money. <i>Hype! </i>spends a lot of time exploring how the media reduced Seattle to a set of simpleminded stereotypes&#8212;lumberjack clothes! dumb-guy guitar riffage!&#8212;that didn&#8217;t do justice to the city&#8217;s spirit of adventurous, non-trendy individuality.&#160;</p>
 
+            <h4>This is an h4. It is a bit smaller.</h4>
+            <p>Youtube While few people outside of Seattle would&#8217;ve cared about a movie like <i>Hype! </i>had it not been for the very same media attention the film rails against, Pray steadfastly focuses his attention on the dimmer lights in the city&#8217;s musical galaxy&#8212;bands like Mono Men, Seaweed, Zipgun, Love Battery, Hovercraft, and Gas Huffer&#8212;instead of its big stars. The point of Pray&#8217;s film seems pretty obvious: The popularity of grunge didn&#8217;t put Seattle music on the map; it <i>ruined </i>Seattle music, because the emphasis suddenly shifted from having fun and creating idiosyncratic records to scoring contracts and making loads of money. <i>Hype! </i>spends a lot of time exploring how the media reduced Seattle to a set of simpleminded stereotypes&#8212;lumberjack clothes! dumb-guy guitar riffage!&#8212;that didn&#8217;t do justice to the city&#8217;s spirit of adventurous, non-trendy individuality.&#160;</p>
 
             <div data-type="image" class="image inline size-medium crop-16x9"  data-image-id="502586" data-crop="16x9" data-size="medium" contenteditable="false">
                     <div></div>
@@ -87,7 +86,9 @@
                 <li>Even Flow</li>
                 </ul>
             </blockquote>
-
+            <div data-type="image" class="image inline size-big crop-16x9"  data-image-id="502586" data-crop="16x9" data-size="big" contenteditable="false">
+                    <div></div>
+            </div>
             <div class="inline embed size-big crop-16x9" data-type="embed" data-crop="16x9" data-size="big">
                 <div>
                 <iframe width="560" height="315" src="//www.youtube.com/embed/aO0TUI9r-So" frameborder="0" allowfullscreen></iframe>
@@ -102,18 +103,20 @@
         <!-- TEMPLATES -->
         <script type="text/template" id="document-tools-template">
             <div class="toolbar-contents">
-                <button name="link" tag="A"><span class="icon-link"></span><span class="btn-label">Link</span></button>
-                <button name="bold" tag="B"><span class="icon-bold"></span><span class="btn-label">Bold</span></button>
-                <button name="italic" tag="I"><span class="icon-italic"></span><span class="btn-label">Italic</span></button>
-                <button name="underline" tag="U"><span class="icon-underline"></span><span class="btn-label">Underline</span></button>
+                <button name="link" tag="A;"><span class="icon-link"></span><span class="btn-label">Link</span></button>
+                <button name="bold" tag="B;"><span class="icon-bold"></span><span class="btn-label">Bold</span></button>
+                <button name="italic" tag="I;"><span class="icon-italic"></span><span class="btn-label">Italic</span></button>
+                <button class="hiddenbydefault" name="heading" tag="H3;"><span class="heading-icon">H<sub>1</sub></span><span class="btn-label">Heading</span></button>
+                <button name="heading" tag="H4;"><span class="heading-icon">H<sub>2<sub></span><span class="btn-label">Sub Heading</span></button>
+                <button class="hiddenbydefault" name="underline" tag="U"><span class="icon-underline"></span><span class="btn-label">Underline</span></button>
 
-                <button class="hiddenbydefault" tag="BLOCKQUOTE" name="blockquote"><span class="icon-quote-left"></span><span class="btn-label">Block quote</span></button>
-                <button class="hiddenbydefault" tag="OL" name="orderedlist"><span class="icon-list-ol"></span><span class="btn-label">Numbered List</span></button>
-                <button class="hiddenbydefault" tag="UL" name="unorderedlist"><span class="icon-list-ul"></span><span class="btn-label">Bullet List</span></button>
-                <button class="hiddenbydefault" tag="STRIKE" name="strikethrough"><span class="icon-strikethrough"></span><span class="btn-label">Strikethrough</span></button>
+                <button class="hiddenbydefault" tag="BLOCKQUOTE;" name="blockquote"><span class="icon-quote-left"></span><span class="btn-label">Block quote</span></button>
+                <button class="hiddenbydefault" tag="OL;" name="orderedlist"><span class="icon-list-ol"></span><span class="btn-label">Numbered List</span></button>
+                <button class="hiddenbydefault" tag="UL;" name="unorderedlist"><span class="icon-list-ul"></span><span class="btn-label">Bullet List</span></button>
+                <button class="hiddenbydefault" tag="STRIKE;" name="strikethrough"><span class="icon-strikethrough"></span><span class="btn-label">Strikethrough</span></button>
                 <!--
-                <button class="hiddenbydefault" tag="SUB" name="subscript"><span class="icon-subscript"></span><span class="btn-label">Subscript</span></button>
-                <button class="hiddenbydefault" tag="SUP" name="superscript"><span class="icon-superscript"></span><span class="btn-label">Superscript</span></button>
+                <button class="hiddenbydefault" tag="SUB;" name="subscript"><span class="icon-subscript"></span><span class="btn-label">Subscript</span></button>
+                <button class="hiddenbydefault" tag="SUP;" name="superscript"><span class="icon-superscript"></span><span class="btn-label">Superscript</span></button>
                 <button class="hiddenbydefault" name="removeformatting"><span class="icon-remove"></span><span class="btn-label">Remove Formatting</span></button>
                 -->
                 <button class="hiddenbydefault" name="visualize"><span class="icon-code"></span><span class="btn-label">Visualize markup</span></button>

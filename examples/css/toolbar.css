@@ -57,6 +57,18 @@
     height:auto;
 }
 
+
+.heading-icon { 
+    font-family:Georgia;
+    text-align:center;
+    width: 20px;
+    font-size: 15px;
+
+}
+
+.heading-icon  sub {
+    bottom:0px;
+}
     
 .toolbar button.hiddenbydefault {
     display:none;
@@ -106,10 +118,9 @@
 }
 
 .embed-tools {
-    left:0ox;
+    left:0px;
     position:absolute;
     display:none;
-
 }
 
 
@@ -296,3 +307,6 @@ span.highlight {
 .editor [contenteditable=false] span.searchResult {
     background-color:transparent;
 }
+
+
+

@@ -58,6 +58,7 @@ body {
 .editor blockquote {
     clear:both;
     padding: 0 30px;
+    border-left: 5px solid #ddd;
 }
 
 
@@ -71,6 +72,20 @@ body {
 
 .editor li {
     margin-bottom: 4px;
+}
+
+
+.editor h3 {
+    margin-top:16px;
+    margin-bottom:12px;
+    font-size: 32px;
+    font-weight:normal;
+}
+
+.editor h4 {
+    margin-top:16px;
+    font-size: 24px;
+    font-weight:normal;
 }
 
 
@@ -128,10 +143,6 @@ body {
 }
 .visualize .editor blockquote {
     background-color: rgba(174,129,255,.1);
-}
-
-blockquote {
-    border-left: 5px solid #ddd;
 }
 
 /* status bar */

@@ -70,6 +70,12 @@
                     global.document.execCommand("subscript");
                 }
             },
+            heading: function() {
+                doHeading("H3");
+            },
+            subheading: function() {
+                doHeading("H4");
+            },
             /* structural formatting */
             unorderedlist: function() {
                 doList("UL")
@@ -94,8 +100,6 @@
             tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
-            console.log(tagName);
-            console.log(editor.selection.getSelectedBlockNodes());
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
             // we have a list of nodes. can we wrap them?
@@ -140,20 +144,11 @@
             }
         }
 
-        function canDoList() {
 
-            //use this in doList, also use this when to show whether or not a button can be clicked
-            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
-
-            }
-
-            //Not sure how to have these modules provide actual feedback to the toolbar to give the user a hint that a button can't be pushed. 
-            /* Options: 
-                1) put names of "action validators" in the markup. call these on hover.
-                2) 
-
-            */
+        function doHeading(tagName){
+            wrap(tagName);
         }
+
 
         function doList(tagName) {
             var nodes = editor.selection.getSelectedBlockNodes();

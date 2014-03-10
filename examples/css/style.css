@@ -59,14 +59,12 @@ h1.title {
 .visualize .editor div {
     background-color: rgba(249,39,114,.5); /* don't want these to appear */
 }
-.visualize .editor p
- { 
+.visualize .editor p { 
     background-color: rgba(102,217,239,.1);
 }
 .visualize .editor blockquote {
     background-color: rgba(174,129,255,.1);
 }
-
 
 
 .editor blockquote,
@@ -103,6 +101,7 @@ h1.title {
 
 
 
+
 /* debug css */
 
 .visualize .debug-previousChildNode {
@@ -118,4 +117,7 @@ span.rangePlaceholder {
     width: 20px;
     background-color: yellow;
 }
+
+
+
 

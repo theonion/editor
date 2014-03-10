@@ -6,16 +6,21 @@
         editor.on("init", init);
 
         //TODO: localize these events just to the editor instance
-        
         editor.on("selection:change", update);
-
 
         function update(e) {
 
             var tagNames = editor.selection.getTagnamesInRange();
-            $(".document-tools button", options.element).removeClass("active");
+            $(".document-tools button", options.element)
+                .removeClass("active")
+                .each(function(index, el) {
+                    el.className = el.className.replace(/tag-\S+/g, "").trim()
+                })
+
             for (var i = 0; i<tagNames.length; i++) {
-                $(".document-tools button[tag=" + tagNames[i] + "]", options.element).addClass("active");
+                $(".document-tools button[tag*='" + tagNames[i] + ";']", options.element)
+                    .addClass("active")
+                    .addClass("tag-" + tagNames[i]);
             }
         }
 
@@ -36,8 +41,6 @@
             if (options.toolbar.inlineTools) {
                 $(".inline-tools", options.element).html(options.toolbar.inlineTools);
             }
-
-
 
             self.toolbarElement = $(options.element).find(".toolbar");  
 
