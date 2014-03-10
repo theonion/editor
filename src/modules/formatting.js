@@ -84,7 +84,7 @@
                 doList("OL")
             },
             blockquote: function() {
-                wrap("BLOCKQUOTE", false)
+                wrap("BLOCKQUOTE")
             },
             visualize: function() {
                 $(options.element)
@@ -96,7 +96,7 @@
         }
 
 
-        function wrap(tagName, allowNesting) {
+        function wrap(tagName) {
             tagName = tagName.toUpperCase();
             // 1. Selection is within a single node, or no selection
             // ---> Wrap element within the tagName
@@ -105,7 +105,6 @@
             // we have a list of nodes. can we wrap them?
 
             if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1){
-                console.log("Selection contains blockquote or div. Abort!")
             }
             else {
                 var parentNodeNames = nodes.map(function(n) {return n.parentNode.nodeName})
@@ -145,14 +144,52 @@
         }
 
 
+        /*  This is a lot like Wrap, but instead of wrapping a paragraph, it replaces the <P> with an <H3>
+            Can't span 
+
+        */
         function doHeading(tagName){
-            wrap(tagName);
+            //Change the outermost tag to a heading.
+            var nodes = editor.selection.getSelectedBlockNodes();
+            var nodeNames = nodes.map(function(n) {return n.nodeName});
+
+            console.log(nodeNames, tagName);
+            // We're applying by default, but if the first node is of type tagName, we're "unapplying"
+            // unapplying converts anything that mathes tagName in the list of nodes to a paragraph
+
+            // applying turns every node into type tagName
+            var applying = true;
+            if (nodeNames[0] === tagName) {
+                applying = false;
+            }
+            console.log("applying", applying);
+
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
+            }
+            else {
+                    
+                for (var i = 0; i < nodes.length; i++) {
+                    if (applying) {
+                        $(nodes[i]).replaceWith("<" + tagName + " class='tmp-selectme'>" +  $(nodes[i]).html() + "</" + tagName + ">");
+                    }
+                    else {
+                        if (nodes[i].nodeName === tagName) {
+                            $(nodes[i]).replaceWith("<P class='tmp-selectme'>" +  $(nodes[i]).html() + "</P>");
+                        }
+                    }
+                }
+                editor.selection.selectNodes($(".tmp-selectme"));
+                $(".tmp-selectme").removeClass("tmp-selectme");
+            }
         }
 
 
         function doList(tagName) {
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName})
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
+                // don't do anything if a BQ or DIV are wrapped.
+            }
 
             /*
             Let's talk about this list of nodes:
@@ -163,7 +200,6 @@
 
             // TODO: Move this out, so you can have the buttons indicate wheter the list action is 
             if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
-                console.log("Selection contains blockquote or div. Abort!")
             }
             else {
                 // if there's only one node selected & it is a list of the same type as the one selected, convert to paragraphs

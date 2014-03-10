@@ -134,21 +134,10 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
 
         self.selectNodes = function(nodes) {
             nodes = $.makeArray(nodes);
-            console.log(nodes);
-
             var sel = rangy.getSelection();
-            //sel.collapse(document.body, 0); //clear the selection, maybe wrong
-            /*
-            var ranges = [];
-            for (var i = 0; i < nodes.length; i++) {
-                var range = rangy.createRange();
-                ranges.push(range);
-            }
-            */
             var range = rangy.createRangyRange();
             range.setStartBefore(nodes[0]);
-            range.setEndAfter(nodes[nodes.length-1]);
-
+            range.setEndAfter(nodes[nodes.length-1].lastChild);
             sel.setSingleRange(range);
         }
 
