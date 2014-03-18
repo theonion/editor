@@ -18,7 +18,7 @@
                 })
 
             for (var i = 0; i<tagNames.length; i++) {
-                $(".document-tools button[tag*='" + tagNames[i] + ";']", options.element)
+                $(".document-tools button[tag='" + tagNames[i] + "']", options.element)
                     .addClass("active")
                     .addClass("tag-" + tagNames[i]);
             }
