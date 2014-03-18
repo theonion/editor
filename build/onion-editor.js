@@ -742,7 +742,6 @@ Making a few assumptions, for now:
             var nodes = editor.selection.getSelectedBlockNodes();
             var nodeNames = nodes.map(function(n) {return n.nodeName});
 
-            console.log(nodeNames, tagName);
             // We're applying by default, but if the first node is of type tagName, we're "unapplying"
             // unapplying converts anything that mathes tagName in the list of nodes to a paragraph
 
@@ -751,9 +750,8 @@ Making a few assumptions, for now:
             if (nodeNames[0] === tagName) {
                 applying = false;
             }
-            console.log("applying", applying);
-
-            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1) {
+            if (nodeNames.indexOf("BLOCKQUOTE") !== -1 || nodeNames.indexOf("DIV") !== -1 
+                || nodeNames.indexOf("UL") !== -1 || nodeNames.indexOf("OL") !== -1) {
             }
             else {
                     
