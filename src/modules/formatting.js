@@ -150,9 +150,7 @@
         */
         function doHeading(tagName){
             //Change the outermost tag to a heading.
-            console.log("DOING HEADING");
             var nodes = editor.selection.getSelectedBlockNodes();
-            console.log("NODES", nodes);
             var nodeNames = nodes.map(function(n) {return n.nodeName});
 
             // We're applying by default, but if the first node is of type tagName, we're "unapplying"

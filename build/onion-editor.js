@@ -754,9 +754,7 @@ Making a few assumptions, for now:
         */
         function doHeading(tagName){
             //Change the outermost tag to a heading.
-            console.log("DOING HEADING");
             var nodes = editor.selection.getSelectedBlockNodes();
-            console.log("NODES", nodes);
             var nodeNames = nodes.map(function(n) {return n.nodeName});
 
             // We're applying by default, but if the first node is of type tagName, we're "unapplying"
@@ -925,7 +923,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         },
         
         self.getCoordinates = function () {
-            //console.log("DEPRECATED: getCoordinates");
             var sel = document.selection, range;
             var top = 0, left = 0;
             if (window.getSelection) {
@@ -1007,7 +1004,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         self.getBlockParent = function() {
             var sel = self.getSelection();
             var anchorNode = sel.anchorNode;
-            console.log("get block parent", anchorNode);
             if (anchorNode.nodeType == 3 || $(anchorNode).css("display") === "inline") {
                 var node;
                 var parents = $(anchorNode).parentsUntil(".editor");
@@ -1041,7 +1037,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 return false;
             }
             else {
-                console.log(node.nodeName);
                 return $(node).css("display") === "block";
             }
         }
