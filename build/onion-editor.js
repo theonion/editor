@@ -164,7 +164,7 @@
                                     e.preventDefault();
                                     self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
-                                    self.selection.setCaretAfter(parentNode);
+                                    self.selection.selectNode(parentNode);
                                 }
 
                             }
@@ -754,7 +754,9 @@ Making a few assumptions, for now:
         */
         function doHeading(tagName){
             //Change the outermost tag to a heading.
+            console.log("DOING HEADING");
             var nodes = editor.selection.getSelectedBlockNodes();
+            console.log("NODES", nodes);
             var nodeNames = nodes.map(function(n) {return n.nodeName});
 
             // We're applying by default, but if the first node is of type tagName, we're "unapplying"
@@ -898,7 +900,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             else {
                 return null;
             }
-
         }
 
 
@@ -974,27 +975,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             return null;
         }
 
-        self.setCaretBefore = function(node) {
-            console.log("DEPRECATED: setCaretBefore");
-
-            var range = document.createRange();
-            var sel = window.getSelection();
-            range.setStartBefore(node);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-
-        self.setCaretAfter = function(node) {
-            console.log("DEPRECATED: setCaretAfter");
-            var range = document.createRange();
-            var sel = window.getSelection();
-            range.setStartAfter(node);
-            range.collapse(true);
-            sel.removeAllRanges();
-            sel.addRange(range);
-        }
-
         
         self.selectNode = function(node) {
             //parameter is 
@@ -1027,7 +1007,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         self.getBlockParent = function() {
             var sel = self.getSelection();
             var anchorNode = sel.anchorNode;
-
+            console.log("get block parent", anchorNode);
             if (anchorNode.nodeType == 3 || $(anchorNode).css("display") === "inline") {
                 var node;
                 var parents = $(anchorNode).parentsUntil(".editor");
@@ -1056,8 +1036,14 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         }
 
         function isBlock(node) {
-            //return (['P', 'BLOCKQUOTE', 'UL', 'OL', 'LI', 'DIV'].indexOf(node.nodeName) !== -1)
-            return $(node).css("display") === "block" && node.nodeType !== 3;
+
+            if (node.nodeType === 3) {
+                return false;
+            }
+            else {
+                console.log(node.nodeName);
+                return $(node).css("display") === "block";
+            }
         }
 
         /* Grab a list of siblings that are block elements */
@@ -1072,6 +1058,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                     return [ self.getNonInlineParent() ]
                 }
                 else {
+                    //TODO: THis grosses me out and confuses me. I don't understand it. Find a less dumb way to do this.
                     var topDepth = 999;
                     var nodesByDepth = {}
                     for (var i = 0; i < nodes.length; i++) {
@@ -1080,7 +1067,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                         if (!nodesByDepth[depth]) {
                             nodesByDepth[depth] = [];
                         }
-                        //TODO: We're including an extra node here sometimes. It's not visibly selected. http://cg.cg/m/04WAO.png 
                         nodesByDepth[depth].push(nodes[i]);
                     }
                     return nodesByDepth[topDepth];

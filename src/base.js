@@ -163,7 +163,7 @@
                                     e.preventDefault();
                                     self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
-                                    self.selection.setCaretAfter(parentNode);
+                                    self.selection.selectNode(parentNode);
                                 }
 
                             }
