@@ -11,11 +11,20 @@
         var self = this;
 
         var template =
-        '<div id="edit-source">\
-            <textarea></textarea>\
-            <button id="edit-source-update">Update</button>\
-            <button id="edit-source-cancel">Cancel</button>\
-        </div>'
+        '<div id="edit-source" class="modal in">\
+            <div class="modal-dialog">\
+                <div class="modal-content">\
+                    <div class="modal-header">\
+                        <button type="button" class="close" data-dismiss="modal" aria-hidden="true">&times;</button>\
+                        <h4 class="modal-title">Edit Raw HTML</h4></div>\
+                    <div class="modal-body"><textarea></textarea></div>\
+                    <div class="modal-footer">\
+                        <button class="btn btn-link" id="edit-source-cancel">Cancel</button>\
+                        <button class="btn btn-primary" id="edit-source-update">Update</button>\
+                    </div>\
+                </div>\
+            </div>\
+        </div>';
 
         editor.on("init", init);
         editor.on("destroy", destroy);
