@@ -146,7 +146,6 @@
                     var isFirstChild = (typeof previousChildNode === "undefined");
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
-
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
                         if (isTextSelected || !options.allowNewline) {  
@@ -162,12 +161,13 @@
                                 else if (isLastChild) {
                                    // LI: At end of list
                                     e.preventDefault();
-                                    $(parentNode).after("<p><br></p>");
+                                    self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
                                     self.selection.setCaretAfter(parentNode);
                                 }
 
                             }
+
                             else if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
 
                             }
@@ -189,9 +189,8 @@
                                 else if (isLastChild) {
                                     // LI: At end of list
                                     e.preventDefault();
-                                    $(parentNode).after("<p><br></p>");
+                                    self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
-                                    self.selection.setCaretAfter(parentNode);
                                 }
                                 else if (!isLastChild && !isFirstChild) {
                                     //LI: In the middle of the list
@@ -203,7 +202,23 @@
                                     })
                                 }
                             }
+                        }
 
+                        else if (["H1", "H2", "H3", "H4", "H5", "H6"].indexOf(node.tagName) > 0) {
+                            //is the cursor at the end? If so insert a new paragraph at the end.
+
+                            // Is the anchor node the last child of the node?
+                            var s = rangy.getSelection();
+                            // cursor is in the last child node of the header...
+                            if (self.selection.lastTextNode(node) === s.anchorNode) {
+                                // cursor is at the very end of the anchor node
+                                if (s.anchorOffset === s.anchorNode.nodeValue.length) {
+                                    var blockNode = self.selection.getNonInlineParent(node);
+                                    self.selection.insertParagraphAfter(blockNode);
+                                    e.preventDefault();
+                                    return;
+                                }
+                            }
                         }
                     }
                     else if (e.keyCode === 8) {

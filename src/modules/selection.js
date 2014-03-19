@@ -27,6 +27,21 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
         }
 
+        self.lastTextNode = function(node) {
+            if (node.lastChild) {
+                if (node.lastChild.nodeType === 3) {
+                    return node.lastChild
+                }
+                else {
+                    return self.lastTextNode(node.lastChild);
+                }
+            }
+            else {
+                return null;
+            }
+
+        }
+
 
         self.hasFocus = function() {
             var sel = self.getSelection();
@@ -139,6 +154,15 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             range.setStartBefore(nodes[0]);
             range.setEndAfter(nodes[nodes.length-1].lastChild);
             sel.setSingleRange(range);
+        }
+
+        self.insertParagraphAfter = function(node) {
+            // insert a paragraph element after 'node'
+            $(node).after("<P><BR></P>");
+
+            //place cursor inside of paragraph
+            self.selectNode(node.nextSibling);
+
         }
 
         self.getBlockParent = function() {

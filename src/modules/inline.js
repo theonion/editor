@@ -67,20 +67,21 @@
             });
 
             /* Events for inline insert */
+            //TODO: make these cursor offsets something we calculated based on font + lineheight + paragraph margin...
             $(".editor", options.element).mousemove( function(e) {
                 if ($(e.target).hasClass("editor")) {
                     var cursorOffset = e.clientY + window.scrollY;
                     // probably inefficient, but may not matter
                     var blocks = $(".editor>*", options.element)
                     for (var i =0; i < blocks.length; i++) {
-                        if (cursorOffset < $(blocks[i]).offset().top + 40  ) {
+                        if (cursorOffset < $(blocks[i]).offset().top + 20  ) {
                             break;
                         }
                     }
                     if (blocks[i]) {
                         var top = $(blocks[i]).position().top;
                         $(".embed-tools", options.element)
-                            .css({ top: top - 35  })
+                            .css({ top: top - 15  })
                             .addClass("active");
                         activeBlock = blocks[i];
                     }

@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-18 */
+/*! onion-editor 2014-03-19 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -147,7 +147,6 @@
                     var isFirstChild = (typeof previousChildNode === "undefined");
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
-
                     // handle enter key shit. 
                     if (e.keyCode === 13) {
                         if (isTextSelected || !options.allowNewline) {  
@@ -163,12 +162,13 @@
                                 else if (isLastChild) {
                                    // LI: At end of list
                                     e.preventDefault();
-                                    $(parentNode).after("<p><br></p>");
+                                    self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
                                     self.selection.setCaretAfter(parentNode);
                                 }
 
                             }
+
                             else if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
 
                             }
@@ -190,9 +190,8 @@
                                 else if (isLastChild) {
                                     // LI: At end of list
                                     e.preventDefault();
-                                    $(parentNode).after("<p><br></p>");
+                                    self.selection.insertParagraphAfter(parentNode);
                                     $(node).remove(); 
-                                    self.selection.setCaretAfter(parentNode);
                                 }
                                 else if (!isLastChild && !isFirstChild) {
                                     //LI: In the middle of the list
@@ -204,7 +203,23 @@
                                     })
                                 }
                             }
+                        }
 
+                        else if (["H1", "H2", "H3", "H4", "H5", "H6"].indexOf(node.tagName) > 0) {
+                            //is the cursor at the end? If so insert a new paragraph at the end.
+
+                            // Is the anchor node the last child of the node?
+                            var s = rangy.getSelection();
+                            // cursor is in the last child node of the header...
+                            if (self.selection.lastTextNode(node) === s.anchorNode) {
+                                // cursor is at the very end of the anchor node
+                                if (s.anchorOffset === s.anchorNode.nodeValue.length) {
+                                    var blockNode = self.selection.getNonInlineParent(node);
+                                    self.selection.insertParagraphAfter(blockNode);
+                                    e.preventDefault();
+                                    return;
+                                }
+                            }
                         }
                     }
                     else if (e.keyCode === 8) {
@@ -529,7 +544,7 @@ Making a few assumptions, for now:
                 })
 
             for (var i = 0; i<tagNames.length; i++) {
-                $(".document-tools button[tag*='" + tagNames[i] + ";']", options.element)
+                $(".document-tools button[tag='" + tagNames[i] + "']", options.element)
                     .addClass("active")
                     .addClass("tag-" + tagNames[i]);
             }
@@ -871,6 +886,21 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             }
         }
 
+        self.lastTextNode = function(node) {
+            if (node.lastChild) {
+                if (node.lastChild.nodeType === 3) {
+                    return node.lastChild
+                }
+                else {
+                    return self.lastTextNode(node.lastChild);
+                }
+            }
+            else {
+                return null;
+            }
+
+        }
+
 
         self.hasFocus = function() {
             var sel = self.getSelection();
@@ -983,6 +1013,15 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             range.setStartBefore(nodes[0]);
             range.setEndAfter(nodes[nodes.length-1].lastChild);
             sel.setSingleRange(range);
+        }
+
+        self.insertParagraphAfter = function(node) {
+            // insert a paragraph element after 'node'
+            $(node).after("<P><BR></P>");
+
+            //place cursor inside of paragraph
+            self.selectNode(node.nextSibling);
+
         }
 
         self.getBlockParent = function() {
@@ -1166,20 +1205,21 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
             });
 
             /* Events for inline insert */
+            //TODO: make these cursor offsets something we calculated based on font + lineheight + paragraph margin...
             $(".editor", options.element).mousemove( function(e) {
                 if ($(e.target).hasClass("editor")) {
                     var cursorOffset = e.clientY + window.scrollY;
                     // probably inefficient, but may not matter
                     var blocks = $(".editor>*", options.element)
                     for (var i =0; i < blocks.length; i++) {
-                        if (cursorOffset < $(blocks[i]).offset().top + 40  ) {
+                        if (cursorOffset < $(blocks[i]).offset().top + 20  ) {
                             break;
                         }
                     }
                     if (blocks[i]) {
                         var top = $(blocks[i]).position().top;
                         $(".embed-tools", options.element)
-                            .css({ top: top - 35  })
+                            .css({ top: top - 15  })
                             .addClass("active");
                         activeBlock = blocks[i];
                     }
