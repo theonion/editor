@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-19 */
+/*! onion-editor 2014-03-20 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -1460,7 +1460,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
 
         function init() {
             if (options.editSource === true) {
-               key('⌘+., ctrl+.', editSource);
+                key('⌘+., ctrl+.', editSource);
             }
         }
 
@@ -1469,14 +1469,15 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
         }
 
         function editSource() {
-            //alert(editor.getContent());
             if ($("#edit-source").length === 0) {
                 $("body").append(template);
+
                 $("#edit-source textarea")
                     .val( editor.getContent() );
                 $("#edit-source-cancel").click(function() {
                     $("#edit-source").remove();
                 });
+                $("#edit-source").show();
                 $("#edit-source-update").click(function() {
                     editor.setContent(
                         $("#edit-source textarea").val()
