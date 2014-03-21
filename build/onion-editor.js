@@ -1,4 +1,4 @@
-/*! onion-editor 2014-03-20 */
+/*! onion-editor 2014-03-21 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || []; 
@@ -1652,7 +1652,7 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
     var Youtube = Youtube || function(editor, options) {
         var self = this;
 
-        var YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
+        var YOUTUBE_BASE_URL = "//www.youtube.com/watch?v=";
 
 
         editor.on("inline:insert:youtube", insert);
