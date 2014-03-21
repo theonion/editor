@@ -10,11 +10,11 @@ This bridges the embed module that the editor exposes & our custom image impleme
     'use strict';
     var OnionImage = OnionImage || function(editor, options) {
 
-        window.IMAGE_URL = "http://img.onionstatic.com/avclub/{{id}}/{{crop}}/{{width}}.jpg"
+        window.IMAGE_URL = "//img.onionstatic.com/avclub/{{id}}/{{crop}}/{{width}}.jpg"
         var embedMarkup = 
             '<div data-picture class="image inline placeholder {{position}} {{crop}}"  data-image-id="{{id}}" data-image-alt="" contenteditable="false">\
                 <div>\
-                    <noscript><img src="http://img.onionstatic.com/avclub/{{id}}/original/300.jpg"></noscript>\
+                    <noscript><img src="//img.onionstatic.com/avclub/{{id}}/original/300.jpg"></noscript>\
                 </div>\
             </div>'
  
