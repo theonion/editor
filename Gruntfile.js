@@ -51,14 +51,6 @@ module.exports = function(grunt) {
         dest: 'build/<%= pkg.name %>.min.js'
       }
     },
-    copy: {
-      main: {
-      files: [
-        { src: 'build/onion-editor.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.js' },
-        { src: 'build/onion-editor.min.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.min.js' },
-      ]
-      }
-    },
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
@@ -71,7 +63,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-uglify');
   grunt.loadNpmTasks('grunt-contrib-concat');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.loadNpmTasks('grunt-contrib-copy');
 
   grunt.registerTask('default', ['concat', 'uglify']);
 

@@ -281,19 +281,15 @@
 
                         var cleanFrag = sanitize.clean_node(fragment.childNodes[0]);
 
-                        window.frag = cleanFrag;
-
-
                         //allow something else to make changes to the fragment
                         self.emit("paste", cleanFrag);
 
-                        $(frag)
+                        $(cleanFrag)
                             .contents()
                             .filter(function() {
                                 console.log(this);
                                 return this.nodeType === 3; //Node.TEXT_NODE
                             }).each(function() {
-                                console.log(self.utils.fixQuotes(this.textContent));
                                 this.textContent = self.utils.fixQuotes(this.textContent);
                             });
 
