@@ -1,6 +1,6 @@
 (function(global){
     'use strict';
-    global.EditorInstances = global.EditorInstances || []; 
+    global.EditorInstances = global.EditorInstances || [];
     global.EditorModules = []; //a place to keep track of modules
 
     var Editor = Editor || function(options) {
@@ -16,7 +16,7 @@
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
                 },
                 /* settings gets serialized & dumped to local storage. put things you want to persist in here */
-                settings: {} 
+                settings: {}
         },
         moduleInstances = [],
         utils = { /* a place for non-editor specific function calls */
@@ -53,20 +53,27 @@
 
             },
             // really basic templating
-            template: function(html, dict) {    
+            template: function(html, dict) {
                 for (var k in dict) {
                     if (k) {
                         html = html.replace(new RegExp("{{" + k + "}}", 'g'), dict[k]);
                     }
                 }
                 return html;
+            },
+            fixQuotes: function(str) {
+              str = str.replace(/(^|[-\u2014\s(\["])'/g, "$1\u2018");       // opening singles
+              str = str.replace(/'/g, "\u2019");                            // closing singles & apostrophes
+              str = str.replace(/(^|[-\u2014/\[(\u2018\s])"/g, "$1\u201c"); // opening doubles
+              str = str.replace(/"/g, "\u201d");                            // closing doubles
+              return str;
             }
         },
         sanitize,
         domChangeTimeout;
 
         function isEmptyCheck() {
-            //if the editor is empty, show the placeholder. 
+            //if the editor is empty, show the placeholder.
             if ($(".editor", options.element).text() === "") {
                 $(".editorPlaceholder", options.element).show();
             }
@@ -89,7 +96,7 @@
             for (var i=0;i<global.EditorModules.length;i++) {
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
-            
+
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editorPlaceholder"></div>\
@@ -101,7 +108,7 @@
                             <div class="link-tools toolbar"></div>\
                             <div class="inline-tools toolbar"></div>\
                         </div>');
-                
+
 
 
             //block drag/drop of text
@@ -112,7 +119,7 @@
             $(".editorPlaceholder", options.element).html(options.placeholder);
             sanitize = new Sanitize(options.sanitize);
 
-            
+
             self.setContent(options.content);
 
             self.content = options.content;
@@ -121,22 +128,22 @@
 
             self.emit("init");
 
-            self.listenForChanges(); //triggers undo & other items that require 
+            self.listenForChanges(); //triggers undo & other items that require
 
             $(".editor", options.element)
                 .bind("mousedown", function() {
-                    
+
                 })
                 .bind("click", function(e) {
                     self.emit("click", e);
                     e.preventDefault();
                 })
                 .bind("keydown", function(e) {
-                    
+
                     /*  This type of stuff should move into formatting, but not sure how yet. */
 
                     var node = self.selection.getNonInlineParent();
-                    
+
                     var previousChildNode = $(node).prev()[0];
 
                     var parentNode = node.parentNode || node;
@@ -146,9 +153,9 @@
                     var isFirstChild = (typeof previousChildNode === "undefined");
                     var isLastChild = (typeof $(node).next()[0] === "undefined");
                     var isTextSelected = self.selection.hasSelection();
-                    // handle enter key shit. 
+                    // handle enter key shit.
                     if (e.keyCode === 13) {
-                        if (isTextSelected || !options.allowNewline) {  
+                        if (isTextSelected || !options.allowNewline) {
                             // shit gets weird when enter is pushed and text is selected. Nobody does this
                             e.preventDefault();
                         }
@@ -162,7 +169,7 @@
                                    // LI: At end of list
                                     e.preventDefault();
                                     self.selection.insertParagraphAfter(parentNode);
-                                    $(node).remove(); 
+                                    $(node).remove();
                                     self.selection.selectNode(parentNode);
                                 }
 
@@ -171,7 +178,7 @@
                             else if (node.tagName === "P") { //go nuts with paragraphs, but not elsewhere
 
                             }
-                            //Redo this block exclusively using dom manip, not 
+                            //Redo this block exclusively using dom manip, not
                             else if (node.tagName == "LI") {
                                 if (isLastChild && isFirstChild) {
                                     e.preventDefault();
@@ -181,7 +188,7 @@
                                         var nodeToRemove = self.selection.getNonInlineParent()
                                         $(nodeToRemove).remove();
                                     }, 5)
-                                
+
                                 }
                                 else if (isFirstChild) {
                                     e.preventDefault();
@@ -190,7 +197,7 @@
                                     // LI: At end of list
                                     e.preventDefault();
                                     self.selection.insertParagraphAfter(parentNode);
-                                    $(node).remove(); 
+                                    $(node).remove();
                                 }
                                 else if (!isLastChild && !isFirstChild) {
                                     //LI: In the middle of the list
@@ -224,11 +231,11 @@
                     else if (e.keyCode === 8) {
                         self.emit("backspace");
                         var sel = window.getSelection()
-                        //this happens when the cursor is in the last remaining empty paragraph. 
+                        //this happens when the cursor is in the last remaining empty paragraph.
                         if (sel.focusNode.tagName === "P" && $(".editor>P").length == 1) {
                             e.preventDefault();
                         }
-                        
+
                         //is the previous element an inline element
                         if ($(previousChildNode).hasClass("inline")) {
                             //is the cursor in the first position of the current node.
@@ -238,7 +245,7 @@
                                 e.preventDefault();
                             }
                         }
-                        
+
                     }
                     setTimeout(isEmptyCheck, 50);
 
@@ -264,18 +271,32 @@
                     setTimeout(function() {
                         var pastedHTML = $("#paste-bucket").html();
                         $("#paste-bucket").remove();
+
+
                         pastedHTML = pastedHTML.replace(/\n/g, " ");
                         var fragment = document.createDocumentFragment();
                         fragment.appendChild(document.createElement("div"))
                         fragment.childNodes[0].innerHTML = pastedHTML;
 
                         var cleanFrag = sanitize.clean_node(fragment.childNodes[0]);
-                        
+
                         window.frag = cleanFrag;
+
+
                         //allow something else to make changes to the fragment
                         self.emit("paste", cleanFrag);
 
-                        var htmlString = "";    
+                        $(frag)
+                            .contents()
+                            .filter(function() {
+                                console.log(this);
+                                return this.nodeType === 3; //Node.TEXT_NODE
+                            }).each(function() {
+                                console.log(self.utils.fixQuotes(this.textContent));
+                                this.textContent = self.utils.fixQuotes(this.textContent);
+                            });
+
+                        var htmlString = "";
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
                             var node = cleanFrag.childNodes[i];
                             if (node.nodeType === 3) {
@@ -289,14 +310,16 @@
                             }
                         }
 
+
+
                         self.deserializeRange(range);
                         $(".editor", options.element).focus();
 
                         //TODO: stop using this insertorreplace thing
                         self.selection.insertOrReplace(htmlString);
-                        isEmptyCheck(); 
+                        isEmptyCheck();
                     }, 50);
-                   
+
                 })
         };
 
@@ -309,7 +332,7 @@
         self.utils = utils;
 
         self.serializeRange = function() {
-            try { 
+            try {
                 var s =  rangy.serializeSelection(rangy.getSelection(), true, $(".editor", options.element)[0]);
                 return s;
             }
@@ -323,11 +346,11 @@
                 rangy.deserializeSelection(serializedRange, $(".editor", options.element)[0])
             }
             else {
-                //remove focus from contenteditable elmenet by putting the cursor in another one. 
+                //remove focus from contenteditable elmenet by putting the cursor in another one.
                self.killFocus()
             }
         }
-        
+
 
         function changed() {
             clearTimeout(domChangeTimeout);
@@ -368,7 +391,7 @@
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
             if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
-                $("#content-body .editor").html( $("#content-body .editor>div").html() )            
+                $("#content-body .editor").html( $("#content-body .editor>div").html() )
             }
 
             //add contentEditable false to any inline objects
@@ -384,7 +407,7 @@
             var fragment = document.createDocumentFragment();
             fragment.appendChild(document.createElement("div"))
             fragment.childNodes[0].innerHTML = $(options.element).find(".editor").html();
-            
+
             $(".image>div>img", fragment.childNodes[0]).remove();
             $(".image", fragment.childNodes[0]).removeClass("new");
 
@@ -395,7 +418,7 @@
             for (var i = 0; i < embeds.length; i++) {
                 if ($(embeds[i]).is("[data-body]")) {
                     $(">div", embeds[i]).html(unescape($(embeds[i]).attr("data-body")));
-                    //don't save with the data-body attribute set. 
+                    //don't save with the data-body attribute set.
                     $(embeds[i]).removeAttr("data-body");
                 }
             }
@@ -409,7 +432,7 @@
 
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
-            
+
             var html = fragment.childNodes[0].innerHTML;
 
             //remove nbsp, if not permitted.

@@ -6,7 +6,7 @@ module.exports = function(grunt) {
         options: {
           separator: ';',
           banner: banner
-        },        
+        },
         dist: {
           src: [
                 'src/base.js',
@@ -14,8 +14,8 @@ module.exports = function(grunt) {
                 'src/modules/toolbar.js',
                 'src/modules/formatting.js',
                 'src/modules/selection.js',
-                'src/modules/inline.js', 
-                'src/modules/undo.js', 
+                'src/modules/inline.js',
+                'src/modules/undo.js',
                 //'src/modules/link.js',
                 'src/modules/persist.js',
                 'src/modules/editSource.js',
@@ -25,7 +25,7 @@ module.exports = function(grunt) {
                 'src/modules/youtube.js',
                 'src/modules/stats.js',
 
-                
+
                 'src/lib/rangy/rangy-core.js',
                 'src/lib/rangy/rangy-cssclassapplier.js',
                 'src/lib/rangy/rangy-selectionsaverestore.js',
