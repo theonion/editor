@@ -6,37 +6,11 @@ module.exports = function(grunt) {
         options: {
           separator: ';',
           banner: banner
-        },        
+        },
         dist: {
           src: [
                 'src/base.js',
-                'src/undoManager.js',
-                'src/modules/toolbar.js',
-                'src/modules/formatting.js',
-                'src/modules/selection.js',
-                'src/modules/inline.js', 
-                'src/modules/undo.js', 
-                //'src/modules/link.js',
-                'src/modules/persist.js',
-                'src/modules/editSource.js',
-                'src/modules/textReplacement.js',
-                'src/modules/screensize.js',
-                'src/modules/theme.js',
-                'src/modules/youtube.js',
-                'src/modules/stats.js',
-
-                
-                'src/lib/rangy/rangy-core.js',
-                'src/lib/rangy/rangy-cssclassapplier.js',
-                'src/lib/rangy/rangy-selectionsaverestore.js',
-                'src/lib/rangy/rangy-serializer.js',
-                'src/lib/rangy/rangy-highlighter.js',
-                'src/lib/rangy/rangy-textrange.js',
-                'src/lib/sanitize.js',
-                'src/lib/keymaster.js',
-                //'src/lib/image.js',
-                'src/findReplace.js',
-
+                'src/plugins/*.js',
                 ],
           dest: 'build/<%= pkg.name %>.js'
         }
@@ -54,18 +28,16 @@ module.exports = function(grunt) {
     copy: {
       main: {
       files: [
-        { src: 'build/onion-editor.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.js' },
-        { src: 'build/onion-editor.min.js', dest: '../avclub/avclub/apps/cms/static/cms/js/onion-editor.min.js' },
-      ]
+          { src: 'build/onion-editor.js', dest: 'build/onion-editor.js' },
+        ]
       }
     },
     watch: {
       scripts: {
         files: ['src/*.js', 'src/*/*.js'],
-        tasks: ['concat', 'uglify'],
+        tasks: ['concat', 'copy'],
       },
     },
-
   });
 
   grunt.loadNpmTasks('grunt-contrib-uglify');
@@ -73,6 +45,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-contrib-copy');
 
-  grunt.registerTask('default', ['concat', 'uglify']);
+  grunt.registerTask('default', ['concat', 'copy']);
 
 };
