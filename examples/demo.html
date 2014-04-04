@@ -182,107 +182,12 @@
                 </div>
         </script>
 
+        <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
+        <script src="//cdnjs.cloudflare.com/ajax/libs/require.js/2.1.11/require.js"  data-main="../src/base"></script>
 
-
-        <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.9.1/jquery.min.js"></script>
-        <script src="../build/onion-editor.js"></script>
-        <script src="../src/lib/image.js"></script>
 
         <script>
 
-
-            var undomanager = new UndoManager();
-            var findReplace = new FindReplace();
-            var content_title_editor = new Editor({
-                /* global options */
-                element:document.getElementById("content-title"),
-                toolbar: {
-                    selectionTools: $("#selection-tools-minimal-template").html(),
-                },
-                undoManager: undomanager,
-                placeholder: "Title",
-                content: "Hey, it's starting to work",
-                allowNewline: false,
-                characterLimit: 200,
-                settings: {
-                    font: "title",
-                    visualize: false
-                },
-                sanitize: {
-                  elements: ['i', 'em'],
-                  remove_contents: ['script', 'style', ],
-                }
-            })
-
-            var content_subhead_editor = new Editor({
-                /* global options */
-                element:document.getElementById("content-subhead"),
-                undoManager: undomanager,
-                placeholder: "Subhead",
-                content: "Party.",
-                allowNewline: false,
-                characterLimit: 400,
-                settings: {
-                    font: "subhead",
-                    visualize: false
-                },
-                sanitize: {
-                  elements: [],
-                  remove_contents: ['script', 'style', ],
-                }
-            })
-
-
-            var image_crops = ["original", "16x9", "1x1"];
-            var content_body_editor = new Editor({
-                /* global options */
-                element:document.getElementById("content-body"),
-                toolbar: {
-                    documentTools: $("#document-tools-template").html(),
-                    embedTools: $("#embed-tools-template").html(),
-                    linkTools: $("#link-tools-template").html(),
-                    inlineTools: $("#inline-tools-template").html(),
-                },
-                undoManager: undomanager,
-                placeholder: "Write here",
-                content: $("#content").html(),
-                editSource: true,
-                inline: {
-                    image: {
-                        size: {
-                            "huge": ["3x1", "16x9"],
-                            "big": image_crops,
-                            "medium": image_crops,
-                            "small": image_crops,
-                            "tiny": image_crops,
-                        }
-                    },
-                    embed: {
-                        size: {
-                            "big": ["16x9", "4x3"],
-                            "small": ["16x9", "4x3"]
-                        }
-                    },
-                    youtube: {
-                        size: {
-                            "big": ["16x9", "4x3"],
-                            "small": ["16x9", "4x3"]
-                        }
-                    },
-                    pullquote: {
-
-                    },
-                    article: {
-                        
-                    },
-                    section: {
-
-                    }
-                },
-                settings: {
-                    visualize: false
-                },
-            })
         </script>
     </body>
 </html>

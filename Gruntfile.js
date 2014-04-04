@@ -9,36 +9,10 @@ module.exports = function(grunt) {
         },        
         dist: {
           src: [
-                'src/base.js',
-                'src/undoManager.js',
-                'src/modules/toolbar.js',
-                'src/modules/formatting.js',
-                'src/modules/selection.js',
-                'src/modules/inline.js', 
-                'src/modules/undo.js', 
-                //'src/modules/link.js',
-                'src/modules/persist.js',
-                'src/modules/editSource.js',
-                'src/modules/textReplacement.js',
-                'src/modules/screensize.js',
-                'src/modules/theme.js',
-                'src/modules/youtube.js',
-                'src/modules/stats.js',
-
-                
-                'src/lib/rangy/rangy-core.js',
-                'src/lib/rangy/rangy-cssclassapplier.js',
-                'src/lib/rangy/rangy-selectionsaverestore.js',
-                'src/lib/rangy/rangy-serializer.js',
-                'src/lib/rangy/rangy-highlighter.js',
-                'src/lib/rangy/rangy-textrange.js',
-                'src/lib/sanitize.js',
-                'src/lib/keymaster.js',
-                //'src/lib/image.js',
-                'src/findReplace.js',
+                'src/base.js'
 
                 ],
-          dest: 'build/<%= pkg.name %>.js'
+          dest: 'public/<%= pkg.name %>.js'
         }
 
     },

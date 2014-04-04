@@ -1,3 +1,4 @@
+/*! onion-editor 2014-03-27 */
 require({
   paths: {
     'scribe': './bower_components/scribe/scribe',
@@ -85,7 +86,7 @@ require({
   scribe.use(scribePluginIntelligentUnlinkCommand());
   scribe.use(scribePluginLinkPromptCommand());
   scribe.use(scribePluginToolbar(document.querySelector('.toolbar')));
-  scribe.use(scribePluginInlineObjectToolbar(document.querySelector('.inline-object-toolbar')));
+  scribe.use(scribePluginToolbar(document.querySelector('.toolbar')));
   scribe.use(scribePluginSmartLists());
   scribe.use(scribePluginCurlyQuotes());
   scribe.use(scribePluginKeyboardShortcuts(commandsToKeyboardShortcutsMap));
