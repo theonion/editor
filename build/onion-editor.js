@@ -81,7 +81,6 @@
             getTextNodesIn: function(node, includeWhitespaceNodes) {
                 var textNodes = [];
                 function getTextNodes(node) {
-                    console.log("NODE:", node);
                     if (node.nodeType == 3) {
                         textNodes.push(node);
                     } 
@@ -322,7 +321,7 @@
                                 htmlString += node.nodeValue;
                             }
                             else if (node.nodeType === 1) {
-                                if (!cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() == "") { // exclude tags with no content
+                                if (cleanFrag.childNodes[i].textContent.replace(/\n/g, "").trim() !== "") { // exclude tags with no content
                                     htmlString += cleanFrag.childNodes[i].outerHTML;
                                 }
                             }
