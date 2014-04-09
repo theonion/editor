@@ -1,4 +1,4 @@
-/*! onion-editor 2014-04-02 */
+/*! onion-editor 2014-04-09 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -62,13 +62,39 @@
                 }
                 return html;
             },
-            fixQuotes: function(str) {
-              str = str.replace(/(^|[-\u2014\s(\["])'/g, "$1\u2018");       // opening singles
-              str = str.replace(/'/g, "\u2019");                            // closing singles & apostrophes
-              str = str.replace(/(^|[-\u2014/\[(\u2018\s])"/g, "$1\u201c"); // opening doubles
-              str = str.replace(/"/g, "\u201d");                            // closing doubles
-              return str;
+            fixQuotes: function(fragment) {
+
+                var nodes = self.utils.getTextNodesIn(fragment, false);
+
+                for (var i = 0; i < nodes.length; i++) {
+                    nodes[i].textContent = makeCurly(nodes[i].textContent);
+                }
+
+                function makeCurly(str) {
+                    str = str.replace(/(^|[-\u2014\s(\["])'/g, "$1\u2018");       // opening singles
+                    str = str.replace(/'/g, "\u2019");                            // closing singles & apostrophes
+                    str = str.replace(/(^|[-\u2014/\[(\u2018\s])"/g, "$1\u201c"); // opening doubles
+                    str = str.replace(/"/g, "\u201d");                            // closing doubles
+                    return str;
+                }
+            },
+            getTextNodesIn: function(node, includeWhitespaceNodes) {
+                var textNodes = [];
+                function getTextNodes(node) {
+                    console.log("NODE:", node);
+                    if (node.nodeType == 3) {
+                        textNodes.push(node);
+                    } 
+                    else {
+                        for (var i = 0, len = node.childNodes.length; i < len; i++) {
+                            getTextNodes(node.childNodes[i]);
+                        }
+                    }
+                }
+                getTextNodes(node);
+                return textNodes;
             }
+
         },
         sanitize,
         domChangeTimeout;
@@ -284,14 +310,9 @@
                         //allow something else to make changes to the fragment
                         self.emit("paste", cleanFrag);
 
-                        $(cleanFrag)
-                            .contents()
-                            .filter(function() {
-                                console.log(this);
-                                return this.nodeType === 3; //Node.TEXT_NODE
-                            }).each(function() {
-                                this.textContent = self.utils.fixQuotes(this.textContent);
-                            });
+                        self.utils.fixQuotes(cleanFrag);
+
+                        
 
                         var htmlString = "";
                         for (var i = 0; i < cleanFrag.childNodes.length; i++) {
