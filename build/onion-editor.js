@@ -1,4 +1,4 @@
-/*! onion-editor 2014-04-09 */
+/*! onion-editor 2014-04-17 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -681,21 +681,21 @@ Making a few assumptions, for now:
 
         var commands = {
             bold : function(e) {
+                e.preventDefault();
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
-                    e.preventDefault();
                 }
             },
             italic: function(e) {
+                e.preventDefault();
                 if (canFormat("i")) {
                     global.document.execCommand("italic");
-                    e.preventDefault();
                 }
             },
             underline: function(e) {
+                e.preventDefault();
                 if (canFormat("u")) {
                     global.document.execCommand("underline");
-                    e.preventDefault();
                 }
             },
             strikethrough: function() {
