@@ -1,4 +1,4 @@
-/*! onion-editor 2014-04-17 */
+/*! onion-editor 2014-04-29 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -417,6 +417,7 @@
             if (typeof window.picturefill === "function") {
                 window.picturefill();
             }
+            isEmptyCheck();
         }
 
         self.getContent = function() {
