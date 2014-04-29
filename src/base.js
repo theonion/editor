@@ -416,6 +416,7 @@
             if (typeof window.picturefill === "function") {
                 window.picturefill();
             }
+            isEmptyCheck();
         }
 
         self.getContent = function() {
