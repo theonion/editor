@@ -371,7 +371,6 @@
 
         self.changed = function() {
             clearTimeout(domChangeTimeout);
-            console.log("changing...");
             domChangeTimeout = setTimeout(function() {
                 self.emit("contentchanged");
                 if (typeof options.onContentChange === "function") {
@@ -1307,7 +1306,9 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 var caption = prompt("Caption", 
                     $(".caption", activeElement).html()
                 );
-                $(".caption", activeElement).html(caption);
+                if (caption !== null) {
+                    $(".caption", activeElement).html(caption);
+                }
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
@@ -1389,7 +1390,6 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
 
         function setValue(attribute, value) {
             editor.changed();
-            console.log("changing value");
             var currentValue = $(activeElement).attr("data-" + attribute);
             $(activeElement)
                 .removeClass(attribute + "-" + currentValue)

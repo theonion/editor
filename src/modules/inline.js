@@ -147,7 +147,9 @@
                 var caption = prompt("Caption", 
                     $(".caption", activeElement).html()
                 );
-                $(".caption", activeElement).html(caption);
+                if (caption !== null) {
+                    $(".caption", activeElement).html(caption);
+                }
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
