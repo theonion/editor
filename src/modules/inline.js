@@ -147,9 +147,7 @@
                 var caption = prompt("Caption", 
                     $(".caption", activeElement).html()
                 );
-                if (caption) {
-                    $(".caption", activeElement).html(caption);
-                }
+                $(".caption", activeElement).html(caption);
             },
             //TODO: size/crop isn't working right after you hit the "HUGE" size in images
             inline_size: function() {
@@ -230,6 +228,7 @@
         } 
 
         function setValue(attribute, value) {
+            editor.changed();
             var currentValue = $(activeElement).attr("data-" + attribute);
             $(activeElement)
                 .removeClass(attribute + "-" + currentValue)

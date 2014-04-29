@@ -368,7 +368,7 @@
         }
 
 
-        function changed() {
+        self.changed = function() {
             clearTimeout(domChangeTimeout);
             domChangeTimeout = setTimeout(function() {
                 self.emit("contentchanged");
@@ -384,11 +384,11 @@
         }
         self.listenForChanges = function() {
            $(".editor", options.element)
-                .bind("DOMSubtreeModified", changed )
+                .bind("DOMSubtreeModified", self.changed )
         }
         self.dontListenForChanges = function() {
            $(".editor", options.element)
-                .unbind("DOMSubtreeModified", changed )
+                .unbind("DOMSubtreeModified", self.changed )
         }
 
 
