@@ -10,7 +10,7 @@
                 content: "<p><br></p>",
                 allowNewline: true,
                 sanitize: {
-                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
+                  elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's', 'h3', 'h4'],
                   attributes: {'a': ['href', 'title']},
                   remove_contents: ['script', 'style', ],
                   protocols: { a: { href: ['http', 'https', 'mailto']}},
@@ -289,7 +289,7 @@
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
                         .css({"position":"fixed", "top":"0px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
-                        .appendTo("body")
+                        .appendTo(options.element)
                         .focus();
 
                     //handle paste, defer to give time to focus & paste
