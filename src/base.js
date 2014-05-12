@@ -406,7 +406,7 @@
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
-            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
+            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1 && $(".editor>*").length ==1) {
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )
             }
 
