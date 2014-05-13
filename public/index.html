@@ -1,46 +1,22 @@
 <!DOCTYPE html>
 <html>
   <head>
-    <title>Scribe</title>
+      <meta charset="UTF-8">
+      <title>CMS Demo</title>
+      <link href="http://netdna.bootstrapcdn.com/font-awesome/3.2.1/css/font-awesome.css" rel="stylesheet">
+      <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
+
+      <!-- Latest compiled and minified CSS -->
+      <!--<link href="//netdna.bootstrapcdn.com/bootstrap/3.0.0/css/bootstrap.min.css" rel="stylesheet">-->
+      <link href='css/themes.css' rel='stylesheet' type='text/css'></link>
+      <link href='css/toolbar.css' rel='stylesheet' type='text/css'></link>
+      <link href='css/image.css' rel='stylesheet' type='text/css'></link>
+      <link href='css/inline.css' rel='stylesheet' type='text/css'></link>
+      <link href='css/cms-demo.css' rel='stylesheet' type='text/css'></link>
   </head>
-  <style>
-    * {
-      box-sizing: border-box;
-    }
 
-    .toolbar {
-      margin-bottom: 1em;
-    }
-
-    button {
-      height: 3em;
-    }
-
-    button.active {
-      border-style: inset;
-    }
-
-    .scribe {
-      height: 370px;
-      overflow: auto;
-      margin-bottom: 1em;
-      border: 1px solid hsl(0, 0%, 80%);
-      padding: 0.5em;
-    }
-
-    .scribe-html {
-      width: 100%;
-      font-family: monospace;
-      border: 1px solid hsl(0, 0%, 80%);
-      padding: 0.5em;
-    }
-
-    p {
-      margin-top: 0;
-    }
-  </style>
   <body>
-    <h1>Scribe</h1>
+    <!--
     <div class="toolbar">
       <button data-command-name="bold">Bold</button>
       <button data-command-name="italic">Italic</button>
@@ -57,17 +33,76 @@
       <button data-command-name="h4">H2</button>
       <button data-command-name="undo">Undo</button>
       <button data-command-name="redo">Redo</button>
-      
-    </div>
-    <div class="inline-object-toolbar">
-      <button data-command-name="image">Image</button>
-      <button data-command-name="image">Embed</button>
     </div>
 
-                    
-    <div class="scribe"></div>
-    <h2>Output</h2>
-    <textarea class="scribe-html" rows="15"></textarea>
+    -->
+    <div id="content-wrapper" class="container">
+      <div class="editor-wrapper">
+        <div class="editorPlaceholder" style="display: block;"></div>
+        <div class="editor scribe"></div>
+        <div class="document-tools toolbar fixed">
+          <div class="toolbar-contents">
+            <button data-command-name="linkPrompt"><span class="fa fa-link"></span><span class="btn-label">Link</span></button>
+            <button data-command-name="bold"><span class="fa fa-bold"></span><span class="btn-label">Bold</span></button>
+            <button data-command-name="italic"><span class="fa fa-italic"></span><span class="btn-label">Italic</span></button>
+            <button data-command-name="h4"><span class="heading-icon">H<sub>2<sub></span><span class="btn-label">Sub Heading</span></button>
+            <button data-command-name="h3" class="hiddenbydefault"><span class="heading-icon">H<sub>1</sub></span><span class="btn-label">Heading</span></button>
+            <button class="hiddenbydefault" data-command-name="blockquote"><span class="fa fa-quote-left"></span><span class="btn-label">Block quote</span></button>
+            <button class="hiddenbydefault" data-command-name="insertOrderedList"><span class="fa fa-list-ol"></span><span class="btn-label">Numbered List</span></button>
+            <button class="hiddenbydefault" data-command-name="insertUnorderedList"><span class="fa fa-list-ul"></span><span class="btn-label">Bullet List</span></button>
+            <button class="hiddenbydefault" data-command-name="strikeThrough"><span class="fa fa-strikethrough"></span><span class="btn-label">Strikethrough</span></button>
+            <button class="hiddenbydefault" data-command-name="removeFormat"><span class="fa fa-times"></span><span class="btn-label">Remove Formatting</span></button>
+          </div>
+        </div>
+        <div class="embed-tools toolbar">
+          <div class="toolbar-contents">
+            <button class="embed-button"><span class="fa fa-plus-circle"></span><span class="btn-label hiddenbydefault">Insert something</span></button>
+            <div class="hiddenbydefault">
+              <button data-command-name="image" title="Image">
+                  <span class="fa fa-picture-o"></span><span class="btn-label">Image</span>
+              </button>
+              <button data-command-name="onion-video" title="AV Video">
+                  <span class="fa fa-film"></span><span class="btn-label">AV Video</span>
+              </button>
+              <button data-command-name="youtube" title="Youtube">
+                  <span class="fa fa-youtube"></span><span class="btn-label">Youtube Video</span>
+              </button>
+              <button data-command-name="embed" title="Embed Something">
+                  <span class="fa fa-code"></span><span class="btn-label">Embed Something</span>
+              </button>
+
+              <button data-command-name="articlelist" title="Related Article List">
+                  <span class="fa fa-file"></span><span class="btn-label">Related Article List</span>
+              </button>
+
+
+              <button data-command-name="hr" title="HR">
+                  <span class="fa fa-minus"></span><span class="btn-label">Horizontal Rule</span>
+              </button>
+            </div>
+          </div>
+        </div>
+        <div class="inline-tools toolbar" style="display: none;">
+            <div class="top toolbar-contents">
+                <div>
+                    <button name="inline_up" class="fa fa-arrow-up"></button>
+                    <button name="inline_down" class="fa fa-arrow-down"></button>
+                    <button class="size inline-attribute" name="inline_size"></button>
+                    <button class="crop inline-attribute" name="inline_crop"></button>
+                </div>
+            </div>
+            <div class="remove">
+                <button name="inline_remove" class="fa fa-trash-o"></button>
+            </div>
+            <div class="edit">
+                <button name="inline_edit">Edit</button>
+                <button name="inline_caption">Caption</button>
+            </div>
+        </div>                        
+      </div>
+    </div>                    
+    <textarea style="display:none" class="scribe-html" rows="15"></textarea>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="bower_components/requirejs/require.js" data-main="./onion-editor"></script>
   </body>
 </html>

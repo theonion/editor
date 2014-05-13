@@ -22,6 +22,8 @@
     "src"
   ],
   "dependencies": {
+    "requirejs": "2.1.11",
+
     "scribe": "0.1.4",
     "scribe-plugin-blockquote-command": "0.1.0",
     "scribe-plugin-curly-quotes": "0.1.0",
