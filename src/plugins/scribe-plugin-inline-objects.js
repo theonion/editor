@@ -19,7 +19,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
         function toolbarClick(event) {
           event.target.dataset.commandName;
-          insertAbove(activeBlock, "<div style='width: 100%; height: 200px;background-color:red;'></div>");
+          insertAbove(activeBlock, "<div contenteditable='false' style='width: 100%; height: 200px;background-color:red;'></div>");
         }
 
         $(".embed-tools button", scribe.el.parentNode).click(toolbarClick);
@@ -28,6 +28,7 @@ define('scribe-plugin-inline-objects',[],function () {
         var activeBlock;
 
 
+        // THIS DOES THE TOOLBAR STUFF
         scribe.el.addEventListener('mouseover', function (event) {
           var blocks = scribe.el.children;
           var cursorOffset = event.clientY + window.scrollY;

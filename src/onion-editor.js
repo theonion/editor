@@ -1,4 +1,5 @@
-require({
+/*
+require.config({
   paths: {
     'scribe': './bower_components/scribe/scribe',
     'scribe-plugin-blockquote-command': './bower_components/scribe-plugin-blockquote-command/scribe-plugin-blockquote-command',
@@ -15,7 +16,10 @@ require({
     'scribe-plugin-inline-objects-toolbar': '../src/plugins/scribe-plugin-inline-objects-toolbar',
 
   }
-}, [
+});
+*/
+
+require([
   'scribe',
   'scribe-plugin-blockquote-command',
   'scribe-plugin-curly-quotes',

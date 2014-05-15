@@ -34,6 +34,7 @@
     "scribe-plugin-link-prompt-command": "0.1.0",
     "scribe-plugin-sanitizer": "0.1.0",
     "scribe-plugin-smart-lists": "0.1.0",
-    "scribe-plugin-toolbar": "0.1.0"
+    "scribe-plugin-toolbar": "0.1.0",
+    "almond": "0.2.9"
   }
 }

@@ -1,4 +1,427 @@
-/*! onion-editor 2014-03-26 */
+/**
+ * @license almond 0.2.9 Copyright (c) 2011-2014, The Dojo Foundation All Rights Reserved.
+ * Available via the MIT or new BSD license.
+ * see: http://github.com/jrburke/almond for details
+ */
+//Going sloppy to avoid 'use strict' string cost, but strict practices should
+//be followed.
+/*jslint sloppy: true */
+/*global setTimeout: false */
+
+var requirejs, require, define;
+(function (undef) {
+    var main, req, makeMap, handlers,
+        defined = {},
+        waiting = {},
+        config = {},
+        defining = {},
+        hasOwn = Object.prototype.hasOwnProperty,
+        aps = [].slice,
+        jsSuffixRegExp = /\.js$/;
+
+    function hasProp(obj, prop) {
+        return hasOwn.call(obj, prop);
+    }
+
+    /**
+     * Given a relative module name, like ./something, normalize it to
+     * a real name that can be mapped to a path.
+     * @param {String} name the relative name
+     * @param {String} baseName a real name that the name arg is relative
+     * to.
+     * @returns {String} normalized name
+     */
+    function normalize(name, baseName) {
+        var nameParts, nameSegment, mapValue, foundMap, lastIndex,
+            foundI, foundStarMap, starI, i, j, part,
+            baseParts = baseName && baseName.split("/"),
+            map = config.map,
+            starMap = (map && map['*']) || {};
+
+        //Adjust any relative paths.
+        if (name && name.charAt(0) === ".") {
+            //If have a base name, try to normalize against it,
+            //otherwise, assume it is a top-level require that will
+            //be relative to baseUrl in the end.
+            if (baseName) {
+                //Convert baseName to array, and lop off the last part,
+                //so that . matches that "directory" and not name of the baseName's
+                //module. For instance, baseName of "one/two/three", maps to
+                //"one/two/three.js", but we want the directory, "one/two" for
+                //this normalization.
+                baseParts = baseParts.slice(0, baseParts.length - 1);
+                name = name.split('/');
+                lastIndex = name.length - 1;
+
+                // Node .js allowance:
+                if (config.nodeIdCompat && jsSuffixRegExp.test(name[lastIndex])) {
+                    name[lastIndex] = name[lastIndex].replace(jsSuffixRegExp, '');
+                }
+
+                name = baseParts.concat(name);
+
+                //start trimDots
+                for (i = 0; i < name.length; i += 1) {
+                    part = name[i];
+                    if (part === ".") {
+                        name.splice(i, 1);
+                        i -= 1;
+                    } else if (part === "..") {
+                        if (i === 1 && (name[2] === '..' || name[0] === '..')) {
+                            //End of the line. Keep at least one non-dot
+                            //path segment at the front so it can be mapped
+                            //correctly to disk. Otherwise, there is likely
+                            //no path mapping for a path starting with '..'.
+                            //This can still fail, but catches the most reasonable
+                            //uses of ..
+                            break;
+                        } else if (i > 0) {
+                            name.splice(i - 1, 2);
+                            i -= 2;
+                        }
+                    }
+                }
+                //end trimDots
+
+                name = name.join("/");
+            } else if (name.indexOf('./') === 0) {
+                // No baseName, so this is ID is resolved relative
+                // to baseUrl, pull off the leading dot.
+                name = name.substring(2);
+            }
+        }
+
+        //Apply map config if available.
+        if ((baseParts || starMap) && map) {
+            nameParts = name.split('/');
+
+            for (i = nameParts.length; i > 0; i -= 1) {
+                nameSegment = nameParts.slice(0, i).join("/");
+
+                if (baseParts) {
+                    //Find the longest baseName segment match in the config.
+                    //So, do joins on the biggest to smallest lengths of baseParts.
+                    for (j = baseParts.length; j > 0; j -= 1) {
+                        mapValue = map[baseParts.slice(0, j).join('/')];
+
+                        //baseName segment has  config, find if it has one for
+                        //this name.
+                        if (mapValue) {
+                            mapValue = mapValue[nameSegment];
+                            if (mapValue) {
+                                //Match, update name to the new value.
+                                foundMap = mapValue;
+                                foundI = i;
+                                break;
+                            }
+                        }
+                    }
+                }
+
+                if (foundMap) {
+                    break;
+                }
+
+                //Check for a star map match, but just hold on to it,
+                //if there is a shorter segment match later in a matching
+                //config, then favor over this star map.
+                if (!foundStarMap && starMap && starMap[nameSegment]) {
+                    foundStarMap = starMap[nameSegment];
+                    starI = i;
+                }
+            }
+
+            if (!foundMap && foundStarMap) {
+                foundMap = foundStarMap;
+                foundI = starI;
+            }
+
+            if (foundMap) {
+                nameParts.splice(0, foundI, foundMap);
+                name = nameParts.join('/');
+            }
+        }
+
+        return name;
+    }
+
+    function makeRequire(relName, forceSync) {
+        return function () {
+            //A version of a require function that passes a moduleName
+            //value for items that may need to
+            //look up paths relative to the moduleName
+            return req.apply(undef, aps.call(arguments, 0).concat([relName, forceSync]));
+        };
+    }
+
+    function makeNormalize(relName) {
+        return function (name) {
+            return normalize(name, relName);
+        };
+    }
+
+    function makeLoad(depName) {
+        return function (value) {
+            defined[depName] = value;
+        };
+    }
+
+    function callDep(name) {
+        if (hasProp(waiting, name)) {
+            var args = waiting[name];
+            delete waiting[name];
+            defining[name] = true;
+            main.apply(undef, args);
+        }
+
+        if (!hasProp(defined, name) && !hasProp(defining, name)) {
+            throw new Error('No ' + name);
+        }
+        return defined[name];
+    }
+
+    //Turns a plugin!resource to [plugin, resource]
+    //with the plugin being undefined if the name
+    //did not have a plugin prefix.
+    function splitPrefix(name) {
+        var prefix,
+            index = name ? name.indexOf('!') : -1;
+        if (index > -1) {
+            prefix = name.substring(0, index);
+            name = name.substring(index + 1, name.length);
+        }
+        return [prefix, name];
+    }
+
+    /**
+     * Makes a name map, normalizing the name, and using a plugin
+     * for normalization if necessary. Grabs a ref to plugin
+     * too, as an optimization.
+     */
+    makeMap = function (name, relName) {
+        var plugin,
+            parts = splitPrefix(name),
+            prefix = parts[0];
+
+        name = parts[1];
+
+        if (prefix) {
+            prefix = normalize(prefix, relName);
+            plugin = callDep(prefix);
+        }
+
+        //Normalize according
+        if (prefix) {
+            if (plugin && plugin.normalize) {
+                name = plugin.normalize(name, makeNormalize(relName));
+            } else {
+                name = normalize(name, relName);
+            }
+        } else {
+            name = normalize(name, relName);
+            parts = splitPrefix(name);
+            prefix = parts[0];
+            name = parts[1];
+            if (prefix) {
+                plugin = callDep(prefix);
+            }
+        }
+
+        //Using ridiculous property names for space reasons
+        return {
+            f: prefix ? prefix + '!' + name : name, //fullName
+            n: name,
+            pr: prefix,
+            p: plugin
+        };
+    };
+
+    function makeConfig(name) {
+        return function () {
+            return (config && config.config && config.config[name]) || {};
+        };
+    }
+
+    handlers = {
+        require: function (name) {
+            return makeRequire(name);
+        },
+        exports: function (name) {
+            var e = defined[name];
+            if (typeof e !== 'undefined') {
+                return e;
+            } else {
+                return (defined[name] = {});
+            }
+        },
+        module: function (name) {
+            return {
+                id: name,
+                uri: '',
+                exports: defined[name],
+                config: makeConfig(name)
+            };
+        }
+    };
+
+    main = function (name, deps, callback, relName) {
+        var cjsModule, depName, ret, map, i,
+            args = [],
+            callbackType = typeof callback,
+            usingExports;
+
+        //Use name if no relName
+        relName = relName || name;
+
+        //Call the callback to define the module, if necessary.
+        if (callbackType === 'undefined' || callbackType === 'function') {
+            //Pull out the defined dependencies and pass the ordered
+            //values to the callback.
+            //Default to [require, exports, module] if no deps
+            deps = !deps.length && callback.length ? ['require', 'exports', 'module'] : deps;
+            for (i = 0; i < deps.length; i += 1) {
+                map = makeMap(deps[i], relName);
+                depName = map.f;
+
+                //Fast path CommonJS standard dependencies.
+                if (depName === "require") {
+                    args[i] = handlers.require(name);
+                } else if (depName === "exports") {
+                    //CommonJS module spec 1.1
+                    args[i] = handlers.exports(name);
+                    usingExports = true;
+                } else if (depName === "module") {
+                    //CommonJS module spec 1.1
+                    cjsModule = args[i] = handlers.module(name);
+                } else if (hasProp(defined, depName) ||
+                           hasProp(waiting, depName) ||
+                           hasProp(defining, depName)) {
+                    args[i] = callDep(depName);
+                } else if (map.p) {
+                    map.p.load(map.n, makeRequire(relName, true), makeLoad(depName), {});
+                    args[i] = defined[depName];
+                } else {
+                    throw new Error(name + ' missing ' + depName);
+                }
+            }
+
+            ret = callback ? callback.apply(defined[name], args) : undefined;
+
+            if (name) {
+                //If setting exports via "module" is in play,
+                //favor that over return value and exports. After that,
+                //favor a non-undefined return value over exports use.
+                if (cjsModule && cjsModule.exports !== undef &&
+                        cjsModule.exports !== defined[name]) {
+                    defined[name] = cjsModule.exports;
+                } else if (ret !== undef || !usingExports) {
+                    //Use the return value from the function.
+                    defined[name] = ret;
+                }
+            }
+        } else if (name) {
+            //May just be an object definition for the module. Only
+            //worry about defining if have a module name.
+            defined[name] = callback;
+        }
+    };
+
+    requirejs = require = req = function (deps, callback, relName, forceSync, alt) {
+        if (typeof deps === "string") {
+            if (handlers[deps]) {
+                //callback in this case is really relName
+                return handlers[deps](callback);
+            }
+            //Just return the module wanted. In this scenario, the
+            //deps arg is the module name, and second arg (if passed)
+            //is just the relName.
+            //Normalize module name, if it contains . or ..
+            return callDep(makeMap(deps, callback).f);
+        } else if (!deps.splice) {
+            //deps is a config object, not an array.
+            config = deps;
+            if (config.deps) {
+                req(config.deps, config.callback);
+            }
+            if (!callback) {
+                return;
+            }
+
+            if (callback.splice) {
+                //callback is an array, which means it is a dependency list.
+                //Adjust args if there are dependencies
+                deps = callback;
+                callback = relName;
+                relName = null;
+            } else {
+                deps = undef;
+            }
+        }
+
+        //Support require(['a'])
+        callback = callback || function () {};
+
+        //If relName is a function, it is an errback handler,
+        //so remove it.
+        if (typeof relName === 'function') {
+            relName = forceSync;
+            forceSync = alt;
+        }
+
+        //Simulate async callback;
+        if (forceSync) {
+            main(undef, deps, callback, relName);
+        } else {
+            //Using a non-zero value because of concern for what old browsers
+            //do, and latest browsers "upgrade" to 4 if lower value is used:
+            //http://www.whatwg.org/specs/web-apps/current-work/multipage/timers.html#dom-windowtimers-settimeout:
+            //If want a value immediately, use require('id') instead -- something
+            //that works in almond on the global level, but not guaranteed and
+            //unlikely to work in other AMD implementations.
+            setTimeout(function () {
+                main(undef, deps, callback, relName);
+            }, 4);
+        }
+
+        return req;
+    };
+
+    /**
+     * Just drops the config on the floor, but returns req in case
+     * the config return value is used.
+     */
+    req.config = function (cfg) {
+        return req(cfg);
+    };
+
+    /**
+     * Expose module registry for debugging and tooling
+     */
+    requirejs._defined = defined;
+
+    define = function (name, deps, callback) {
+
+        //This module may not have dependencies
+        if (!deps.splice) {
+            //deps is not an array, so probably means
+            //an object literal or factory function for
+            //the value. Adjust args.
+            callback = deps;
+            deps = [];
+        }
+
+        if (!hasProp(defined, name) && !hasProp(waiting, name)) {
+            waiting[name] = [name, deps, callback];
+        }
+    };
+
+    define.amd = {
+        jQuery: true
+    };
+}());
+
+define("../bower_components/almond/almond", function(){});
+
 /*!
  * EventEmitter v4.2.7 - git.io/ee
  * Oliver Caldwell
@@ -4250,29 +4673,2351 @@ define('scribe',[
 });
 
 //# sourceMappingURL=scribe.js.map;
-/*  Onion Editor 
- *
- *  - Wraps Scribe (http://github.com/theguardian/scribe
- *  - Defines a Scribe plugin for injecting inline objects like images, video & embeds
- *  - Maybe some toolbar stuff?
- */
-(function(global){
-  'use strict';
+define('scribe-plugin-blockquote-command',[],function () {
 
-  var Editor = Editor || function(options) {
-    var self = this,
-      defaults = {
-          element: null, /* element to make Editable */
-          content: "<p><br></p>",
-          allowNewline: true,
-          sanitize: {
-            elements: ['b', 'em', 'i', 'strong', 'u', 'p','blockquote','a', 'ul', 'ol', 'li','br', 'sub', 'sup', 's'],
-            attributes: {'a': ['href', 'title']},
-            remove_contents: ['script', 'style', ],
-            protocols: { a: { href: ['http', 'https', 'mailto']}},
-          }
+  /**
+   * Adds a command for using BLOCKQUOTEs.
+   */
+
+  
+
+  return function () {
+    return function (scribe) {
+      var blockquoteCommand = new scribe.api.SimpleCommand('blockquote', 'BLOCKQUOTE');
+
+      blockquoteCommand.execute = function () {
+        var command = scribe.getCommand(this.queryState() ? 'outdent' : 'indent');
+        command.execute();
       };
 
+      blockquoteCommand.queryEnabled = function () {
+        var command = scribe.getCommand(this.queryState() ? 'outdent' : 'indent');
+        return command.queryEnabled();
+      };
+
+      blockquoteCommand.queryState = function () {
+        var selection = new scribe.api.Selection();
+        var blockquoteElement = selection.getContaining(function (element) {
+          return element.nodeName === 'BLOCKQUOTE';
+        });
+
+        return scribe.allowsBlockElements() && !! blockquoteElement;
+      };
+
+      scribe.commands.blockquote = blockquoteCommand;
+
+      /**
+       * If the paragraphs option is set to true, we unapply the blockquote on
+       * <enter> keypresses if the caret is on a new line.
+       */
+      if (scribe.allowsBlockElements()) {
+        scribe.el.addEventListener('keydown', function (event) {
+          if (event.keyCode === 13) { // enter
+
+            var command = scribe.getCommand('blockquote');
+            if (command.queryState()) {
+              var selection = new scribe.api.Selection();
+              if (selection.isCaretOnNewLine()) {
+                event.preventDefault();
+                command.execute();
+              }
+            }
+          }
+        });
+      }
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-blockquote-command.js.map;
+define('scribe-plugin-curly-quotes',[],function () {
+
+  
+
+  return function () {
+
+    var keys = {
+      34: '"',
+      39: '\''
+    };
+
+    var openDoubleCurly = '“';
+    var closeDoubleCurly = '”';
+
+    var openSingleCurly = '‘';
+    var closeSingleCurly = '’';
+
+    var NON_BREAKING_SPACE = '\u00A0';
+
+    return function (scribe) {
+      // Substitute quotes while typing
+      scribe.el.addEventListener('keypress', input);
+
+      // Substitute quotes on setting content or paste
+      scribe.htmlFormatter.formatters.push(substituteCurlyQuotes);
+
+      function input(event) {
+        var curlyChar;
+
+        // If previous char is real content, close quote; else, open
+        // TODO: annoying Chrome/Firefox
+        var currentChar = keys[event.charCode];
+        if (currentChar === '"') {
+          if (wordBeforeSelectedRange()) {
+            curlyChar = closeDoubleCurly;
+          } else {
+            curlyChar = openDoubleCurly;
+          }
+        } else if (currentChar === '\'') {
+          if (wordBeforeSelectedRange()) {
+            curlyChar = closeSingleCurly;
+          } else {
+            curlyChar = openSingleCurly;
+          }
+        }
+
+        // Substitute entered char with curly replacement
+        if (curlyChar) {
+          event.preventDefault();
+
+          scribe.transactionManager.run(function() {
+            var quoteText = replaceSelectedRangeWith(curlyChar);
+            placeCaretAfter(quoteText);
+          });
+        }
+      }
+
+      function wordBeforeSelectedRange() {
+        var prevChar = charBeforeSelectedRange();
+        return (
+          prevChar !== ' ' &&
+          prevChar !== NON_BREAKING_SPACE &&
+          typeof prevChar !== 'undefined'
+        );
+      }
+
+      function charBeforeSelectedRange() {
+        var selection = new scribe.api.Selection();
+        var context = selection.range.commonAncestorContainer.textContent;
+        return context[selection.range.startOffset - 1];
+      }
+
+      function charAfterSelectedRange() {
+        var selection = new scribe.api.Selection();
+        var context = selection.range.commonAncestorContainer.textContent;
+        return context[selection.range.endOffset];
+      }
+
+      /** Delete any selected text, insert text instead */
+      function replaceSelectedRangeWith(text) {
+        var textNode = document.createTextNode(text);
+
+        var selection = new scribe.api.Selection();
+        selection.range.deleteContents();
+        selection.range.insertNode(textNode);
+
+        return textNode;
+      }
+
+      function placeCaretAfter(node) {
+        var rangeAfter = document.createRange();
+        rangeAfter.setStartAfter(node);
+        rangeAfter.setEndAfter(node);
+
+        var selection = new scribe.api.Selection();
+        selection.selection.removeAllRanges();
+        selection.selection.addRange(rangeAfter);
+      }
+
+      function substituteCurlyQuotes(html) {
+        // We don't want to replace quotes within the HTML markup
+        // (e.g. attributes), only to text nodes
+        var holder = document.createElement('div');
+        holder.innerHTML = html;
+
+        // Replace straight single and double quotes with curly
+        // equivalent in the given string
+        mapTextNodes(holder, function(str) {
+          return str.
+            // Use [\s\S] instead of . to match any characters _including newlines_
+            replace(/([\s\S])?'([\s\S])?/g,
+                    replaceQuotesFromContext(openSingleCurly, closeSingleCurly)).
+            replace(/([\s\S])?"([\s\S])?/g,
+                    replaceQuotesFromContext(openDoubleCurly, closeDoubleCurly));
+        });
+
+        return holder.innerHTML;
+      }
+
+      function replaceQuotesFromContext(openCurly, closeCurly) {
+        return function(m, prev, next) {
+          prev = prev || '';
+          next = next || '';
+          var isStart = ! prev;
+          var isEnd = ! next;
+          var hasCharsBefore = /[^\s]/.test(prev);
+          var hasCharsAfter = /[^\s]/.test(next);
+          // Optimistic heuristic, would need to look at DOM structure
+          // (esp block vs inline elements) for more robust inference
+          if (hasCharsBefore || (isStart && ! hasCharsAfter && ! isEnd)) {
+            return prev + closeCurly + next;
+          } else {
+            return prev + openCurly + next;
+          }
+        };
+      }
+
+      // Apply a function on all text nodes in a container, mutating in place
+      function mapTextNodes(container, func) {
+        var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
+        var node = walker.firstChild();
+        if (node) {
+          do {
+            node.data = func(node.data);
+          } while ((node = walker.nextSibling()));
+        }
+
+        return node;
+      }
+
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-curly-quotes.js.map;
+define('scribe-plugin-formatter-plain-text-convert-new-lines-to-html',[],function () {
+
+  
+
+  return function () {
+    return function (scribe) {
+      scribe.plainTextFormatter.formatters.push(function (html) {
+        return html.replace(/\n([ \t]*\n)+/g, '</p><p>').replace(/\n/g, '<br>');
+      });
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-formatter-plain-text-convert-new-lines-to-html.js.map;
+define('scribe-plugin-heading-command',[],function () {
+
+  /**
+   * This plugin adds a command for headings.
+   */
+
+  
+
+  return function (level) {
+    return function (scribe) {
+      var tag = '<h' + level + '>';
+      var nodeName = 'H' + level;
+      var commandName = 'h' + level;
+
+      /**
+       * Chrome: the `heading` command doesn't work. Supported by Firefox only.
+       */
+
+      var headingCommand = new scribe.api.Command('formatBlock');
+
+      headingCommand.execute = function () {
+        if (this.queryState()) {
+          scribe.api.Command.prototype.execute.call(this, '<p>');
+        } else {
+          scribe.api.Command.prototype.execute.call(this, tag);
+        }
+      };
+
+      headingCommand.queryState = function () {
+        var selection = new scribe.api.Selection();
+        return !! selection.getContaining(function (node) {
+          return node.nodeName === nodeName;
+        });
+      };
+
+      /**
+       * All: Executing a heading command inside a list element corrupts the markup.
+       * Disabling for now.
+       */
+      headingCommand.queryEnabled = function () {
+        var selection = new scribe.api.Selection();
+        var listNode = selection.getContaining(function (node) {
+          return node.nodeName === 'OL' || node.nodeName === 'UL';
+        });
+
+        return scribe.api.Command.prototype.queryEnabled.apply(this, arguments)
+          && scribe.allowsBlockElements() && ! listNode;
+      };
+
+      scribe.commands[commandName] = headingCommand;
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-heading-command.js.map;
+define('scribe-plugin-intelligent-unlink-command',[],function () {
+
+  /**
+   * This plugin modifies the `unlink` command so that, when the user's
+   * selection is collapsed, remove the containing A.
+   */
+
+  
+
+  return function () {
+    return function (scribe) {
+      var unlinkCommand = new scribe.api.Command('unlink');
+
+      unlinkCommand.execute = function () {
+        var selection = new scribe.api.Selection();
+
+        if (selection.selection.isCollapsed) {
+          scribe.transactionManager.run(function () {
+            /**
+             * If the selection is collapsed, we can remove the containing anchor.
+             */
+
+            var aNode = selection.getContaining(function (node) {
+              return node.nodeName === 'A';
+            });
+
+            if (aNode) {
+              new scribe.api.Element(aNode.parentNode).unwrap(aNode);
+            }
+          }.bind(this));
+        } else {
+          scribe.api.Command.prototype.execute.apply(this, arguments);
+        }
+      };
+
+      unlinkCommand.queryEnabled = function () {
+        var selection = new scribe.api.Selection();
+        if (selection.selection.isCollapsed) {
+          return !! selection.getContaining(function (node) {
+            return node.nodeName === 'A';
+          });
+        } else {
+          return scribe.api.Command.prototype.queryEnabled.apply(this, arguments);
+        }
+      };
+
+      scribe.commands.unlink = unlinkCommand;
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-intelligent-unlink-command.js.map;
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/isNative',[], function() {
+
+  /** Used for native method references */
+  var objectProto = Object.prototype;
+
+  /** Used to resolve the internal [[Class]] of values */
+  var toString = objectProto.toString;
+
+  /** Used to detect if a method is native */
+  var reNative = RegExp('^' +
+    String(toString)
+      .replace(/[.*+?^${}()|[\]\\]/g, '\\$&')
+      .replace(/toString| for [^\]]+/g, '.*?') + '$'
+  );
+
+  /**
+   * Checks if `value` is a native function.
+   *
+   * @private
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a native function, else `false`.
+   */
+  function isNative(value) {
+    return typeof value == 'function' && reNative.test(value);
   }
-  global.Editor = Editor;
-})(this);
+
+  return isNative;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/objectTypes',[], function() {
+
+  /** Used to determine if values are of the language type Object */
+  var objectTypes = {
+    'boolean': false,
+    'function': true,
+    'object': true,
+    'number': false,
+    'string': false,
+    'undefined': false
+  };
+
+  return objectTypes;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/isObject',['../internals/objectTypes'], function(objectTypes) {
+
+  /**
+   * Checks if `value` is the language type of Object.
+   * (e.g. arrays, functions, objects, regexes, `new Number(0)`, and `new String('')`)
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is an object, else `false`.
+   * @example
+   *
+   * _.isObject({});
+   * // => true
+   *
+   * _.isObject([1, 2, 3]);
+   * // => true
+   *
+   * _.isObject(1);
+   * // => false
+   */
+  function isObject(value) {
+    // check if the value is the ECMAScript language type of Object
+    // http://es5.github.io/#x8
+    // and avoid a V8 bug
+    // http://code.google.com/p/v8/issues/detail?id=2291
+    return !!(value && objectTypes[typeof value]);
+  }
+
+  return isObject;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/utilities/noop',[], function() {
+
+  /**
+   * A no-operation function.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.noop(object) === undefined;
+   * // => true
+   */
+  function noop() {
+    // no operation performed
+  }
+
+  return noop;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/baseCreate',['./isNative', '../objects/isObject', '../utilities/noop'], function(isNative, isObject, noop) {
+
+  /* Native method shortcuts for methods with the same name as other `lodash` methods */
+  var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
+
+  /**
+   * The base implementation of `_.create` without support for assigning
+   * properties to the created object.
+   *
+   * @private
+   * @param {Object} prototype The object to inherit from.
+   * @returns {Object} Returns the new object.
+   */
+  function baseCreate(prototype, properties) {
+    return isObject(prototype) ? nativeCreate(prototype) : {};
+  }
+  // fallback for browsers without `Object.create`
+  if (!nativeCreate) {
+    baseCreate = (function() {
+      function Object() {}
+      return function(prototype) {
+        if (isObject(prototype)) {
+          Object.prototype = prototype;
+          var result = new Object;
+          Object.prototype = null;
+        }
+        return result || window.Object();
+      };
+    }());
+  }
+
+  return baseCreate;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/setBindData',['./isNative', '../utilities/noop'], function(isNative, noop) {
+
+  /** Used as the property descriptor for `__bindData__` */
+  var descriptor = {
+    'configurable': false,
+    'enumerable': false,
+    'value': null,
+    'writable': false
+  };
+
+  /** Used to set meta data on functions */
+  var defineProperty = (function() {
+    // IE 8 only accepts DOM elements
+    try {
+      var o = {},
+          func = isNative(func = Object.defineProperty) && func,
+          result = func(o, o, o) && func;
+    } catch(e) { }
+    return result;
+  }());
+
+  /**
+   * Sets `this` binding data on a given function.
+   *
+   * @private
+   * @param {Function} func The function to set data on.
+   * @param {Array} value The data array to set.
+   */
+  var setBindData = !defineProperty ? noop : function(func, value) {
+    descriptor.value = value;
+    defineProperty(func, '__bindData__', descriptor);
+  };
+
+  return setBindData;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/slice',[], function() {
+
+  /**
+   * Slices the `collection` from the `start` index up to, but not including,
+   * the `end` index.
+   *
+   * Note: This function is used instead of `Array#slice` to support node lists
+   * in IE < 9 and to ensure dense arrays are returned.
+   *
+   * @private
+   * @param {Array|Object|string} collection The collection to slice.
+   * @param {number} start The start index.
+   * @param {number} end The end index.
+   * @returns {Array} Returns the new array.
+   */
+  function slice(array, start, end) {
+    start || (start = 0);
+    if (typeof end == 'undefined') {
+      end = array ? array.length : 0;
+    }
+    var index = -1,
+        length = end - start || 0,
+        result = Array(length < 0 ? 0 : length);
+
+    while (++index < length) {
+      result[index] = array[start + index];
+    }
+    return result;
+  }
+
+  return slice;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/baseBind',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
+
+  /**
+   * Used for `Array` method references.
+   *
+   * Normally `Array.prototype` would suffice, however, using an array literal
+   * avoids issues in Narwhal.
+   */
+  var arrayRef = [];
+
+  /** Native method shortcuts */
+  var push = arrayRef.push;
+
+  /**
+   * The base implementation of `_.bind` that creates the bound function and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new bound function.
+   */
+  function baseBind(bindData) {
+    var func = bindData[0],
+        partialArgs = bindData[2],
+        thisArg = bindData[4];
+
+    function bound() {
+      // `Function#bind` spec
+      // http://es5.github.io/#x15.3.4.5
+      if (partialArgs) {
+        // avoid `arguments` object deoptimizations by using `slice` instead
+        // of `Array.prototype.slice.call` and not assigning `arguments` to a
+        // variable as a ternary expression
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      // mimic the constructor's `return` behavior
+      // http://es5.github.io/#x13.2.2
+      if (this instanceof bound) {
+        // ensure `new bound` is an instance of `func`
+        var thisBinding = baseCreate(func.prototype),
+            result = func.apply(thisBinding, args || arguments);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisArg, args || arguments);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  return baseBind;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/baseCreateWrapper',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
+
+  /**
+   * Used for `Array` method references.
+   *
+   * Normally `Array.prototype` would suffice, however, using an array literal
+   * avoids issues in Narwhal.
+   */
+  var arrayRef = [];
+
+  /** Native method shortcuts */
+  var push = arrayRef.push;
+
+  /**
+   * The base implementation of `createWrapper` that creates the wrapper and
+   * sets its meta data.
+   *
+   * @private
+   * @param {Array} bindData The bind data array.
+   * @returns {Function} Returns the new function.
+   */
+  function baseCreateWrapper(bindData) {
+    var func = bindData[0],
+        bitmask = bindData[1],
+        partialArgs = bindData[2],
+        partialRightArgs = bindData[3],
+        thisArg = bindData[4],
+        arity = bindData[5];
+
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        key = func;
+
+    function bound() {
+      var thisBinding = isBind ? thisArg : this;
+      if (partialArgs) {
+        var args = slice(partialArgs);
+        push.apply(args, arguments);
+      }
+      if (partialRightArgs || isCurry) {
+        args || (args = slice(arguments));
+        if (partialRightArgs) {
+          push.apply(args, partialRightArgs);
+        }
+        if (isCurry && args.length < arity) {
+          bitmask |= 16 & ~32;
+          return baseCreateWrapper([func, (isCurryBound ? bitmask : bitmask & ~3), args, null, thisArg, arity]);
+        }
+      }
+      args || (args = arguments);
+      if (isBindKey) {
+        func = thisBinding[key];
+      }
+      if (this instanceof bound) {
+        thisBinding = baseCreate(func.prototype);
+        var result = func.apply(thisBinding, args);
+        return isObject(result) ? result : thisBinding;
+      }
+      return func.apply(thisBinding, args);
+    }
+    setBindData(bound, bindData);
+    return bound;
+  }
+
+  return baseCreateWrapper;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/isFunction',[], function() {
+
+  /**
+   * Checks if `value` is a function.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {*} value The value to check.
+   * @returns {boolean} Returns `true` if the `value` is a function, else `false`.
+   * @example
+   *
+   * _.isFunction(_);
+   * // => true
+   */
+  function isFunction(value) {
+    return typeof value == 'function';
+  }
+
+  return isFunction;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/createWrapper',['./baseBind', './baseCreateWrapper', '../objects/isFunction', './slice'], function(baseBind, baseCreateWrapper, isFunction, slice) {
+
+  /**
+   * Used for `Array` method references.
+   *
+   * Normally `Array.prototype` would suffice, however, using an array literal
+   * avoids issues in Narwhal.
+   */
+  var arrayRef = [];
+
+  /** Native method shortcuts */
+  var push = arrayRef.push,
+      unshift = arrayRef.unshift;
+
+  /**
+   * Creates a function that, when called, either curries or invokes `func`
+   * with an optional `this` binding and partially applied arguments.
+   *
+   * @private
+   * @param {Function|string} func The function or method name to reference.
+   * @param {number} bitmask The bitmask of method flags to compose.
+   *  The bitmask may be composed of the following flags:
+   *  1 - `_.bind`
+   *  2 - `_.bindKey`
+   *  4 - `_.curry`
+   *  8 - `_.curry` (bound)
+   *  16 - `_.partial`
+   *  32 - `_.partialRight`
+   * @param {Array} [partialArgs] An array of arguments to prepend to those
+   *  provided to the new function.
+   * @param {Array} [partialRightArgs] An array of arguments to append to those
+   *  provided to the new function.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {number} [arity] The arity of `func`.
+   * @returns {Function} Returns the new function.
+   */
+  function createWrapper(func, bitmask, partialArgs, partialRightArgs, thisArg, arity) {
+    var isBind = bitmask & 1,
+        isBindKey = bitmask & 2,
+        isCurry = bitmask & 4,
+        isCurryBound = bitmask & 8,
+        isPartial = bitmask & 16,
+        isPartialRight = bitmask & 32;
+
+    if (!isBindKey && !isFunction(func)) {
+      throw new TypeError;
+    }
+    if (isPartial && !partialArgs.length) {
+      bitmask &= ~16;
+      isPartial = partialArgs = false;
+    }
+    if (isPartialRight && !partialRightArgs.length) {
+      bitmask &= ~32;
+      isPartialRight = partialRightArgs = false;
+    }
+    var bindData = func && func.__bindData__;
+    if (bindData && bindData !== true) {
+      // clone `bindData`
+      bindData = slice(bindData);
+      if (bindData[2]) {
+        bindData[2] = slice(bindData[2]);
+      }
+      if (bindData[3]) {
+        bindData[3] = slice(bindData[3]);
+      }
+      // set `thisBinding` is not previously bound
+      if (isBind && !(bindData[1] & 1)) {
+        bindData[4] = thisArg;
+      }
+      // set if previously bound but not currently (subsequent curried functions)
+      if (!isBind && bindData[1] & 1) {
+        bitmask |= 8;
+      }
+      // set curried arity if not yet set
+      if (isCurry && !(bindData[1] & 4)) {
+        bindData[5] = arity;
+      }
+      // append partial left arguments
+      if (isPartial) {
+        push.apply(bindData[2] || (bindData[2] = []), partialArgs);
+      }
+      // append partial right arguments
+      if (isPartialRight) {
+        unshift.apply(bindData[3] || (bindData[3] = []), partialRightArgs);
+      }
+      // merge flags
+      bindData[1] |= bitmask;
+      return createWrapper.apply(null, bindData);
+    }
+    // fast path for `_.bind`
+    var creater = (bitmask == 1 || bitmask === 17) ? baseBind : baseCreateWrapper;
+    return creater([func, bitmask, partialArgs, partialRightArgs, thisArg, arity]);
+  }
+
+  return createWrapper;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/functions/bind',['../internals/createWrapper', '../internals/slice'], function(createWrapper, slice) {
+
+  /**
+   * Creates a function that, when called, invokes `func` with the `this`
+   * binding of `thisArg` and prepends any additional `bind` arguments to those
+   * provided to the bound function.
+   *
+   * @static
+   * @memberOf _
+   * @category Functions
+   * @param {Function} func The function to bind.
+   * @param {*} [thisArg] The `this` binding of `func`.
+   * @param {...*} [arg] Arguments to be partially applied.
+   * @returns {Function} Returns the new bound function.
+   * @example
+   *
+   * var func = function(greeting) {
+   *   return greeting + ' ' + this.name;
+   * };
+   *
+   * func = _.bind(func, { 'name': 'fred' }, 'hi');
+   * func();
+   * // => 'hi fred'
+   */
+  function bind(func, thisArg) {
+    return arguments.length > 2
+      ? createWrapper(func, 17, slice(arguments, 2), null, thisArg)
+      : createWrapper(func, 1, null, null, thisArg);
+  }
+
+  return bind;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/utilities/identity',[], function() {
+
+  /**
+   * This method returns the first argument provided to it.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} value Any value.
+   * @returns {*} Returns `value`.
+   * @example
+   *
+   * var object = { 'name': 'fred' };
+   * _.identity(object) === object;
+   * // => true
+   */
+  function identity(value) {
+    return value;
+  }
+
+  return identity;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/support',['./internals/isNative'], function(isNative) {
+
+  /** Used to detect functions containing a `this` reference */
+  var reThis = /\bthis\b/;
+
+  /**
+   * An object used to flag environments features.
+   *
+   * @static
+   * @memberOf _
+   * @type Object
+   */
+  var support = {};
+
+  /**
+   * Detect if functions can be decompiled by `Function#toString`
+   * (all but PS3 and older Opera mobile browsers & avoided in Windows 8 apps).
+   *
+   * @memberOf _.support
+   * @type boolean
+   */
+  support.funcDecomp = !isNative(window.WinRTError) && reThis.test(function() { return this; });
+
+  /**
+   * Detect if `Function#name` is supported (all but IE).
+   *
+   * @memberOf _.support
+   * @type boolean
+   */
+  support.funcNames = typeof Function.name == 'string';
+
+  return support;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/baseCreateCallback',['../functions/bind', '../utilities/identity', './setBindData', '../support'], function(bind, identity, setBindData, support) {
+
+  /** Used to detected named functions */
+  var reFuncName = /^\s*function[ \n\r\t]+\w/;
+
+  /** Used to detect functions containing a `this` reference */
+  var reThis = /\bthis\b/;
+
+  /** Native method shortcuts */
+  var fnToString = Function.prototype.toString;
+
+  /**
+   * The base implementation of `_.createCallback` without support for creating
+   * "_.pluck" or "_.where" style callbacks.
+   *
+   * @private
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   */
+  function baseCreateCallback(func, thisArg, argCount) {
+    if (typeof func != 'function') {
+      return identity;
+    }
+    // exit early for no `thisArg` or already bound by `Function#bind`
+    if (typeof thisArg == 'undefined' || !('prototype' in func)) {
+      return func;
+    }
+    var bindData = func.__bindData__;
+    if (typeof bindData == 'undefined') {
+      if (support.funcNames) {
+        bindData = !func.name;
+      }
+      bindData = bindData || !support.funcDecomp;
+      if (!bindData) {
+        var source = fnToString.call(func);
+        if (!support.funcNames) {
+          bindData = !reFuncName.test(source);
+        }
+        if (!bindData) {
+          // checks if `func` references the `this` keyword and stores the result
+          bindData = reThis.test(source);
+          setBindData(func, bindData);
+        }
+      }
+    }
+    // exit early if there are no `this` references or `func` is bound
+    if (bindData === false || (bindData !== true && bindData[1] & 1)) {
+      return func;
+    }
+    switch (argCount) {
+      case 1: return function(value) {
+        return func.call(thisArg, value);
+      };
+      case 2: return function(a, b) {
+        return func.call(thisArg, a, b);
+      };
+      case 3: return function(value, index, collection) {
+        return func.call(thisArg, value, index, collection);
+      };
+      case 4: return function(accumulator, value, index, collection) {
+        return func.call(thisArg, accumulator, value, index, collection);
+      };
+    }
+    return bind(func, thisArg);
+  }
+
+  return baseCreateCallback;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/forIn',['../internals/baseCreateCallback', '../internals/objectTypes'], function(baseCreateCallback, objectTypes) {
+
+  /**
+   * Iterates over own and inherited enumerable properties of an object,
+   * executing the callback for each property. The callback is bound to `thisArg`
+   * and invoked with three arguments; (value, key, object). Callbacks may exit
+   * iteration early by explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * function Shape() {
+   *   this.x = 0;
+   *   this.y = 0;
+   * }
+   *
+   * Shape.prototype.move = function(x, y) {
+   *   this.x += x;
+   *   this.y += y;
+   * };
+   *
+   * _.forIn(new Shape, function(value, key) {
+   *   console.log(key);
+   * });
+   * // => logs 'x', 'y', and 'move' (property order is not guaranteed across environments)
+   */
+  var forIn = function(collection, callback, thisArg) {
+    var index, iterable = collection, result = iterable;
+    if (!iterable) return result;
+    if (!objectTypes[typeof iterable]) return result;
+    callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+      for (index in iterable) {
+        if (callback(iterable[index], index, collection) === false) return result;
+      }
+    return result
+  };
+
+  return forIn;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/arrayPool',[], function() {
+
+  /** Used to pool arrays and objects used internally */
+  var arrayPool = [];
+
+  return arrayPool;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/getArray',['./arrayPool'], function(arrayPool) {
+
+  /**
+   * Gets an array from the array pool or creates a new one if the pool is empty.
+   *
+   * @private
+   * @returns {Array} The array from the pool.
+   */
+  function getArray() {
+    return arrayPool.pop() || [];
+  }
+
+  return getArray;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/maxPoolSize',[], function() {
+
+  /** Used as the max size of the `arrayPool` and `objectPool` */
+  var maxPoolSize = 40;
+
+  return maxPoolSize;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/releaseArray',['./arrayPool', './maxPoolSize'], function(arrayPool, maxPoolSize) {
+
+  /**
+   * Releases the given array back to the array pool.
+   *
+   * @private
+   * @param {Array} [array] The array to release.
+   */
+  function releaseArray(array) {
+    array.length = 0;
+    if (arrayPool.length < maxPoolSize) {
+      arrayPool.push(array);
+    }
+  }
+
+  return releaseArray;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/baseIsEqual',['../objects/forIn', './getArray', '../objects/isFunction', './objectTypes', './releaseArray'], function(forIn, getArray, isFunction, objectTypes, releaseArray) {
+
+  /** `Object#toString` result shortcuts */
+  var argsClass = '[object Arguments]',
+      arrayClass = '[object Array]',
+      boolClass = '[object Boolean]',
+      dateClass = '[object Date]',
+      numberClass = '[object Number]',
+      objectClass = '[object Object]',
+      regexpClass = '[object RegExp]',
+      stringClass = '[object String]';
+
+  /** Used for native method references */
+  var objectProto = Object.prototype;
+
+  /** Used to resolve the internal [[Class]] of values */
+  var toString = objectProto.toString;
+
+  /** Native method shortcuts */
+  var hasOwnProperty = objectProto.hasOwnProperty;
+
+  /**
+   * The base implementation of `_.isEqual`, without support for `thisArg` binding,
+   * that allows partial "_.where" style comparisons.
+   *
+   * @private
+   * @param {*} a The value to compare.
+   * @param {*} b The other value to compare.
+   * @param {Function} [callback] The function to customize comparing values.
+   * @param {Function} [isWhere=false] A flag to indicate performing partial comparisons.
+   * @param {Array} [stackA=[]] Tracks traversed `a` objects.
+   * @param {Array} [stackB=[]] Tracks traversed `b` objects.
+   * @returns {boolean} Returns `true` if the values are equivalent, else `false`.
+   */
+  function baseIsEqual(a, b, callback, isWhere, stackA, stackB) {
+    // used to indicate that when comparing objects, `a` has at least the properties of `b`
+    if (callback) {
+      var result = callback(a, b);
+      if (typeof result != 'undefined') {
+        return !!result;
+      }
+    }
+    // exit early for identical values
+    if (a === b) {
+      // treat `+0` vs. `-0` as not equal
+      return a !== 0 || (1 / a == 1 / b);
+    }
+    var type = typeof a,
+        otherType = typeof b;
+
+    // exit early for unlike primitive values
+    if (a === a &&
+        !(a && objectTypes[type]) &&
+        !(b && objectTypes[otherType])) {
+      return false;
+    }
+    // exit early for `null` and `undefined` avoiding ES3's Function#call behavior
+    // http://es5.github.io/#x15.3.4.4
+    if (a == null || b == null) {
+      return a === b;
+    }
+    // compare [[Class]] names
+    var className = toString.call(a),
+        otherClass = toString.call(b);
+
+    if (className == argsClass) {
+      className = objectClass;
+    }
+    if (otherClass == argsClass) {
+      otherClass = objectClass;
+    }
+    if (className != otherClass) {
+      return false;
+    }
+    switch (className) {
+      case boolClass:
+      case dateClass:
+        // coerce dates and booleans to numbers, dates to milliseconds and booleans
+        // to `1` or `0` treating invalid dates coerced to `NaN` as not equal
+        return +a == +b;
+
+      case numberClass:
+        // treat `NaN` vs. `NaN` as equal
+        return (a != +a)
+          ? b != +b
+          // but treat `+0` vs. `-0` as not equal
+          : (a == 0 ? (1 / a == 1 / b) : a == +b);
+
+      case regexpClass:
+      case stringClass:
+        // coerce regexes to strings (http://es5.github.io/#x15.10.6.4)
+        // treat string primitives and their corresponding object instances as equal
+        return a == String(b);
+    }
+    var isArr = className == arrayClass;
+    if (!isArr) {
+      // unwrap any `lodash` wrapped values
+      var aWrapped = hasOwnProperty.call(a, '__wrapped__'),
+          bWrapped = hasOwnProperty.call(b, '__wrapped__');
+
+      if (aWrapped || bWrapped) {
+        return baseIsEqual(aWrapped ? a.__wrapped__ : a, bWrapped ? b.__wrapped__ : b, callback, isWhere, stackA, stackB);
+      }
+      // exit for functions and DOM nodes
+      if (className != objectClass) {
+        return false;
+      }
+      // in older versions of Opera, `arguments` objects have `Array` constructors
+      var ctorA = a.constructor,
+          ctorB = b.constructor;
+
+      // non `Object` object instances with different constructors are not equal
+      if (ctorA != ctorB &&
+            !(isFunction(ctorA) && ctorA instanceof ctorA && isFunction(ctorB) && ctorB instanceof ctorB) &&
+            ('constructor' in a && 'constructor' in b)
+          ) {
+        return false;
+      }
+    }
+    // assume cyclic structures are equal
+    // the algorithm for detecting cyclic structures is adapted from ES 5.1
+    // section 15.12.3, abstract operation `JO` (http://es5.github.io/#x15.12.3)
+    var initedStack = !stackA;
+    stackA || (stackA = getArray());
+    stackB || (stackB = getArray());
+
+    var length = stackA.length;
+    while (length--) {
+      if (stackA[length] == a) {
+        return stackB[length] == b;
+      }
+    }
+    var size = 0;
+    result = true;
+
+    // add `a` and `b` to the stack of traversed objects
+    stackA.push(a);
+    stackB.push(b);
+
+    // recursively compare objects and arrays (susceptible to call stack limits)
+    if (isArr) {
+      // compare lengths to determine if a deep comparison is necessary
+      length = a.length;
+      size = b.length;
+      result = size == length;
+
+      if (result || isWhere) {
+        // deep compare the contents, ignoring non-numeric properties
+        while (size--) {
+          var index = length,
+              value = b[size];
+
+          if (isWhere) {
+            while (index--) {
+              if ((result = baseIsEqual(a[index], value, callback, isWhere, stackA, stackB))) {
+                break;
+              }
+            }
+          } else if (!(result = baseIsEqual(a[size], value, callback, isWhere, stackA, stackB))) {
+            break;
+          }
+        }
+      }
+    }
+    else {
+      // deep compare objects using `forIn`, instead of `forOwn`, to avoid `Object.keys`
+      // which, in this case, is more costly
+      forIn(b, function(value, key, b) {
+        if (hasOwnProperty.call(b, key)) {
+          // count the number of properties.
+          size++;
+          // deep compare each property value.
+          return (result = hasOwnProperty.call(a, key) && baseIsEqual(a[key], value, callback, isWhere, stackA, stackB));
+        }
+      });
+
+      if (result && !isWhere) {
+        // ensure both objects have the same number of properties
+        forIn(a, function(value, key, a) {
+          if (hasOwnProperty.call(a, key)) {
+            // `size` will be `-1` if `a` has more properties than `b`
+            return (result = --size > -1);
+          }
+        });
+      }
+    }
+    stackA.pop();
+    stackB.pop();
+
+    if (initedStack) {
+      releaseArray(stackA);
+      releaseArray(stackB);
+    }
+    return result;
+  }
+
+  return baseIsEqual;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/internals/shimKeys',['./objectTypes'], function(objectTypes) {
+
+  /** Used for native method references */
+  var objectProto = Object.prototype;
+
+  /** Native method shortcuts */
+  var hasOwnProperty = objectProto.hasOwnProperty;
+
+  /**
+   * A fallback implementation of `Object.keys` which produces an array of the
+   * given object's own enumerable property names.
+   *
+   * @private
+   * @type Function
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   */
+  var shimKeys = function(object) {
+    var index, iterable = object, result = [];
+    if (!iterable) return result;
+    if (!(objectTypes[typeof object])) return result;
+      for (index in iterable) {
+        if (hasOwnProperty.call(iterable, index)) {
+          result.push(index);
+        }
+      }
+    return result
+  };
+
+  return shimKeys;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/keys',['../internals/isNative', './isObject', '../internals/shimKeys'], function(isNative, isObject, shimKeys) {
+
+  /* Native method shortcuts for methods with the same name as other `lodash` methods */
+  var nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys;
+
+  /**
+   * Creates an array composed of the own enumerable property names of an object.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to inspect.
+   * @returns {Array} Returns an array of property names.
+   * @example
+   *
+   * _.keys({ 'one': 1, 'two': 2, 'three': 3 });
+   * // => ['one', 'two', 'three'] (property order is not guaranteed across environments)
+   */
+  var keys = !nativeKeys ? shimKeys : function(object) {
+    if (!isObject(object)) {
+      return [];
+    }
+    return nativeKeys(object);
+  };
+
+  return keys;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/utilities/property',[], function() {
+
+  /**
+   * Creates a "_.pluck" style function, which returns the `key` value of a
+   * given object.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {string} key The name of the property to retrieve.
+   * @returns {Function} Returns the new function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'fred',   'age': 40 },
+   *   { 'name': 'barney', 'age': 36 }
+   * ];
+   *
+   * var getName = _.property('name');
+   *
+   * _.map(characters, getName);
+   * // => ['barney', 'fred']
+   *
+   * _.sortBy(characters, getName);
+   * // => [{ 'name': 'barney', 'age': 36 }, { 'name': 'fred',   'age': 40 }]
+   */
+  function property(key) {
+    return function(object) {
+      return object[key];
+    };
+  }
+
+  return property;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/functions/createCallback',['../internals/baseCreateCallback', '../internals/baseIsEqual', '../objects/isObject', '../objects/keys', '../utilities/property'], function(baseCreateCallback, baseIsEqual, isObject, keys, property) {
+
+  /**
+   * Produces a callback bound to an optional `thisArg`. If `func` is a property
+   * name the created callback will return the property value for a given element.
+   * If `func` is an object the created callback will return `true` for elements
+   * that contain the equivalent object properties, otherwise it will return `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Utilities
+   * @param {*} [func=identity] The value to convert to a callback.
+   * @param {*} [thisArg] The `this` binding of the created callback.
+   * @param {number} [argCount] The number of arguments the callback accepts.
+   * @returns {Function} Returns a callback function.
+   * @example
+   *
+   * var characters = [
+   *   { 'name': 'barney', 'age': 36 },
+   *   { 'name': 'fred',   'age': 40 }
+   * ];
+   *
+   * // wrap to create custom callback shorthands
+   * _.createCallback = _.wrap(_.createCallback, function(func, callback, thisArg) {
+   *   var match = /^(.+?)__([gl]t)(.+)$/.exec(callback);
+   *   return !match ? func(callback, thisArg) : function(object) {
+   *     return match[2] == 'gt' ? object[match[1]] > match[3] : object[match[1]] < match[3];
+   *   };
+   * });
+   *
+   * _.filter(characters, 'age__gt38');
+   * // => [{ 'name': 'fred', 'age': 40 }]
+   */
+  function createCallback(func, thisArg, argCount) {
+    var type = typeof func;
+    if (func == null || type == 'function') {
+      return baseCreateCallback(func, thisArg, argCount);
+    }
+    // handle "_.pluck" style callback shorthands
+    if (type != 'object') {
+      return property(func);
+    }
+    var props = keys(func),
+        key = props[0],
+        a = func[key];
+
+    // handle "_.where" style callback shorthands
+    if (props.length == 1 && a === a && !isObject(a)) {
+      // fast path the common case of providing an object with a single
+      // property containing a primitive value
+      return function(object) {
+        var b = object[key];
+        return a === b && (a !== 0 || (1 / a == 1 / b));
+      };
+    }
+    return function(object) {
+      var length = props.length,
+          result = false;
+
+      while (length--) {
+        if (!(result = baseIsEqual(object[props[length]], func[props[length]], null, true))) {
+          break;
+        }
+      }
+      return result;
+    };
+  }
+
+  return createCallback;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/forOwn',['../internals/baseCreateCallback', './keys', '../internals/objectTypes'], function(baseCreateCallback, keys, objectTypes) {
+
+  /**
+   * Iterates over own enumerable properties of an object, executing the callback
+   * for each property. The callback is bound to `thisArg` and invoked with three
+   * arguments; (value, key, object). Callbacks may exit iteration early by
+   * explicitly returning `false`.
+   *
+   * @static
+   * @memberOf _
+   * @type Function
+   * @category Objects
+   * @param {Object} object The object to iterate over.
+   * @param {Function} [callback=identity] The function called per iteration.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {Object} Returns `object`.
+   * @example
+   *
+   * _.forOwn({ '0': 'zero', '1': 'one', 'length': 2 }, function(num, key) {
+   *   console.log(key);
+   * });
+   * // => logs '0', '1', and 'length' (property order is not guaranteed across environments)
+   */
+  var forOwn = function(collection, callback, thisArg) {
+    var index, iterable = collection, result = iterable;
+    if (!iterable) return result;
+    if (!objectTypes[typeof iterable]) return result;
+    callback = callback && typeof thisArg == 'undefined' ? callback : baseCreateCallback(callback, thisArg, 3);
+      var ownIndex = -1,
+          ownProps = objectTypes[typeof iterable] && keys(iterable),
+          length = ownProps ? ownProps.length : 0;
+
+      while (++ownIndex < length) {
+        index = ownProps[ownIndex];
+        if (callback(iterable[index], index, collection) === false) return result;
+      }
+    return result
+  };
+
+  return forOwn;
+});
+
+/**
+ * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
+ * Build: `lodash modularize modern exports="amd" -o ./modern/`
+ * Copyright 2012-2013 The Dojo Foundation <http://dojofoundation.org/>
+ * Based on Underscore.js 1.5.2 <http://underscorejs.org/LICENSE>
+ * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
+ * Available under MIT license <http://lodash.com/license>
+ */
+define('lodash-modern/objects/findKey',['../functions/createCallback', './forOwn'], function(createCallback, forOwn) {
+
+  /**
+   * This method is like `_.findIndex` except that it returns the key of the
+   * first element that passes the callback check, instead of the element itself.
+   *
+   * If a property name is provided for `callback` the created "_.pluck" style
+   * callback will return the property value of the given element.
+   *
+   * If an object is provided for `callback` the created "_.where" style callback
+   * will return `true` for elements that have the properties of the given object,
+   * else `false`.
+   *
+   * @static
+   * @memberOf _
+   * @category Objects
+   * @param {Object} object The object to search.
+   * @param {Function|Object|string} [callback=identity] The function called per
+   *  iteration. If a property name or object is provided it will be used to
+   *  create a "_.pluck" or "_.where" style callback, respectively.
+   * @param {*} [thisArg] The `this` binding of `callback`.
+   * @returns {string|undefined} Returns the key of the found element, else `undefined`.
+   * @example
+   *
+   * var characters = {
+   *   'barney': {  'age': 36, 'blocked': false },
+   *   'fred': {    'age': 40, 'blocked': true },
+   *   'pebbles': { 'age': 1,  'blocked': false }
+   * };
+   *
+   * _.findKey(characters, function(chr) {
+   *   return chr.age < 40;
+   * });
+   * // => 'barney' (property order is not guaranteed across environments)
+   *
+   * // using "_.where" callback shorthand
+   * _.findKey(characters, { 'age': 1 });
+   * // => 'pebbles'
+   *
+   * // using "_.pluck" callback shorthand
+   * _.findKey(characters, 'blocked');
+   * // => 'fred'
+   */
+  function findKey(object, callback, thisArg) {
+    var result;
+    callback = createCallback(callback, thisArg, 3);
+    forOwn(object, function(value, key, object) {
+      if (callback(value, key, object)) {
+        result = key;
+        return false;
+      }
+    });
+    return result;
+  }
+
+  return findKey;
+});
+
+define('scribe-plugin-keyboard-shortcuts',[
+  'lodash-modern/objects/findKey'
+], function (
+  findKey
+) {
+
+  
+
+  return function (commandsToKeyboardShortcutsMap) {
+    return function (scribe) {
+      scribe.el.addEventListener('keydown', function (event) {
+        var commandName = findKey(commandsToKeyboardShortcutsMap, function (isKeyboardShortcut) {
+          return isKeyboardShortcut(event);
+        });
+
+        if (commandName) {
+          // FIXME: should command return undefined if one is
+          // not found.
+
+          var command = scribe.getCommand(commandName);
+          event.preventDefault();
+
+          if (command.queryEnabled()) {
+            command.execute();
+          }
+        }
+      });
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-keyboard-shortcuts.js.map;
+define('scribe-plugin-link-prompt-command',[],function () {
+
+  /**
+   * This plugin adds a command for creating links, including a basic prompt.
+   */
+
+  
+
+  return function () {
+    return function (scribe) {
+      var linkPromptCommand = new scribe.api.Command('createLink');
+
+      linkPromptCommand.nodeName = 'A';
+
+      linkPromptCommand.execute = function () {
+        var selection = new scribe.api.Selection();
+        var range = selection.range;
+        var anchorNode = selection.getContaining(function (node) {
+          return node.nodeName === this.nodeName;
+        }.bind(this));
+        var initialLink = anchorNode ? anchorNode.href : 'http://';
+        var link = window.prompt('Enter a link.', initialLink);
+
+        if (anchorNode) {
+          range.selectNode(anchorNode);
+          selection.selection.removeAllRanges(range);
+          selection.selection.addRange(range);
+        }
+
+        // FIXME: I don't like how plugins like this do so much. Is there a way
+        // to compose?
+
+        if (link) {
+          // Prepend href protocol if missing
+          // For emails we just look for a `@` symbol as it is easier.
+          if (! /^mailto\:/.test(link) && /@/.test(link)) {
+            var shouldPrefixEmail = window.confirm(
+              'The URL you entered appears to be an email address. ' +
+              'Do you want to add the required “mailto:” prefix?'
+            );
+            if (shouldPrefixEmail) {
+              link = 'mailto:' + link;
+            }
+          } else if (! /^https?\:\/\//.test(link)) {
+            var shouldPrefixLink = window.confirm(
+              'The URL you entered appears to be a link. ' +
+              'Do you want to add the required “http://” prefix?'
+            );
+            if (shouldPrefixLink) {
+              link = 'http://' + link;
+            }
+          }
+
+          scribe.api.SimpleCommand.prototype.execute.call(this, link);
+        }
+      };
+
+      linkPromptCommand.queryState = function () {
+        /**
+         * We override the native `document.queryCommandState` for links because
+         * the `createLink` and `unlink` commands are not supported.
+         * As per: http://jsbin.com/OCiJUZO/1/edit?js,console,output
+         */
+        var selection = new scribe.api.Selection();
+        return !! selection.getContaining(function (node) {
+          return node.nodeName === this.nodeName;
+        }.bind(this));
+      };
+
+      scribe.commands.linkPrompt = linkPromptCommand;
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-link-prompt-command.js.map;
+// UMD
+(function (root, factory) {
+  if (typeof define === 'function' && define.amd) {
+    define('html-janitor',factory);
+  } else {
+    root.amdWeb = factory();
+  }
+}(this, function () {
+
+  function HTMLJanitor(config) {
+    this.config = config;
+  }
+
+  // TODO: not exhaustive?
+  var blockElementNames = ['P', 'LI', 'DIV'];
+  function isBlockElement(node) {
+    return blockElementNames.indexOf(node.nodeName) !== -1;
+  }
+
+  HTMLJanitor.prototype.clean = function (html) {
+    var sandbox = document.createElement('div');
+    sandbox.innerHTML = html;
+
+    this._sanitize(sandbox);
+
+    return sandbox.innerHTML;
+  };
+
+  HTMLJanitor.prototype._sanitize = function (parentNode) {
+    var treeWalker = createTreeWalker(parentNode);
+    var node = treeWalker.firstChild();
+    if (!node) { return; }
+
+    do {
+      var nodeName = node.nodeName.toLowerCase();
+      var allowedAttrs = this.config.tags[nodeName];
+
+      // Ignore nodes that have already been sanitized
+      if (node._sanitized) {
+        continue;
+      }
+
+      if (node.nodeType === Node.TEXT_NODE) {
+        // If this text node is just whitespace and the previous or next element
+        // sibling is a block element, remove it
+        // N.B.: This heuristic could change. Very specific to a bug with
+        // `contenteditable` in Firefox: http://jsbin.com/EyuKase/1/edit?js,output
+        // FIXME: make this an option?
+        if (node.data.trim() === ''
+            && ((node.previousElementSibling && isBlockElement(node.previousElementSibling))
+                 || (node.nextElementSibling && isBlockElement(node.nextElementSibling)))) {
+          parentNode.removeChild(node);
+          this._sanitize(parentNode);
+          break;
+        } else {
+          continue;
+        }
+      }
+
+      // Remove all comments
+      if (node.nodeType === Node.COMMENT_NODE) {
+        parentNode.removeChild(node);
+        this._sanitize(parentNode);
+        break;
+      }
+
+      var isInlineElement = nodeName === 'b';
+      var containsBlockElement;
+      if (isInlineElement) {
+        containsBlockElement = Array.prototype.some.call(node.childNodes, isBlockElement);
+      }
+
+      var isInvalid = isInlineElement && containsBlockElement;
+
+      // Block elements should not be nested (e.g. <li><p>...); if
+      // they are, we want to unwrap the inner block element.
+      var isNotTopContainer = !! parentNode.parentNode;
+      // TODO: Don't hardcore this — this is not invalid markup. Should be
+      // configurable.
+      var isNestedBlockElement =
+            isBlockElement(parentNode) &&
+            isBlockElement(node) &&
+            isNotTopContainer;
+
+      // Drop tag entirely according to the whitelist *and* if the markup
+      // is invalid.
+      if (!this.config.tags[nodeName] || isInvalid || isNestedBlockElement) {
+        // Do not keep the inner text of SCRIPT/STYLE elements.
+        if (! (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE')) {
+          while (node.childNodes.length > 0) {
+            parentNode.insertBefore(node.childNodes[0], node);
+          }
+        }
+        parentNode.removeChild(node);
+
+        this._sanitize(parentNode);
+        break;
+      }
+
+      // Sanitize attributes
+      for (var a = 0; a < node.attributes.length; a += 1) {
+        var attr = node.attributes[a];
+        var attrName = attr.name.toLowerCase();
+
+        // Allow attribute?
+        var allowedAttrValue = allowedAttrs[attrName];
+        var notInAttrList = ! allowedAttrValue;
+        var valueNotAllowed = allowedAttrValue !== true && attr.value !== allowedAttrValue;
+        if (notInAttrList || valueNotAllowed) {
+          node.removeAttribute(attr.name);
+          // Shift the array to continue looping.
+          a = a - 1;
+        }
+      }
+
+      // Sanitize children
+      this._sanitize(node);
+
+      // Mark node as sanitized so it's ignored in future runs
+      node._sanitized = true;
+    } while (node = treeWalker.nextSibling());
+  };
+
+  function createTreeWalker(node) {
+    return document.createTreeWalker(node,
+                                     NodeFilter.SHOW_TEXT | NodeFilter.SHOW_ELEMENT | NodeFilter.SHOW_COMMENT);
+  }
+
+  return HTMLJanitor;
+
+}));
+
+define('scribe-plugin-sanitizer',[
+  'html-janitor'
+], function (
+  HTMLJanitor
+) {
+
+  /**
+   * This plugin adds the ability to sanitize content when it is pasted into the
+   * scribe, adhering to a whitelist of allowed tags and attributes.
+   */
+
+  
+
+  return function (config) {
+    return function (scribe) {
+      var janitor = new HTMLJanitor(config);
+
+      scribe.htmlFormatter.formatters.push(janitor.clean.bind(janitor));
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-sanitizer.js.map;
+define('scribe-plugin-smart-lists',[],function () {
+
+  
+
+  return function () {
+
+    var keys = {
+      32: 'Space',
+      42: '*',
+      45: '-',
+      46: '.',
+      49: '1',
+      // Bullet insertion keycode, most likely only working on OS X...
+      8226:  '•'
+    };
+
+    function isUnorderedListChar(string) {
+      return string === '*' || string === '-' || string === '•';
+    }
+
+    function findBlockContainer(node) {
+      while (node && ! isBlockElement(node)) {
+        node = node.parentNode;
+      }
+
+      return node;
+    }
+
+    function isBlockElement(node) {
+      return (
+        node.tagName === 'P' ||
+        node.tagName === 'LI' ||
+        node.tagName === 'DIV'
+        // TODO: etc
+      );
+    }
+
+
+    return function (scribe) {
+
+      var preLastChar, lastChar, currentChar;
+
+      function removeSelectedTextNode() {
+        var selection = new scribe.api.Selection();
+        var container = selection.range.commonAncestorContainer;
+        if (container.nodeType === Node.TEXT_NODE) {
+          container.parentNode.removeChild(container);
+        } else {
+          throw new Error('Cannot empty non-text node!');
+        }
+      }
+
+      function input(event) {
+        var listCommand;
+
+        preLastChar = lastChar;
+        lastChar = currentChar;
+        // FIXME: Chrome / FF, theoretically we should be using event.key?
+        //        can we abstract this madness?
+        currentChar = keys[event.charCode];
+
+        var selection = new scribe.api.Selection();
+
+        // TODO: if a <p> with just this content
+        var container = selection.range.commonAncestorContainer;
+
+        // If in a <p>
+        var blockContainer = findBlockContainer(container);
+        if (blockContainer && blockContainer.tagName === 'P') {
+          var startOfLineIsUList = isUnorderedListChar(container.textContent[0]);
+          if (isUnorderedListChar(lastChar) && currentChar === 'Space' && startOfLineIsUList) {
+            listCommand = 'insertUnorderedList';
+          }
+
+          var startOfLineIsOList = container.textContent === '1.';
+          if (preLastChar === '1' && lastChar === '.' && currentChar === 'Space' && startOfLineIsOList) {
+            listCommand = 'insertOrderedList';
+          }
+        }
+
+        if (listCommand) {
+          // Ignore the typed character
+          event.preventDefault();
+
+          scribe.transactionManager.run(function() {
+            scribe.getCommand(listCommand).execute();
+
+            // Clear "* "/etc from the list item
+            removeSelectedTextNode();
+          });
+        }
+      }
+
+      scribe.el.addEventListener('keypress', input);
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-smart-lists.js.map;
+define('scribe-plugin-toolbar',[],function () {
+
+  
+
+  return function (toolbarNode) {
+    return function (scribe) {
+      var buttons = toolbarNode.querySelectorAll('button');
+
+      Array.prototype.forEach.call(buttons, function (button) {
+        // Look for a predefined command, otherwise define one now.
+        var command = scribe.getCommand(button.dataset.commandName);
+
+        button.addEventListener('click', function () {
+          /**
+           * Focus will have been taken away from the Scribe instance when
+           * clicking on a button (Chrome will return the focus automatically
+           * but only if the selection is not collapsed. As per: http://jsbin.com/tupaj/1/edit?html,js,output).
+           * It is important that we focus the instance again before executing
+           * the command, because it might rely on selection data.
+           */
+          scribe.el.focus();
+          command.execute();
+          /**
+           * Chrome has a bit of magic to re-focus the `contenteditable` when a
+           * command is executed.
+           * As per: http://jsbin.com/papi/1/edit?html,js,output
+           */
+        });
+
+        // Keep the state of toolbar buttons in sync with the current selection.
+        // Unfortunately, there is no `selectionchange` event.
+        scribe.el.addEventListener('keyup', updateUi);
+        scribe.el.addEventListener('mouseup', updateUi);
+        // We also want to update the UI whenever the content changes. This
+        // could be when one of the toolbar buttons is actioned.
+        // TODO: The `input` event does not trigger when we manipulate the content
+        // ourselves. Maybe commands should fire events when they are activated.
+        scribe.on('content-changed', updateUi);
+
+        function updateUi() {
+          var selection = new scribe.api.Selection();
+
+          if (selection.range) {
+            if (command.queryEnabled()) {
+              button.removeAttribute('disabled');
+
+              if (command.queryState()) {
+                button.classList.add('active');
+              } else {
+                button.classList.remove('active');
+              }
+            } else {
+              button.setAttribute('disabled', 'disabled');
+            }
+          }
+        }
+      });
+    };
+  };
+
+});
+
+//# sourceMappingURL=scribe-plugin-toolbar.js.map;
+define('scribe-plugin-inline-objects',[],function () {
+
+  /**
+   * Adds support for inserting, like embeds, videos and images.
+   */
+
+
+  return function (config) {
+    return function (scribe) {
+        // define inline objects
+        
+       
+        
+        function insertAbove(element, html) {
+          scribe.transactionManager.run(function () {
+            $(element).before(html);
+          });
+        }
+
+        function toolbarClick(event) {
+          event.target.dataset.commandName;
+          insertAbove(activeBlock, "<div contenteditable='false' style='width: 100%; height: 200px;background-color:red;'></div>");
+        }
+
+        $(".embed-tools button", scribe.el.parentNode).click(toolbarClick);
+
+
+        var activeBlock;
+
+
+        // THIS DOES THE TOOLBAR STUFF
+        scribe.el.addEventListener('mouseover', function (event) {
+          var blocks = scribe.el.children;
+          var cursorOffset = event.clientY + window.scrollY;
+          for (var i = 0; i < blocks.length; i++) {
+            if (cursorOffset < blocks[i].offsetTop + 25  ) {
+              break;
+            }
+          }
+          if (blocks[i]) {
+            var top = blocks[i].offsetTop;
+            
+            $(".embed-tools", scribe.el.parentNode)
+                .css({ top: top - 35  })
+                .addClass("active");
+            activeBlock = blocks[i];
+          }
+          else {
+            $(".embed-tools", scribe.el.parentNode).removeClass("active");
+          }
+        });
+
+        scribe.el.parentNode.addEventListener('mouseleave', function (event) {
+          $(".embed-tools", scribe.el.parentNode).removeClass("active");
+        });
+
+    }
+  }
+});
+/*
+require.config({
+  paths: {
+    'scribe': './bower_components/scribe/scribe',
+    'scribe-plugin-blockquote-command': './bower_components/scribe-plugin-blockquote-command/scribe-plugin-blockquote-command',
+    'scribe-plugin-curly-quotes': './bower_components/scribe-plugin-curly-quotes/scribe-plugin-curly-quotes',
+    'scribe-plugin-formatter-plain-text-convert-new-lines-to-html': './bower_components/scribe-plugin-formatter-plain-text-convert-new-lines-to-html/scribe-plugin-formatter-plain-text-convert-new-lines-to-html',
+    'scribe-plugin-heading-command': './bower_components/scribe-plugin-heading-command/scribe-plugin-heading-command',
+    'scribe-plugin-intelligent-unlink-command': './bower_components/scribe-plugin-intelligent-unlink-command/scribe-plugin-intelligent-unlink-command',
+    'scribe-plugin-keyboard-shortcuts': './bower_components/scribe-plugin-keyboard-shortcuts/scribe-plugin-keyboard-shortcuts',
+    'scribe-plugin-link-prompt-command': './bower_components/scribe-plugin-link-prompt-command/scribe-plugin-link-prompt-command',
+    'scribe-plugin-sanitizer': './bower_components/scribe-plugin-sanitizer/scribe-plugin-sanitizer',
+    'scribe-plugin-smart-lists': './bower_components/scribe-plugin-smart-lists/scribe-plugin-smart-lists',
+    'scribe-plugin-toolbar': './bower_components/scribe-plugin-toolbar/scribe-plugin-toolbar',
+    'scribe-plugin-inline-objects': '../src/plugins/scribe-plugin-inline-objects',
+    'scribe-plugin-inline-objects-toolbar': '../src/plugins/scribe-plugin-inline-objects-toolbar',
+
+  }
+});
+*/
+
+require([
+  'scribe',
+  'scribe-plugin-blockquote-command',
+  'scribe-plugin-curly-quotes',
+  'scribe-plugin-formatter-plain-text-convert-new-lines-to-html',
+  'scribe-plugin-heading-command',
+  'scribe-plugin-intelligent-unlink-command',
+  'scribe-plugin-keyboard-shortcuts',
+  'scribe-plugin-link-prompt-command',
+  'scribe-plugin-sanitizer',
+  'scribe-plugin-smart-lists',
+  'scribe-plugin-toolbar',
+  'scribe-plugin-inline-objects',
+], function (
+  Scribe,
+  scribePluginBlockquoteCommand,
+  scribePluginCurlyQuotes,
+  scribePluginFormatterPlainTextConvertNewLinesToHtml,
+  scribePluginHeadingCommand,
+  scribePluginIntelligentUnlinkCommand,
+  scribePluginKeyboardShortcuts,
+  scribePluginLinkPromptCommand,
+  scribePluginSanitizer,
+  scribePluginSmartLists,
+  scribePluginToolbar,
+  scribePluginInlineObjects
+) {
+
+  
+
+  var scribe = new Scribe(document.querySelector('.scribe'), { allowBlockElements: true });
+
+  scribe.on('content-changed', updateHTML);
+
+  function updateHTML() {
+    document.querySelector('.scribe-html').textContent = scribe.getHTML();
+  }
+
+  /**
+   * Keyboard shortcuts
+   */
+
+  var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
+
+  var commandsToKeyboardShortcutsMap = Object.freeze({
+    bold: function (event) { return event.metaKey && event.keyCode === 66; }, // b
+    italic: function (event) { return event.metaKey && event.keyCode === 73; }, // i
+    strikeThrough: function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }, // s
+    removeFormat: function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }, // a
+    linkPrompt: function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }, // k
+    unlink: function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }, // k,
+    insertUnorderedList: function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }, // b
+    insertOrderedList: function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }, // n
+    blockquote: function (event) { return event.altKey && event.shiftKey && event.keyCode === 87; }, // w
+    h3: function (event) { return ctrlKey(event) && event.keyCode === 50; }, // 2
+    h4: function (event) { return ctrlKey(event) && event.keyCode === 51; }, // 2
+  });
+
+  /**
+   * Plugins
+   */
+
+  scribe.use(scribePluginBlockquoteCommand());
+  scribe.use(scribePluginHeadingCommand(3));
+  scribe.use(scribePluginHeadingCommand(4));
+
+  scribe.use(scribePluginIntelligentUnlinkCommand());
+  scribe.use(scribePluginLinkPromptCommand());
+  scribe.use(scribePluginToolbar(document.querySelector('.document-tools .toolbar-contents')));
+  //scribe.use(scribePluginInlineObjectToolbar(document.querySelector('.inline-object-toolbar')));
+  scribe.use(scribePluginSmartLists());
+  scribe.use(scribePluginCurlyQuotes());
+  scribe.use(scribePluginKeyboardShortcuts(commandsToKeyboardShortcutsMap));
+
+
+  //TODO: Pass in inline object configuration
+  scribe.use(scribePluginInlineObjects(
+    {
+      "image": {
+          "template":
+          "<div data-type=\"image\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-url=\"{{source}}\"><img src=\"{{url}}\"></div>"
+      },
+      "embed": {
+          "size": ["big", "small"],
+          "crop": ["original","16x9", "4x3"],
+          "defaults": {
+              "size":"big",
+              "crop": "16x9"
+          },
+          "template": 
+          "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{embed_code}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
+      }
+    }));
+  // Formatters
+  scribe.use(scribePluginSanitizer({
+    tags: {
+      p: {},
+      br: {},
+      b: {},
+      strong: {},
+      i: {},
+      s: {},
+      blockquote: {},
+      ol: {},
+      ul: {},
+      li: {},
+      a: { href: true },
+      h3: {},
+      h4: {}
+    }
+  }));
+  scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
+
+  if (scribe.allowsBlockElements()) {
+    scribe.setContent('<p>Hello, World!</p>');
+  } else {
+    scribe.setContent('Hello, World!');
+  }
+});
+
+define("onion-editor", function(){});
+
