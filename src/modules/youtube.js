@@ -3,7 +3,7 @@
     var Youtube = Youtube || function(editor, options) {
         var self = this;
 
-        var YOUTUBE_BASE_URL = "http://www.youtube.com/watch?v=";
+        var YOUTUBE_BASE_URL = "//www.youtube.com/watch?v=";
 
 
         editor.on("inline:insert:youtube", insert);

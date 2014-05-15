@@ -21,10 +21,16 @@
     "examples",
     "src"
   ],
+<<<<<<< HEAD
   "dependencies": {
     "requirejs": "2.1.11",
 
     "scribe": "0.1.4",
+=======
+  "devDependencies": {
+    "scribe": "0.1.4",
+    "requirejs": "~2.1.9",
+>>>>>>> 1c4f0611303d295517d7fa6a4b20637de19d0a80
     "scribe-plugin-blockquote-command": "0.1.0",
     "scribe-plugin-curly-quotes": "0.1.0",
     "scribe-plugin-formatter-plain-text-convert-new-lines-to-html": "0.1.0",
@@ -34,7 +40,11 @@
     "scribe-plugin-link-prompt-command": "0.1.0",
     "scribe-plugin-sanitizer": "0.1.0",
     "scribe-plugin-smart-lists": "0.1.0",
+<<<<<<< HEAD
     "scribe-plugin-toolbar": "0.1.0",
     "almond": "0.2.9"
+=======
+    "scribe-plugin-toolbar": "0.1.0"
+>>>>>>> 1c4f0611303d295517d7fa6a4b20637de19d0a80
   }
 }
