@@ -15,7 +15,10 @@ require.config({
     'scribe-plugin-inline-objects': './plugins/scribe-plugin-inline-objects'
   },
   name: "../bower_components/almond/almond",
-
+  wrap: {
+    startFile: 'src/wrap-start.frag',
+    endFile: 'src/wrap-end.frag'
+  },
   include: ["onion-editor"],
   optimize: "none",
 

@@ -38,7 +38,7 @@
     <div id="content-wrapper" class="container">
       <div class="editor-wrapper">
         <div class="editorPlaceholder" style="display: block;"></div>
-        <div class="editor scribe"></div>
+        <div id="editor" class="editor scribe"></div>
         <div class="document-tools toolbar fixed">
           <div class="toolbar-contents">
             <button data-command-name="linkPrompt"><span class="fa fa-link"></span><span class="btn-label">Link</span></button>
@@ -103,5 +103,9 @@
     <textarea style="display:none" class="scribe-html" rows="15"></textarea>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="../build/onion-editor.js"></script>
+    <script>
+      console.log(OnionEditor);
+      var editor = new OnionEditor(document.getElementById("editor"), {});
+    </script>
   </body>
 </html>
