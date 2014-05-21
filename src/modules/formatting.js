@@ -38,22 +38,23 @@
 
         var commands = {
             bold : function(e) {
-                e.preventDefault();
+                
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
                 }
+                e.preventDefault();
             },
             italic: function(e) {
-                e.preventDefault();
                 if (canFormat("i")) {
                     global.document.execCommand("italic");
                 }
+                e.preventDefault();
             },
             underline: function(e) {
-                e.preventDefault();
                 if (canFormat("u")) {
                     global.document.execCommand("underline");
                 }
+                e.preventDefault();
             },
             strikethrough: function() {
                 if (canFormat("s")) {

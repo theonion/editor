@@ -1,4 +1,4 @@
-/*! onion-editor 2014-05-09 */
+/*! onion-editor 2014-05-21 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -407,7 +407,7 @@
 
             //check dom for errors. For now, just pull out of div if all content is wrapped with a div.
             var firstDiv = $(".editor>div", options.element);
-            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1) {
+            if (typeof firstDiv.attr("data-type") === "undefined" && firstDiv.length == 1 && $(".editor>*").length ==1) {
                 $("#content-body .editor").html( $("#content-body .editor>div").html() )
             }
 
@@ -682,22 +682,23 @@ Making a few assumptions, for now:
 
         var commands = {
             bold : function(e) {
-                e.preventDefault();
+                
                 if (canFormat("b")) {
                     global.document.execCommand("bold");
                 }
+                e.preventDefault();
             },
             italic: function(e) {
-                e.preventDefault();
                 if (canFormat("i")) {
                     global.document.execCommand("italic");
                 }
+                e.preventDefault();
             },
             underline: function(e) {
-                e.preventDefault();
                 if (canFormat("u")) {
                     global.document.execCommand("underline");
                 }
+                e.preventDefault();
             },
             strikethrough: function() {
                 if (canFormat("s")) {
