@@ -22,10 +22,6 @@ body {
     background-color: #eee;
 }
 
-#editor {
-    padding: 20px 0;
-    min-height: 100%;
-}
 
 .editor-wrapper {   
     margin: 0px auto;

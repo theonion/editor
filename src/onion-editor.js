@@ -77,24 +77,6 @@ define('onion-editor',[
      * Plugins
      */
 
-
-    //TODO: Pass in inline object configuration
-    scribe.use(scribePluginInlineObjects({
-      "image": {
-          "template":
-          "<div data-type=\"image\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-url=\"{{source}}\"><img src=\"{{url}}\"></div>"
-      },
-      "embed": {
-          "size": ["big", "small"],
-          "crop": ["original","16x9", "4x3"],
-          "defaults": {
-              "size":"big",
-              "crop": "16x9"
-          },
-          "template": 
-          "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{embed_code}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
-      }
-    }));
     // Formatters
     scribe.use(scribePluginSanitizer({
       tags: {
@@ -115,11 +97,11 @@ define('onion-editor',[
     }));
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
-    self.setContent = function(content) {
-      scribe.setContent(content);
+    this.setContent = function(content) {
+      this.scribe.setContent(content);
     }
 
-    self.getContent = function(content) {
+    this.getContent = function(content) {
       return self.element.textContent 
     }
     return this;
