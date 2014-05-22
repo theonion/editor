@@ -7011,7 +7011,7 @@ define('onion-editor',[
 
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', options.element)[0]));
+      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', options.element.parentNode)[0]));
     }
     else {
       $('.document-tools .toolbar-contents').hide();
