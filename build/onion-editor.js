@@ -6934,8 +6934,7 @@ define('onion-editor',[
     self.element = element;
 
     options = $.extend(defaults, options);
-    
-    console.log(options);
+
     var scribe = new Scribe(self.element, { allowBlockElements: true });      
 
     /**
@@ -7023,12 +7022,14 @@ define('onion-editor',[
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
     this.setContent = function(content) {
+      if (!content) {
+          content = "<p><br></p>";
+      }
       scribe.setContent(content);
     }
 
-    this.getContent = function(content) {
+    this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
-
       return self.element.textContent 
     }
     return this;
