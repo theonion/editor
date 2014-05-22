@@ -134,7 +134,7 @@ define('onion-editor',[
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
     this.setContent = function(content) {
-      this.scribe.setContent(content);
+      scribe.setContent(content);
     }
 
     this.getContent = function(content) {
