@@ -288,8 +288,8 @@
                     $("<div>")
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
-                        .css({"position":"fixed", "top":"0px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
-                        .appendTo(options.element)
+                        .css({"position":"fixed", "top":"200px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
+                        .after(options.element)
                         .focus();
 
                     //handle paste, defer to give time to focus & paste

@@ -1,4 +1,4 @@
-/*! onion-editor 2014-05-21 */
+/*! onion-editor 2014-05-22 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -290,7 +290,7 @@
                         .attr("contenteditable", "true")
                         .attr("id", "paste-bucket")
                         .css({"position":"fixed", "top":"0px", "z-index":10000, "width":"1px", "height":"1px","overflow":"hidden"})
-                        .appendTo(options.element)
+                        .after(options.element)
                         .focus();
 
                     //handle paste, defer to give time to focus & paste
