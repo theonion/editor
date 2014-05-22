@@ -11,13 +11,17 @@ module.exports = function(grunt) {
       }
     },
     watch: {
-      tasks: ['requirejs']
+      scripts: {
+        files: ['src/*.js', 'src/*/*.js'],
+        tasks: ['requirejs'],
+      }
     }
 
 
   });
   // Load external tasks
   grunt.loadNpmTasks('grunt-contrib-requirejs');
+  grunt.loadNpmTasks('grunt-contrib-watch');
 
   grunt.registerTask('default', 'requirejs');
 
