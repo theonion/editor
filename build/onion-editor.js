@@ -6930,44 +6930,48 @@ define('onion-editor',[
   }
 
   function OnionEditor(element, options) {
-    var self = this;    
-    self.element = element;
 
     options = $.extend(defaults, options);
 
-    var scribe = new Scribe(self.element, { allowBlockElements: true });      
-
-    /**
-    * Keyboard shortcuts
-    */
-    var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
+    var scribe = new Scribe(element, { allowBlockElements: true });      
 
 
     var keyCommands = {};
+    var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
     // Allowable Tags
     var tags = {};
     
+    // Multiline
     if (options.multiline) {
       tags.p = {};
       tags.br = {};
       tags.hr = {};
     }
 
+    // Bold
     if (options.formatting.bold) {
       keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
       tags.b = {};
     }
+
+    // Italics
     if (options.formatting.italic) {
       keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
       tags.i = {};
       tags.em = {};
     }
+
+    // Strike
     if (options.formatting.strike) {
       keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
       tags.s = {};
     }
+
+    //Remove formatting... 
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
+
+    // Links
     if (options.multiline && options.formatting.links) {
       keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
@@ -6975,6 +6979,8 @@ define('onion-editor',[
       scribe.use(scribePluginLinkPromptCommand());
       tags.a = { href:true, target:true }
     }
+
+    // Lists
     if (options.multiline &&  options.formatting.list) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
@@ -6983,11 +6989,15 @@ define('onion-editor',[
       tags.ul = {};
       tags.li = {};
     }
+
+    //Blockquotes
     if (options.multiline && options.formatting.blockquote) {
       keyCommands.blockquote = function (event) { return event.altKey && event.shiftKey && event.keyCode === 87; }; // w
       scribe.use(scribePluginBlockquoteCommand());
       tags.blockquote = {};
     }
+
+    // Headings
     if (options.multiline && options.formatting.heading) {
       keyCommands.h3 = function (event) { return ctrlKey(event) && event.keyCode === 50; }; // 2
       keyCommands.h4 = function (event) { return ctrlKey(event) && event.keyCode === 51; }; // 2
@@ -7011,7 +7021,7 @@ define('onion-editor',[
 
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', options.element)[0]));
+      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
     }
     else {
       $('.document-tools .toolbar-contents').hide();
@@ -7030,7 +7040,7 @@ define('onion-editor',[
 
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
-      return self.element.textContent 
+      return element.textContent 
     }
     return this;
   } 
