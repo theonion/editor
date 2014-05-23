@@ -42,11 +42,10 @@ define('onion-editor',[
 
   function OnionEditor(element, options) {
     var self = this;    
-    self.element = element;
 
     options = $.extend(defaults, options);
 
-    var scribe = new Scribe(self.element, { allowBlockElements: true });      
+    var scribe = new Scribe(element, { allowBlockElements: true });      
 
     /**
     * Keyboard shortcuts
@@ -122,7 +121,8 @@ define('onion-editor',[
 
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', options.element.parentNode)[0]));
+      console.log(
+      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
     }
     else {
       $('.document-tools .toolbar-contents').hide();
@@ -141,7 +141,7 @@ define('onion-editor',[
 
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
-      return self.element.textContent 
+      return element.textContent 
     }
     return this;
   } 
