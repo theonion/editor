@@ -121,7 +121,7 @@ define('onion-editor',[
 
     // Inline Objects
     if (options.multiline && options.inlineObjects) {
-      scribe.use(scribePluginInlineObjects({configUrl: inlineObject});
+      scribe.use(scribePluginInlineObjects(options.inlineObjects));
     }
 
     scribe.use(scribePluginSanitizer({
@@ -142,8 +142,6 @@ define('onion-editor',[
     else {
       $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
-
-
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 

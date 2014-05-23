@@ -7008,6 +7008,11 @@ define('onion-editor',[
     }
 
 
+    // Inline Objects
+    if (options.multiline && options.inlineObjects) {
+      scribe.use(scribePluginInlineObjects(options.inlineObjects));
+    }
+
     scribe.use(scribePluginSanitizer({
       tags: tags
     }));
@@ -7024,10 +7029,8 @@ define('onion-editor',[
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
     }
     else {
-      $('.document-tools .toolbar-contents').hide();
+      $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
-
-
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
