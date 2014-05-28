@@ -21,7 +21,7 @@
     width: auto;
     max-width: 100%;
     cursor:pointer;
-    float:left;
+    /*float:left;*/
     position:relative;
     padding-top: 0px;
     margin-top:8px;

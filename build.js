@@ -12,7 +12,12 @@ require.config({
     'scribe-plugin-sanitizer': '../bower_components/scribe-plugin-sanitizer/scribe-plugin-sanitizer',
     'scribe-plugin-smart-lists': '../bower_components/scribe-plugin-smart-lists/scribe-plugin-smart-lists',
     'scribe-plugin-toolbar': '../bower_components/scribe-plugin-toolbar/scribe-plugin-toolbar',
-    'scribe-plugin-inline-objects': './plugins/scribe-plugin-inline-objects'
+    'scribe-plugin-inline-objects': './plugins/scribe-plugin-inline-objects',
+    'scribe-plugin-betty-cropper': './plugins/scribe-plugin-betty-cropper',
+    'scribe-plugin-onion-video': './plugins/scribe-plugin-onion-video',
+    'scribe-plugin-hr': './plugins/scribe-plugin-hr',
+    'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
+    'scribe-plugin-embed': './plugins/scribe-plugin-embed'
   },
   name: "../bower_components/almond/almond",
   wrap: {
@@ -21,6 +26,5 @@ require.config({
   },
   include: ["onion-editor"],
   optimize: "none",
-
   out: "./build/onion-editor.js"
 });

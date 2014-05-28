@@ -57,7 +57,7 @@
           <div class="toolbar-contents">
             <button class="embed-button"><span class="fa fa-plus-circle"></span><span class="btn-label hiddenbydefault">Insert something</span></button>
             <div class="hiddenbydefault">
-              <button data-command-name="image" title="Image">
+              <button data-command-name="betty-cropper" title="Image">
                   <span class="fa fa-picture-o"></span><span class="btn-label">Image</span>
               </button>
               <button data-command-name="onion-video" title="AV Video">
@@ -69,11 +69,6 @@
               <button data-command-name="embed" title="Embed Something">
                   <span class="fa fa-code"></span><span class="btn-label">Embed Something</span>
               </button>
-
-              <button data-command-name="articlelist" title="Related Article List">
-                  <span class="fa fa-file"></span><span class="btn-label">Related Article List</span>
-              </button>
-
 
               <button data-command-name="hr" title="HR">
                   <span class="fa fa-minus"></span><span class="btn-label">Horizontal Rule</span>
@@ -104,7 +99,7 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="../build/onion-editor.js"></script>
     <script>
-      var editor = new OnionEditor(document.getElementById("editor"), {inlineObjects: "someurl", multiline:true});
+      var editor = new OnionEditor(document.getElementById("editor"), {inlineObjects: "/public/inline-config.json", multiline:true});
     </script>
   </body>
 </html>

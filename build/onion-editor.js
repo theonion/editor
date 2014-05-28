@@ -6839,29 +6839,47 @@ define('scribe-plugin-inline-objects',[],function () {
     return function (scribe) {
         // define inline objects
         
-       
+
+        // OK, we need to load the config. 
+
+        var templates;
+        $.ajax(config, {success: configLoaded});
+
+        function configLoaded(data) {
+          templates = data;;
+          $(".embed-tools button", scribe.el.parentNode).click(toolbarClick);
+        }
         
         function insertAbove(element, html) {
           scribe.transactionManager.run(function () {
             $(element).before(html);
+            $(".inline").attr("contenteditable", "false"); 
           });
         }
 
-        function toolbarClick(event) {
-          event.target.dataset.commandName;
-          insertAbove(activeBlock, "<div contenteditable='false' style='width: 100%; height: 200px;background-color:red;'></div>");
+        function insert(event) {
+          var type = $(event.target).closest("button").data("commandName");
+          scribe.emit("inline:" + type, {
+            block: activeBlock,
+            onSuccess: function(block, values) {
+              insertAbove(activeBlock, 
+                render(templates[type].template, 
+                $.extend(templates[type].defaults, values) ) ) 
+            }
+          });
         }
 
-        $(".embed-tools button", scribe.el.parentNode).click(toolbarClick);
+        function edit(event) {
+          
+        }
 
 
         var activeBlock;
 
-
         // THIS DOES THE TOOLBAR STUFF
         scribe.el.addEventListener('mouseover', function (event) {
           var blocks = scribe.el.children;
-          var cursorOffset = event.clientY + window.scrollY;
+          var cursorOffset = event.y;
           for (var i = 0; i < blocks.length; i++) {
             if (cursorOffset < blocks[i].offsetTop + 25  ) {
               break;
@@ -6869,9 +6887,8 @@ define('scribe-plugin-inline-objects',[],function () {
           }
           if (blocks[i]) {
             var top = blocks[i].offsetTop;
-            
             $(".embed-tools", scribe.el.parentNode)
-                .css({ top: top - 35  })
+                .css({ top: top   })
                 .addClass("active");
             activeBlock = blocks[i];
           }
@@ -6884,7 +6901,100 @@ define('scribe-plugin-inline-objects',[],function () {
           $(".embed-tools", scribe.el.parentNode).removeClass("active");
         });
 
+
+
+
+        function render(html, dict) {
+          for (var k in dict) {
+              if (k) {
+                  html = html.replace(new RegExp("{{" + k + "}}", 'g'), dict[k]);
+              }
+          }
+          return html;
+        }
+
     }
+  }
+});
+define('scribe-plugin-betty-cropper',[],function () {
+
+  return function (config) {
+    return function (scribe) {
+
+        // CONFIG may contain some kind of 
+        scribe.on("inline:betty-cropper", showImageOptions);
+
+
+        function showImageOptions(options) {
+            console.log("HEY, betty-cropper PLUGIN CALLED. EVENTS ARE TWERKING", options);
+            options.onSuccess(options.block, {image_id: 5});
+        }
+
+      };
+    }
+});
+define('scribe-plugin-youtube',[],function () {
+
+  return function (config) {
+    return function (scribe) {
+
+        scribe.on("inline:youtube", showDialog);
+
+        function parseYoutube(url){
+          var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
+          var match = url.match(regExp);
+          if (match && match[7].length == 11) {
+            return match[7];
+          }
+          else {
+            return false;
+          }
+        }
+
+        function showDialog(options) {
+          var url = prompt("Youtube URL:", $("A", options.element).attr("href"));
+          var youtube_id  = parseYoutube(url);
+          if (youtube_id) {
+            options.onSuccess(
+              options.element,
+              {
+                "youtube_id": youtube_id, 
+                "caption": $(".caption", options.element).html()
+              }
+            );
+          }
+        }
+      };
+    }
+});
+define('scribe-plugin-embed',[],function () {
+  return function (config) {
+    return function (scribe) {
+      scribe.on("inline:embed", showDialog);
+      function showDialog(options) {
+        options.onSuccess(options.block, {html: "", caption: ""});
+      }
+    };
+  }
+});
+define('scribe-plugin-onion-video',[],function () {
+  return function (config) {
+    return function (scribe) {
+      scribe.on("inline:onion-video", showDialog);
+      function showDialog(options) {
+        options.onSuccess(options.block, {video_id: 0, caption: ""});
+      }
+    };
+  }
+});
+define('scribe-plugin-hr',[],function () {
+  return function (config) {
+    return function (scribe) {
+      scribe.on("inline:hr", showDialog);
+      function showDialog(options) {
+        options.onSuccess(options.block, {});
+      }
+    };
   }
 });
 define('onion-editor',[
@@ -6900,6 +7010,11 @@ define('onion-editor',[
   'scribe-plugin-smart-lists',
   'scribe-plugin-toolbar',
   'scribe-plugin-inline-objects',
+  'scribe-plugin-betty-cropper',
+  'scribe-plugin-youtube',
+  'scribe-plugin-embed',
+  'scribe-plugin-onion-video',
+  'scribe-plugin-hr'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -6912,7 +7027,12 @@ define('onion-editor',[
   scribePluginSanitizer,
   scribePluginSmartLists,
   scribePluginToolbar,
-  scribePluginInlineObjects
+  scribePluginInlineObjects,
+  scribePluginBettyCropper,
+  scribePluginYoutube,
+  scribePluginEmbed,
+  scribePluginOnionVideo,
+  scribePluginHr
 ) {
 
   
@@ -6972,7 +7092,7 @@ define('onion-editor',[
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
 
     // Links
-    if (options.multiline && options.formatting.links) {
+    if (options.multiline && options.formatting.link) {
       keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
@@ -7011,6 +7131,7 @@ define('onion-editor',[
     // Inline Objects
     if (options.multiline && options.inlineObjects) {
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
+      scribe.use(scribePluginBettyCropper());
     }
 
     scribe.use(scribePluginSanitizer({

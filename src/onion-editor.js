@@ -11,6 +11,11 @@ define('onion-editor',[
   'scribe-plugin-smart-lists',
   'scribe-plugin-toolbar',
   'scribe-plugin-inline-objects',
+  'scribe-plugin-betty-cropper',
+  'scribe-plugin-youtube',
+  'scribe-plugin-embed',
+  'scribe-plugin-onion-video',
+  'scribe-plugin-hr'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -23,7 +28,12 @@ define('onion-editor',[
   scribePluginSanitizer,
   scribePluginSmartLists,
   scribePluginToolbar,
-  scribePluginInlineObjects
+  scribePluginInlineObjects,
+  scribePluginBettyCropper,
+  scribePluginYoutube,
+  scribePluginEmbed,
+  scribePluginOnionVideo,
+  scribePluginHr
 ) {
 
   'use strict';
@@ -83,7 +93,7 @@ define('onion-editor',[
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
 
     // Links
-    if (options.multiline && options.formatting.links) {
+    if (options.multiline && options.formatting.link) {
       keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
@@ -122,6 +132,7 @@ define('onion-editor',[
     // Inline Objects
     if (options.multiline && options.inlineObjects) {
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
+      scribe.use(scribePluginBettyCropper());
     }
 
     scribe.use(scribePluginSanitizer({
