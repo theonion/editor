@@ -8,4 +8,4 @@ define('scribe-plugin-betty-cropper',[],function () {
         scribe.on("inline:betty-cropper", showDialog);
       };
     }
-});
+}); 

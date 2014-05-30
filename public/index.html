@@ -14,7 +14,7 @@
       <link href='css/cms-demo.css' rel='stylesheet' type='text/css'></link>
   </head>
 
-  <body>
+  <body>  
     <div id="content-wrapper" class="container">
       <div class="editor-wrapper">
         <div class="editorPlaceholder" style="display: block;"></div>
@@ -75,11 +75,19 @@
         </div>                        
       </div>
     </div>                    
-    <textarea style="display:none" class="scribe-html" rows="15"></textarea>
+    
+    <div style="display:none" id="content">
+      <p> This is an image</p>
+      <div data-type="onion-image" class="onion-image image inline size-big crop-16x9" data-image-id="5" data-size="big" data-crop="16x9" contenteditable="false"> <div></div><span class="caption"></span></div>
+      <p>Party</p>
+    </div>
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="../build/onion-editor.js"></script>
     <script>
-      var editor = new OnionEditor(document.getElementById("editor"), {inlineObjects: "/public/inline-config.json", multiline:true});
+      var editor = new OnionEditor(document.getElementById("editor"), {
+        inlineObjects: "/public/inline-config.json", multiline:true});
+
+      editor.setContent($("#content").html());
     </script>
   </body>
 </html>

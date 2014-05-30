@@ -67,6 +67,6 @@
         "template":  "<div data-type=\"articlelist\" data-tag=\"{{tag}}\"></div>"
     },
     "hr": {
-        "template":  "<hr>"
+        "template":  "<div><hr/></div>"
     }
 }
