@@ -10,7 +10,7 @@
             "url": ""
         },
         "template":
-        "<div data-type=\"onion-image\" class=\"onion-image image inline size-{{size}} crop-{{crop}}\" data-image-id=\"{{image_id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"> <div><noscript><img src=\"{{url}}\" ></noscript></div><span class=\"caption\">{{caption}}</span></div>"
+        "<div data-type=\"onion-image\" class=\"onion-image image inline size-{{size}} crop-{{crop}}\" data-image-id=\"{{image_id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"> <div></div><span class=\"caption\">{{caption}}</span></div>"
     },
     "onion-video": {
         "size": ["big", "small"],

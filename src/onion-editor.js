@@ -56,18 +56,20 @@ define('onion-editor',[
 
     var scribe = new Scribe(element, { allowBlockElements: true });      
 
-
+    console.log(scribe);
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
     // Allowable Tags
-    var tags = {};
+    var tags = {}, ignoredTags = {};
     
     // Multiline
     if (options.multiline) {
       tags.p = {};
       tags.br = {};
       tags.hr = {};
+
+      ignoredTags.div = {}
     }
 
     // Bold
@@ -132,11 +134,18 @@ define('onion-editor',[
     // Inline Objects
     if (options.multiline && options.inlineObjects) {
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
+      
+      // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
       scribe.use(scribePluginBettyCropper());
+      scribe.use(scribePluginYoutube());
+      scribe.use(scribePluginEmbed());
+      scribe.use(scribePluginHr());
+      scribe.use(scribePluginOnionVideo());
     }
 
     scribe.use(scribePluginSanitizer({
-      tags: tags
+      tags: tags,
+      ignoredTags: ignoredTags
     }));
 
 

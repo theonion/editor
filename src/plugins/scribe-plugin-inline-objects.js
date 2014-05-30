@@ -3,50 +3,51 @@ define('scribe-plugin-inline-objects',[],function () {
   /**
    * Adds support for inserting, like embeds, videos and images.
    */
-
-
   return function (config) {
     return function (scribe) {
         // define inline objects
         
 
-        // OK, we need to load the config. 
-
+        
         var templates;
+        var activeBlock;
+
+        // Load the config. 
         $.ajax(config, {success: configLoaded});
 
         function configLoaded(data) {
-          templates = data;;
-          $(".embed-tools button", scribe.el.parentNode).click(toolbarClick);
+          templates = data;
+          $(".embed-tools button", scribe.el.parentNode).click(insertObject);
         }
         
-        function insertAbove(element, html) {
-          scribe.transactionManager.run(function () {
-            $(element).before(html);
-            $(".inline").attr("contenteditable", "false"); 
-          });
-        }
-
-        function insert(event) {
+        function insertObject(event) {
+          //derive type from button clicked.
           var type = $(event.target).closest("button").data("commandName");
-          scribe.emit("inline:" + type, {
-            block: activeBlock,
-            onSuccess: function(block, values) {
-              insertAbove(activeBlock, 
-                render(templates[type].template, 
-                $.extend(templates[type].defaults, values) ) ) 
+          //emit an event, so handler plugin can pick up.
+          console.log(scribe.trigger);
+          scribe.trigger("inline:" + type, [
+            activeBlock, 
+            function(block, values) {
+                scribe.transactionManager.run(function () {
+                  var html = render(
+                      templates[type].template, 
+                      $.extend(templates[type].defaults, values) 
+                  );
+                  console.log(html);
+                  $(block).before(html); 
+                  $(".inline").attr("contenteditable", "false"); 
+                });
             }
-          });
+          ]);
         }
 
+        // Edit action
         function edit(event) {
-          
+
         }
 
 
-        var activeBlock;
-
-        // THIS DOES THE TOOLBAR STUFF
+        // Insert toolbar. 
         scribe.el.addEventListener('mouseover', function (event) {
           var blocks = scribe.el.children;
           var cursorOffset = event.y;
@@ -72,6 +73,14 @@ define('scribe-plugin-inline-objects',[],function () {
         });
 
 
+        // Edit Button
+
+
+
+        // Overlay options
+
+
+        // Caption (keep this in for now, for simplicity)
 
 
         function render(html, dict) {
@@ -82,7 +91,6 @@ define('scribe-plugin-inline-objects',[],function () {
           }
           return html;
         }
-
     }
   }
 });

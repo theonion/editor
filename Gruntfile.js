@@ -16,13 +16,9 @@ module.exports = function(grunt) {
         tasks: ['requirejs'],
       }
     }
-
-
   });
   // Load external tasks
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
-
   grunt.registerTask('default', 'requirejs');
-
 };

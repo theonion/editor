@@ -16,12 +16,12 @@ define('scribe-plugin-youtube',[],function () {
           }
         }
 
-        function showDialog(options) {
+        function showDialog(block, callback) {
           var url = prompt("Youtube URL:", $("A", options.element).attr("href"));
           var youtube_id  = parseYoutube(url);
           if (youtube_id) {
-            options.onSuccess(
-              options.element,
+            callback(
+              block,
               {
                 "youtube_id": youtube_id, 
                 "caption": $(".caption", options.element).html()
