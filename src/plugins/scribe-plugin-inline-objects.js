@@ -34,6 +34,7 @@ define('scribe-plugin-inline-objects',[],function () {
           scribe.trigger("inline:" + type, [
             activeBlock, 
             function(block, values) {
+                // 
                 scribe.transactionManager.run(function () {
                   var html = render(
                       templates[type].template, 
@@ -75,10 +76,6 @@ define('scribe-plugin-inline-objects',[],function () {
         });
 
 
-        // Edit Button
-
-
-
         // Overlay options
         $(".editor", editorEl).mouseover( function(e) {
           //check to see if the target is inside of an inline element
@@ -97,7 +94,7 @@ define('scribe-plugin-inline-objects',[],function () {
         function hideToolbar() {
           $(".inline-tools").hide();
           $(editorEl).removeClass("inline-active")
-        }
+        } 
 
         function showToolbar() {
           var el = $(activeElement);
@@ -199,10 +196,10 @@ define('scribe-plugin-inline-objects',[],function () {
             For now, the module is responsible for making modifications to the markup. 
 
             */
-            scribe.on("inline:" + $(activeElement).attr("data-type"), 
-              {
-                element: activeElement,
-                onChange: function(element, values) {
+            scribe.trigger("inline:" + $(activeElement).attr("data-type"), 
+              [
+                activeElement,
+                function(element, values) {
                   var type = $(element).attr("data-type");
                   element.outerHTML = 
                     render(
@@ -210,7 +207,7 @@ define('scribe-plugin-inline-objects',[],function () {
                       $.extend(templates[type].defaults, values) 
                     )
                 }
-              }
+              ]
             )
           }
         }
