@@ -1,4 +1,4 @@
-/*! onion-editor 2014-05-22 */
+/*! onion-editor 2014-06-04 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
@@ -123,6 +123,7 @@
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
 
+            /*
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editorPlaceholder"></div>\
@@ -134,7 +135,7 @@
                             <div class="link-tools toolbar"></div>\
                             <div class="inline-tools toolbar"></div>\
                         </div>');
-
+            */
 
 
             //block drag/drop of text
@@ -591,6 +592,7 @@ Making a few assumptions, for now:
         }
 
         function init() {
+            /*
             if (options.toolbar.documentTools) {
                 $(".document-tools", options.element).html(options.toolbar.documentTools);
             }
@@ -607,7 +609,7 @@ Making a few assumptions, for now:
             if (options.toolbar.inlineTools) {
                 $(".inline-tools", options.element).html(options.toolbar.inlineTools);
             }
-
+            */
             self.toolbarElement = $(options.element).find(".toolbar");  
 
             //handle clicks
@@ -618,7 +620,7 @@ Making a few assumptions, for now:
                 else {
                     var el = $(e.target).parents('button')
                 }
-                return el.attr("name");
+                return el.attr("data-command-name");
             }
 
             self.toolbarElement.click(function(e) {
@@ -700,7 +702,7 @@ Making a few assumptions, for now:
                 }
                 e.preventDefault();
             },
-            strikethrough: function() {
+            strikeThrough: function() {
                 if (canFormat("s")) {
                     global.document.execCommand("strikethrough");
                 }
@@ -715,17 +717,17 @@ Making a few assumptions, for now:
                     global.document.execCommand("subscript");
                 }
             },
-            heading: function() {
+            h3: function() {
                 doHeading("H3");
             },
-            subheading: function() {
+            h4: function() {
                 doHeading("H4");
             },
             /* structural formatting */
-            unorderedlist: function() {
+            insertOrderedList: function() {
                 doList("UL")
             },
-            orderedlist: function() {
+            insertUnorderedList: function() {
                 doList("OL")
             },
             blockquote: function() {
@@ -735,7 +737,7 @@ Making a few assumptions, for now:
                 $(options.element)
                     .toggleClass("visualize");
             },
-            removeformatting: function() {
+            removeFormat: function() {
                 global.document.execCommand("removeformat", false, "");
             }
         }
