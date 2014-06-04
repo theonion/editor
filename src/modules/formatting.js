@@ -56,7 +56,7 @@
                 }
                 e.preventDefault();
             },
-            strikethrough: function() {
+            strikeThrough: function() {
                 if (canFormat("s")) {
                     global.document.execCommand("strikethrough");
                 }
@@ -71,17 +71,17 @@
                     global.document.execCommand("subscript");
                 }
             },
-            heading: function() {
+            h3: function() {
                 doHeading("H3");
             },
-            subheading: function() {
+            h4: function() {
                 doHeading("H4");
             },
             /* structural formatting */
-            unorderedlist: function() {
+            insertOrderedList: function() {
                 doList("UL")
             },
-            orderedlist: function() {
+            insertUnorderedList: function() {
                 doList("OL")
             },
             blockquote: function() {
@@ -91,7 +91,7 @@
                 $(options.element)
                     .toggleClass("visualize");
             },
-            removeformatting: function() {
+            removeFormat: function() {
                 global.document.execCommand("removeformat", false, "");
             }
         }

@@ -25,6 +25,7 @@
         }
 
         function init() {
+            /*
             if (options.toolbar.documentTools) {
                 $(".document-tools", options.element).html(options.toolbar.documentTools);
             }
@@ -41,7 +42,7 @@
             if (options.toolbar.inlineTools) {
                 $(".inline-tools", options.element).html(options.toolbar.inlineTools);
             }
-
+            */
             self.toolbarElement = $(options.element).find(".toolbar");  
 
             //handle clicks
@@ -52,7 +53,7 @@
                 else {
                     var el = $(e.target).parents('button')
                 }
-                return el.attr("name");
+                return el.attr("data-command-name");
             }
 
             self.toolbarElement.click(function(e) {

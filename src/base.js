@@ -122,6 +122,7 @@
                 moduleInstances.push(new global.EditorModules[i](self, options));
             }
 
+            /*
             $(options.element)
                 .append('<div class="editor-wrapper">\
                             <div class="editorPlaceholder"></div>\
@@ -133,7 +134,7 @@
                             <div class="link-tools toolbar"></div>\
                             <div class="inline-tools toolbar"></div>\
                         </div>');
-
+            */
 
 
             //block drag/drop of text
