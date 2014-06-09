@@ -1,4 +1,4 @@
-/*! onion-editor 2014-06-04 */
+/*! onion-editor 2014-06-09 */
 (function(global){
     'use strict';
     global.EditorInstances = global.EditorInstances || [];
