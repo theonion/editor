@@ -130,14 +130,13 @@
         }
 
 
+
         function getSizes() {
-            return  Object.keys(options.inline[$(activeElement).attr("data-type")].size);
+            return options.inline[$(activeElement).attr("data-type")].size;
         }
 
         function getCrops() {
-            return options
-                    .inline[$(activeElement).attr("data-type")]
-                    .size[$(activeElement).attr("data-size")];
+            return options.inline[$(activeElement).attr("data-type")].crop;
         }
 
         //TODO: Determine how to handle two adjacent inline elements. Probably skip over?
@@ -155,19 +154,9 @@
             inline_size: function() {
                 var l = getSizes();
                 toggleAttribute("size", l);
-
-                var currentCrop = $(activeElement).attr("data-crop");
-                var cropOptions = getCrops();
-                //this crop isn't available for the new size option
-                if (cropOptions.indexOf(currentCrop) === -1) {
-                    setValue("crop", cropOptions[0]);
-                }
-
             },
             inline_crop: function() {
-                var l = options
-                    .inline[$(activeElement).attr("data-type")]
-                    .size[$(activeElement).attr("data-size")];
+                var l = getCrops();
                 toggleAttribute("crop", l);
             },
             inline_up: function() {
@@ -228,7 +217,7 @@
             }
            
         } 
-
+        
         function setValue(attribute, value) {
             editor.changed();
             var currentValue = $(activeElement).attr("data-" + attribute);
