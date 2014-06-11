@@ -376,7 +376,7 @@
                 if (typeof options.onContentChange === "function") {
                     options.onContentChange(self);
                 }
-            }, 500);
+            }, 100);
         }
 
 
