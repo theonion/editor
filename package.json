@@ -1,6 +1,6 @@
 {
   "name": "onion-editor",
-  "version": "0.1.14",
+  "version": "0.1.16  ",
   "author": {
     "name": "Mike Wnuk",
     "email": "mwnuk@theonion.com"
@@ -16,4 +16,4 @@
     "grunt-contrib-concat": "~0.3.0",
     "grunt-contrib-copy": "~0.4.0"
   }
-}
+} 

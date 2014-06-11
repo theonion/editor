@@ -449,8 +449,12 @@
             //remove all other style attributes
             $(">p [style]", fragment.childNodes[0]).removeAttr("style");
 
+            //remove all styles from elements 
+            $(".image [style]", fragment.childNodes[0]).removeAttr("style");
+            
             //let's strip out any contentEditable attributes
             $(".inline", fragment.childNodes[0]).removeAttr("contentEditable");
+
 
             var html = fragment.childNodes[0].innerHTML;
 
