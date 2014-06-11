@@ -212,6 +212,9 @@
                 index = 0;
 
             setValue(attribute, list[index]);
+            if ($(activeElement).hasClass("image")) {
+                $("[style]", activeElement).removeAttr("style");
+            }
             if (typeof window.picturefill === "function") {
                 setTimeout(window.picturefill, 100);
             }

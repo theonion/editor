@@ -1378,6 +1378,9 @@ Now that I'm using RANGY, some of this stuff needs to be revisited.
                 index = 0;
 
             setValue(attribute, list[index]);
+            if ($(activeElement).hasClass("image")) {
+                $("[style]", activeElement).removeAttr("style");
+            }
             if (typeof window.picturefill === "function") {
                 setTimeout(window.picturefill, 100);
             }
