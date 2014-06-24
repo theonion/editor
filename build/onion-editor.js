@@ -439,7 +439,7 @@ define("../bower_components/almond/almond", function(){});
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/isNative',[], function() {
+define('lodash-amd/modern/internals/isNative',[], function() {
 
   /** Used for native method references */
   var objectProto = Object.prototype;
@@ -476,7 +476,7 @@ define('lodash-modern/internals/isNative',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/objectTypes',[], function() {
+define('lodash-amd/modern/internals/objectTypes',[], function() {
 
   /** Used to determine if values are of the language type Object */
   var objectTypes = {
@@ -499,7 +499,7 @@ define('lodash-modern/internals/objectTypes',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/isObject',['../internals/objectTypes'], function(objectTypes) {
+define('lodash-amd/modern/objects/isObject',['../internals/objectTypes'], function(objectTypes) {
 
   /**
    * Checks if `value` is the language type of Object.
@@ -540,7 +540,7 @@ define('lodash-modern/objects/isObject',['../internals/objectTypes'], function(o
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/shimKeys',['./objectTypes'], function(objectTypes) {
+define('lodash-amd/modern/internals/shimKeys',['./objectTypes'], function(objectTypes) {
 
   /** Used for native method references */
   var objectProto = Object.prototype;
@@ -580,7 +580,7 @@ define('lodash-modern/internals/shimKeys',['./objectTypes'], function(objectType
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/keys',['../internals/isNative', './isObject', '../internals/shimKeys'], function(isNative, isObject, shimKeys) {
+define('lodash-amd/modern/objects/keys',['../internals/isNative', './isObject', '../internals/shimKeys'], function(isNative, isObject, shimKeys) {
 
   /* Native method shortcuts for methods with the same name as other `lodash` methods */
   var nativeKeys = isNative(nativeKeys = Object.keys) && nativeKeys;
@@ -616,7 +616,7 @@ define('lodash-modern/objects/keys',['../internals/isNative', './isObject', '../
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/defaults',['./keys', '../internals/objectTypes'], function(keys, objectTypes) {
+define('lodash-amd/modern/objects/defaults',['./keys', '../internals/objectTypes'], function(keys, objectTypes) {
 
   /**
    * Assigns own enumerable properties of source object(s) to the destination
@@ -671,7 +671,7 @@ define('lodash-modern/objects/defaults',['./keys', '../internals/objectTypes'], 
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/isArguments',[], function() {
+define('lodash-amd/modern/objects/isArguments',[], function() {
 
   /** `Object#toString` result shortcuts */
   var argsClass = '[object Arguments]';
@@ -714,7 +714,7 @@ define('lodash-modern/objects/isArguments',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/isArray',['../internals/isNative'], function(isNative) {
+define('lodash-amd/modern/objects/isArray',['../internals/isNative'], function(isNative) {
 
   /** `Object#toString` result shortcuts */
   var arrayClass = '[object Array]';
@@ -761,7 +761,7 @@ define('lodash-modern/objects/isArray',['../internals/isNative'], function(isNat
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseFlatten',['../objects/isArguments', '../objects/isArray'], function(isArguments, isArray) {
+define('lodash-amd/modern/internals/baseFlatten',['../objects/isArguments', '../objects/isArray'], function(isArguments, isArray) {
 
   /**
    * The base implementation of `_.flatten` without support for callback
@@ -814,7 +814,7 @@ define('lodash-modern/internals/baseFlatten',['../objects/isArguments', '../obje
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/utilities/noop',[], function() {
+define('lodash-amd/modern/utilities/noop',[], function() {
 
   /**
    * A no-operation function.
@@ -843,7 +843,7 @@ define('lodash-modern/utilities/noop',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseCreate',['./isNative', '../objects/isObject', '../utilities/noop'], function(isNative, isObject, noop) {
+define('lodash-amd/modern/internals/baseCreate',['./isNative', '../objects/isObject', '../utilities/noop'], function(isNative, isObject, noop) {
 
   /* Native method shortcuts for methods with the same name as other `lodash` methods */
   var nativeCreate = isNative(nativeCreate = Object.create) && nativeCreate;
@@ -885,7 +885,7 @@ define('lodash-modern/internals/baseCreate',['./isNative', '../objects/isObject'
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/setBindData',['./isNative', '../utilities/noop'], function(isNative, noop) {
+define('lodash-amd/modern/internals/setBindData',['./isNative', '../utilities/noop'], function(isNative, noop) {
 
   /** Used as the property descriptor for `__bindData__` */
   var descriptor = {
@@ -929,7 +929,7 @@ define('lodash-modern/internals/setBindData',['./isNative', '../utilities/noop']
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/slice',[], function() {
+define('lodash-amd/modern/internals/slice',[], function() {
 
   /**
    * Slices the `collection` from the `start` index up to, but not including,
@@ -970,7 +970,7 @@ define('lodash-modern/internals/slice',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseBind',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
+define('lodash-amd/modern/internals/baseBind',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
 
   /**
    * Used for `Array` method references.
@@ -1031,7 +1031,7 @@ define('lodash-modern/internals/baseBind',['./baseCreate', '../objects/isObject'
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseCreateWrapper',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
+define('lodash-amd/modern/internals/baseCreateWrapper',['./baseCreate', '../objects/isObject', './setBindData', './slice'], function(baseCreate, isObject, setBindData, slice) {
 
   /**
    * Used for `Array` method references.
@@ -1108,7 +1108,7 @@ define('lodash-modern/internals/baseCreateWrapper',['./baseCreate', '../objects/
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/isFunction',[], function() {
+define('lodash-amd/modern/objects/isFunction',[], function() {
 
   /**
    * Checks if `value` is a function.
@@ -1138,7 +1138,7 @@ define('lodash-modern/objects/isFunction',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/createWrapper',['./baseBind', './baseCreateWrapper', '../objects/isFunction', './slice'], function(baseBind, baseCreateWrapper, isFunction, slice) {
+define('lodash-amd/modern/internals/createWrapper',['./baseBind', './baseCreateWrapper', '../objects/isFunction', './slice'], function(baseBind, baseCreateWrapper, isFunction, slice) {
 
   /**
    * Used for `Array` method references.
@@ -1243,7 +1243,7 @@ define('lodash-modern/internals/createWrapper',['./baseBind', './baseCreateWrapp
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/functions/bind',['../internals/createWrapper', '../internals/slice'], function(createWrapper, slice) {
+define('lodash-amd/modern/functions/bind',['../internals/createWrapper', '../internals/slice'], function(createWrapper, slice) {
 
   /**
    * Creates a function that, when called, invokes `func` with the `this`
@@ -1284,7 +1284,7 @@ define('lodash-modern/functions/bind',['../internals/createWrapper', '../interna
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/utilities/identity',[], function() {
+define('lodash-amd/modern/utilities/identity',[], function() {
 
   /**
    * This method returns the first argument provided to it.
@@ -1315,7 +1315,7 @@ define('lodash-modern/utilities/identity',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/support',['./internals/isNative'], function(isNative) {
+define('lodash-amd/modern/support',['./internals/isNative'], function(isNative) {
 
   /** Used to detect functions containing a `this` reference */
   var reThis = /\bthis\b/;
@@ -1357,7 +1357,7 @@ define('lodash-modern/support',['./internals/isNative'], function(isNative) {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseCreateCallback',['../functions/bind', '../utilities/identity', './setBindData', '../support'], function(bind, identity, setBindData, support) {
+define('lodash-amd/modern/internals/baseCreateCallback',['../functions/bind', '../utilities/identity', './setBindData', '../support'], function(bind, identity, setBindData, support) {
 
   /** Used to detected named functions */
   var reFuncName = /^\s*function[ \n\r\t]+\w/;
@@ -1436,7 +1436,7 @@ define('lodash-modern/internals/baseCreateCallback',['../functions/bind', '../ut
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/forIn',['../internals/baseCreateCallback', '../internals/objectTypes'], function(baseCreateCallback, objectTypes) {
+define('lodash-amd/modern/objects/forIn',['../internals/baseCreateCallback', '../internals/objectTypes'], function(baseCreateCallback, objectTypes) {
 
   /**
    * Iterates over own and inherited enumerable properties of an object,
@@ -1491,7 +1491,7 @@ define('lodash-modern/objects/forIn',['../internals/baseCreateCallback', '../int
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/arrayPool',[], function() {
+define('lodash-amd/modern/internals/arrayPool',[], function() {
 
   /** Used to pool arrays and objects used internally */
   var arrayPool = [];
@@ -1507,7 +1507,7 @@ define('lodash-modern/internals/arrayPool',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/getArray',['./arrayPool'], function(arrayPool) {
+define('lodash-amd/modern/internals/getArray',['./arrayPool'], function(arrayPool) {
 
   /**
    * Gets an array from the array pool or creates a new one if the pool is empty.
@@ -1530,7 +1530,7 @@ define('lodash-modern/internals/getArray',['./arrayPool'], function(arrayPool) {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/maxPoolSize',[], function() {
+define('lodash-amd/modern/internals/maxPoolSize',[], function() {
 
   /** Used as the max size of the `arrayPool` and `objectPool` */
   var maxPoolSize = 40;
@@ -1546,7 +1546,7 @@ define('lodash-modern/internals/maxPoolSize',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/releaseArray',['./arrayPool', './maxPoolSize'], function(arrayPool, maxPoolSize) {
+define('lodash-amd/modern/internals/releaseArray',['./arrayPool', './maxPoolSize'], function(arrayPool, maxPoolSize) {
 
   /**
    * Releases the given array back to the array pool.
@@ -1572,7 +1572,7 @@ define('lodash-modern/internals/releaseArray',['./arrayPool', './maxPoolSize'], 
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseIsEqual',['../objects/forIn', './getArray', '../objects/isFunction', './objectTypes', './releaseArray'], function(forIn, getArray, isFunction, objectTypes, releaseArray) {
+define('lodash-amd/modern/internals/baseIsEqual',['../objects/forIn', './getArray', '../objects/isFunction', './objectTypes', './releaseArray'], function(forIn, getArray, isFunction, objectTypes, releaseArray) {
 
   /** `Object#toString` result shortcuts */
   var argsClass = '[object Arguments]',
@@ -1779,7 +1779,7 @@ define('lodash-modern/internals/baseIsEqual',['../objects/forIn', './getArray', 
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/utilities/property',[], function() {
+define('lodash-amd/modern/utilities/property',[], function() {
 
   /**
    * Creates a "_.pluck" style function, which returns the `key` value of a
@@ -1822,7 +1822,7 @@ define('lodash-modern/utilities/property',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/functions/createCallback',['../internals/baseCreateCallback', '../internals/baseIsEqual', '../objects/isObject', '../objects/keys', '../utilities/property'], function(baseCreateCallback, baseIsEqual, isObject, keys, property) {
+define('lodash-amd/modern/functions/createCallback',['../internals/baseCreateCallback', '../internals/baseIsEqual', '../objects/isObject', '../objects/keys', '../utilities/property'], function(baseCreateCallback, baseIsEqual, isObject, keys, property) {
 
   /**
    * Produces a callback bound to an optional `thisArg`. If `func` is a property
@@ -1901,7 +1901,7 @@ define('lodash-modern/functions/createCallback',['../internals/baseCreateCallbac
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/forOwn',['../internals/baseCreateCallback', './keys', '../internals/objectTypes'], function(baseCreateCallback, keys, objectTypes) {
+define('lodash-amd/modern/objects/forOwn',['../internals/baseCreateCallback', './keys', '../internals/objectTypes'], function(baseCreateCallback, keys, objectTypes) {
 
   /**
    * Iterates over own enumerable properties of an object, executing the callback
@@ -1951,7 +1951,7 @@ define('lodash-modern/objects/forOwn',['../internals/baseCreateCallback', './key
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/collections/map',['../functions/createCallback', '../objects/forOwn'], function(createCallback, forOwn) {
+define('lodash-amd/modern/collections/map',['../functions/createCallback', '../objects/forOwn'], function(createCallback, forOwn) {
 
   /**
    * Creates an array of values by running each element in the collection
@@ -2022,7 +2022,7 @@ define('lodash-modern/collections/map',['../functions/createCallback', '../objec
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/arrays/flatten',['../internals/baseFlatten', '../collections/map'], function(baseFlatten, map) {
+define('lodash-amd/modern/arrays/flatten',['../internals/baseFlatten', '../collections/map'], function(baseFlatten, map) {
 
   /**
    * Flattens a nested array (the nesting can be to any depth). If `isShallow`
@@ -2407,7 +2407,7 @@ define('plugins/core/commands',[
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/baseIndexOf',[], function() {
+define('lodash-amd/modern/internals/baseIndexOf',[], function() {
 
   /**
    * The base implementation of `_.indexOf` without support for binary searches
@@ -2442,7 +2442,7 @@ define('lodash-modern/internals/baseIndexOf',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/isString',[], function() {
+define('lodash-amd/modern/objects/isString',[], function() {
 
   /** `Object#toString` result shortcuts */
   var stringClass = '[object String]';
@@ -2482,7 +2482,7 @@ define('lodash-modern/objects/isString',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/collections/contains',['../internals/baseIndexOf', '../objects/forOwn', '../objects/isArray', '../objects/isString'], function(baseIndexOf, forOwn, isArray, isString) {
+define('lodash-amd/modern/collections/contains',['../internals/baseIndexOf', '../objects/forOwn', '../objects/isArray', '../objects/isString'], function(baseIndexOf, forOwn, isArray, isString) {
 
   /* Native method shortcuts for methods with the same name as other `lodash` methods */
   var nativeMax = Math.max;
@@ -2546,7 +2546,7 @@ define('lodash-modern/collections/contains',['../internals/baseIndexOf', '../obj
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/values',['./keys'], function(keys) {
+define('lodash-amd/modern/objects/values',['./keys'], function(keys) {
 
   /**
    * Creates an array composed of the own enumerable property values of `object`.
@@ -2584,7 +2584,7 @@ define('lodash-modern/objects/values',['./keys'], function(keys) {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/collections/toArray',['../objects/isString', '../internals/slice', '../objects/values'], function(isString, slice, values) {
+define('lodash-amd/modern/collections/toArray',['../objects/isString', '../internals/slice', '../objects/values'], function(isString, slice, values) {
 
   /**
    * Converts the `collection` to an array.
@@ -2609,23 +2609,73 @@ define('lodash-modern/collections/toArray',['../objects/isString', '../internals
   return toArray;
 });
 
+define('scribe-common/element',['lodash-amd/modern/collections/contains'], function (contains) {
+
+  
+
+  // TODO: not exhaustive?
+  var blockElementNames = ['P', 'LI', 'DIV', 'BLOCKQUOTE', 'UL', 'OL', 'H1',
+                           'H2', 'H3', 'H4', 'H5', 'H6'];
+  function isBlockElement(node) {
+    return contains(blockElementNames, node.nodeName);
+  }
+
+  function isSelectionMarkerNode(node) {
+    return (node.nodeType === Node.ELEMENT_NODE && node.className === 'scribe-marker');
+  }
+
+  function unwrap(node, childNode) {
+    while (childNode.childNodes.length > 0) {
+      node.insertBefore(childNode.childNodes[0], childNode);
+    }
+    node.removeChild(childNode);
+  }
+
+  return {
+    isBlockElement: isBlockElement,
+    isSelectionMarkerNode: isSelectionMarkerNode,
+    unwrap: unwrap
+  };
+
+});
+
+define('scribe-common/node',[], function () {
+
+  
+
+  function isEmptyTextNode(node) {
+    return (node.nodeType === Node.TEXT_NODE && node.textContent === '');
+  }
+
+  function insertAfter(newNode, referenceNode) {
+    return referenceNode.parentNode.insertBefore(newNode, referenceNode.nextSibling);
+  }
+
+  function removeNode(node) {
+    return node.parentNode.removeChild(node);
+  }
+
+  return {
+    isEmptyTextNode: isEmptyTextNode,
+    insertAfter: insertAfter,
+    removeNode: removeNode
+  };
+
+});
+
 define('dom-observer',[
-  'lodash-modern/arrays/flatten',
-  'lodash-modern/collections/toArray'
+  'lodash-amd/modern/arrays/flatten',
+  'lodash-amd/modern/collections/toArray',
+  'scribe-common/element',
+  'scribe-common/node'
 ], function (
   flatten,
-  toArray
+  toArray,
+  elementHelpers,
+  nodeHelpers
 ) {
 
   function observeDomChanges(el, callback) {
-    function notEmptyTextNode(node) {
-      return ! (node.nodeType === Node.TEXT_NODE && node.textContent === '');
-    }
-
-    function notSelectionMarkerNode(node) {
-      return ! (node.nodeType === Node.ELEMENT_NODE && node.className === 'scribe-marker');
-    }
-
     function includeRealMutations(mutations) {
       var allChangedNodes = flatten(mutations.map(function(mutation) {
         var added   = toArray(mutation.addedNodes);
@@ -2634,12 +2684,11 @@ define('dom-observer',[
       }));
 
       var realChangedNodes = allChangedNodes.
-        filter(notEmptyTextNode).
-        filter(notSelectionMarkerNode);
+        filter(function(n) { return ! nodeHelpers.isEmptyTextNode(n); }).
+        filter(function(n) { return ! elementHelpers.isSelectionMarkerNode(n); });
 
       return realChangedNodes.length > 0;
     }
-
 
     // Flag to avoid running recursively
     var runningPostMutation = false;
@@ -2672,7 +2721,7 @@ define('dom-observer',[
 });
 
 define('plugins/core/events',[
-  'lodash-modern/collections/contains',
+  'lodash-amd/modern/collections/contains',
   '../../dom-observer'
 ], function (
   contains,
@@ -2974,7 +3023,7 @@ define('plugins/core/formatters/html/replace-nbsp-chars',[],function () {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/arrays/last',['../functions/createCallback', '../internals/slice'], function(createCallback, slice) {
+define('lodash-amd/modern/arrays/last',['../functions/createCallback', '../internals/slice'], function(createCallback, slice) {
 
   /** Used as a safe reference for `undefined` in pre ES5 environments */
   var undefined;
@@ -3054,7 +3103,7 @@ define('lodash-modern/arrays/last',['../functions/createCallback', '../internals
   return last;
 });
 
-define('api/element',['lodash-modern/collections/contains'], function (contains) {
+define('api/element',['lodash-amd/modern/collections/contains'], function (contains) {
 
   
 
@@ -3080,7 +3129,7 @@ define('api/element',['lodash-modern/collections/contains'], function (contains)
 });
 
 define('plugins/core/formatters/html/enforce-p-elements',[
-  'lodash-modern/arrays/last',
+  'lodash-amd/modern/arrays/last',
   '../../../../api/element'
 ], function (
   last,
@@ -3252,7 +3301,7 @@ define('plugins/core/formatters/html/ensure-selectable-containers',[],function (
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/htmlEscapes',[], function() {
+define('lodash-amd/modern/internals/htmlEscapes',[], function() {
 
   /**
    * Used to convert characters to HTML entities:
@@ -3281,7 +3330,7 @@ define('lodash-modern/internals/htmlEscapes',[], function() {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/escapeHtmlChar',['./htmlEscapes'], function(htmlEscapes) {
+define('lodash-amd/modern/internals/escapeHtmlChar',['./htmlEscapes'], function(htmlEscapes) {
 
   /**
    * Used by `escape` to convert characters to HTML entities.
@@ -3305,7 +3354,7 @@ define('lodash-modern/internals/escapeHtmlChar',['./htmlEscapes'], function(html
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/internals/reUnescapedHtml',['./htmlEscapes', '../objects/keys'], function(htmlEscapes, keys) {
+define('lodash-amd/modern/internals/reUnescapedHtml',['./htmlEscapes', '../objects/keys'], function(htmlEscapes, keys) {
 
   /** Used to match HTML entities and HTML characters */
   var reUnescapedHtml = RegExp('[' + keys(htmlEscapes).join('') + ']', 'g');
@@ -3321,7 +3370,7 @@ define('lodash-modern/internals/reUnescapedHtml',['./htmlEscapes', '../objects/k
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/utilities/escape',['../internals/escapeHtmlChar', '../objects/keys', '../internals/reUnescapedHtml'], function(escapeHtmlChar, keys, reUnescapedHtml) {
+define('lodash-amd/modern/utilities/escape',['../internals/escapeHtmlChar', '../objects/keys', '../internals/reUnescapedHtml'], function(escapeHtmlChar, keys, reUnescapedHtml) {
 
   /**
    * Converts the characters `&`, `<`, `>`, `"`, and `'` in `string` to their
@@ -3345,7 +3394,7 @@ define('lodash-modern/utilities/escape',['../internals/escapeHtmlChar', '../obje
 });
 
 define('plugins/core/formatters/plain-text/escape-html-characters',[
-  'lodash-modern/utilities/escape'
+  'lodash-amd/modern/utilities/escape'
 ], function (
   escape
 ) {
@@ -3634,7 +3683,8 @@ define('plugins/core/patches/commands/insert-html',['../../../../api/element'], 
 
 });
 
-define('plugins/core/patches/commands/insert-list',['../../../../api/element'], function (element) {
+define('plugins/core/patches/commands/insert-list',['../../../../api/element',
+        'scribe-common/node'], function (element, nodeHelpers) {
 
   
 
@@ -3652,34 +3702,58 @@ define('plugins/core/patches/commands/insert-list',['../../../../api/element'], 
           scribe.api.CommandPatch.prototype.execute.call(this, value);
 
           if (this.queryState()) {
-            /**
-             * Chrome: If we apply the insertOrderedList command on an empty block, the
-             * OL/UL will be nested inside the block.
-             * As per: http://jsbin.com/oDOriyU/1/edit?html,js,output
-             */
-
             var selection = new scribe.api.Selection();
 
             var listElement = selection.getContaining(function (node) {
               return node.nodeName === 'OL' || node.nodeName === 'UL';
             });
 
+
+            /**
+             * Firefox: If we apply the insertOrderedList or the insertUnorderedList
+             * command on an empty block, a P will be inserted after the OL/UL.
+             * As per: http://jsbin.com/cubacoli/3/edit?html,js,output
+             */
+
+            if (listElement.nextElementSibling &&
+                listElement.nextElementSibling.childNodes.length === 0) {
+              nodeHelpers.removeNode(listElement.nextElementSibling);
+            }
+
+            /**
+             * Chrome: If we apply the insertOrderedList or the insertUnorderedList
+             * command on an empty block, the OL/UL will be nested inside the block.
+             * As per: http://jsbin.com/eFiRedUc/1/edit?html,js,output
+             */
+
             if (listElement) {
               var listParentNode = listElement.parentNode;
-
               // If list is within a text block then split that block
               if (listParentNode && /^(H[1-6]|P)$/.test(listParentNode.nodeName)) {
                 selection.placeMarkers();
-                listParentNode.parentNode.insertBefore(listElement, listParentNode.nextElementSibling);
+                // Move listElement out of the block
+                nodeHelpers.insertAfter(listElement, listParentNode);
                 selection.selectMarkers();
-                listParentNode.parentNode.removeChild(listParentNode);
+
+                /**
+                 * Chrome 27-34: An empty text node is inserted.
+                 */
+                if (listParentNode.childNodes.length === 2 &&
+                    nodeHelpers.isEmptyTextNode(listParentNode.firstChild)) {
+                  nodeHelpers.removeNode(listParentNode);
+                }
+
+                // Remove the block if it's empty
+                if (listParentNode.childNodes.length === 0) {
+                  nodeHelpers.removeNode(listParentNode);
+                }
               }
             }
 
             /**
              * Chrome: If a parent node has a CSS `line-height` when we apply the
-             * insert(Un)OrderedList command, Chrome appends a SPAN to LIs with
-             * inline styling replicating that `line-height`.
+             * insertOrderedList or the insertUnorderedList command, Chrome appends
+             * a SPAN to LIs with inline styling replicating that `line-height`.
              * As per: http://jsbin.com/OtemujAY/7/edit?html,css,js,output
              *
              * FIXME: what if the user actually wants to use SPANs? This could
@@ -3742,13 +3816,16 @@ define('plugins/core/patches/commands/outdent',[],function () {
           var selection = new scribe.api.Selection();
           var range = selection.range;
 
+          var blockquoteNode = selection.getContaining(function (node) {
+            return node.nodeName === 'BLOCKQUOTE';
+          });
+
           if (range.commonAncestorContainer.nodeName === 'BLOCKQUOTE') {
             /**
              * Chrome: Applying the outdent command when a whole BLOCKQUOTE is
              * selected removes the formatting of its contents.
              * As per: http://jsbin.com/okAYaHa/1/edit?html,js,output
              */
-            var blockquoteNode = range.commonAncestorContainer;
 
             // Insert a copy of the selection before the BLOCKQUOTE, and then
             // restore the selection on the copy.
@@ -3776,10 +3853,6 @@ define('plugins/core/patches/commands/outdent',[],function () {
             });
 
             if (pNode) {
-              var blockquoteNode = selection.getContaining(function (node) {
-                return node.nodeName === 'BLOCKQUOTE';
-              });
-
               /**
                * If we are not at the start of end of a BLOCKQUOTE, we have to
                * split the node and insert the P in the middle.
@@ -3813,6 +3886,45 @@ define('plugins/core/patches/commands/outdent',[],function () {
       };
 
       scribe.commandPatches.outdent = outdentCommand;
+    };
+  };
+
+});
+
+define('plugins/core/patches/commands/create-link',[],function () {
+
+  
+
+  return function () {
+    return function (scribe) {
+      var createLinkCommand = new scribe.api.CommandPatch('createLink');
+      scribe.commandPatches.createLink = createLinkCommand;
+
+      createLinkCommand.execute = function (value) {
+        var selection = new scribe.api.Selection();
+
+        /**
+         * Firefox does not create a link when selection is collapsed
+         * so we create it manually. http://jsbin.com/tutufi/2/edit?js,output
+         */
+        if (selection.selection.isCollapsed) {
+          var aElement = document.createElement('a');
+          aElement.setAttribute('href', value);
+          aElement.textContent = value;
+
+          selection.range.insertNode(aElement);
+
+          // Select the created link
+          var newRange = document.createRange();
+          newRange.setStartBefore(aElement);
+          newRange.setEndAfter(aElement);
+
+          selection.selection.removeAllRanges();
+          selection.selection.addRange(newRange);
+        } else {
+          scribe.api.CommandPatch.prototype.execute.call(this, value);
+        }
+      };
     };
   };
 
@@ -3911,6 +4023,7 @@ define('plugins/core/patches',[
   './patches/commands/insert-html',
   './patches/commands/insert-list',
   './patches/commands/outdent',
+  './patches/commands/create-link',
   './patches/events'
 ], function (
   boldCommand,
@@ -3918,6 +4031,7 @@ define('plugins/core/patches',[
   insertHTMLCommand,
   insertListCommands,
   outdentCommand,
+  createLinkCommand,
   events
 ) {
 
@@ -3935,7 +4049,8 @@ define('plugins/core/patches',[
       indent: indentCommand,
       insertHTML: insertHTMLCommand,
       insertList: insertListCommands,
-      outdent: outdentCommand
+      outdent: outdentCommand,
+      createLink: createLinkCommand,
     },
     events: events
   };
@@ -4072,9 +4187,10 @@ define('api/node',[],function () {
 
   Node.prototype.nextAll = function () {
     var all = [];
-    var el = this.node;
-    while (el = el.nextSibling) {
+    var el = this.node.nextSibling;
+    while (el) {
       all.push(el);
+      el = el.nextSibling;
     }
     return all;
   };
@@ -4124,7 +4240,7 @@ define('api/selection',[],function () {
         endMarker.parentNode.removeChild(endMarker.nextSibling);
       }
 
-      if (!this.isCollapsed) {
+      if (! this.selection.isCollapsed) {
         // Start marker
         var rangeStart = this.range.cloneRange();
         rangeStart.collapse(true);
@@ -4264,7 +4380,7 @@ define('api',[
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/objects/assign',['../internals/baseCreateCallback', './keys', '../internals/objectTypes'], function(baseCreateCallback, keys, objectTypes) {
+define('lodash-amd/modern/objects/assign',['../internals/baseCreateCallback', './keys', '../internals/objectTypes'], function(baseCreateCallback, keys, objectTypes) {
 
   /**
    * Assigns own enumerable properties of source object(s) to the destination
@@ -4326,7 +4442,7 @@ define('lodash-modern/objects/assign',['../internals/baseCreateCallback', './key
   return assign;
 });
 
-define('transaction-manager',['lodash-modern/objects/assign'], function (assign) {
+define('transaction-manager',['lodash-amd/modern/objects/assign'], function (assign) {
 
   
 
@@ -4418,7 +4534,7 @@ define('undo-manager',[],function () {
  * Copyright 2009-2013 Jeremy Ashkenas, DocumentCloud and Investigative Reporters & Editors
  * Available under MIT license <http://lodash.com/license>
  */
-define('lodash-modern/arrays/pull',[], function() {
+define('lodash-amd/modern/arrays/pull',[], function() {
 
   /**
    * Used for `Array` method references.
@@ -4470,7 +4586,7 @@ define('lodash-modern/arrays/pull',[], function() {
   return pull;
 });
 
-define('event-emitter',['lodash-modern/arrays/pull'], function (pull) {
+define('event-emitter',['lodash-amd/modern/arrays/pull'], function (pull) {
 
   
 
@@ -4481,7 +4597,7 @@ define('event-emitter',['lodash-modern/arrays/pull'], function (pull) {
     this._listeners = {};
   }
 
-  EventEmitter.prototype.on = function (eventName, fn) {  
+  EventEmitter.prototype.on = function (eventName, fn) {
     var listeners = this._listeners[eventName] || [];
 
     listeners.push(fn);
@@ -4500,6 +4616,7 @@ define('event-emitter',['lodash-modern/arrays/pull'], function (pull) {
 
   EventEmitter.prototype.trigger = function (eventName, args) {
     var listeners = this._listeners[eventName] || [];
+
     listeners.forEach(function (listener) {
       listener.apply(null, args);
     });
@@ -4510,8 +4627,8 @@ define('event-emitter',['lodash-modern/arrays/pull'], function (pull) {
 });
 
 define('scribe',[
-  'lodash-modern/objects/defaults',
-  'lodash-modern/arrays/flatten',
+  'lodash-amd/modern/objects/defaults',
+  'lodash-amd/modern/arrays/flatten',
   './plugins/core/commands',
   './plugins/core/events',
   './plugins/core/formatters/html/replace-nbsp-chars',
@@ -4606,6 +4723,7 @@ define('scribe',[
     this.use(patches.commands.insertHTML());
     this.use(patches.commands.insertList());
     this.use(patches.commands.outdent());
+    this.use(patches.commands.createLink());
     this.use(patches.events());
 
     this.use(commands.indent());
@@ -9484,6 +9602,10 @@ define('scribe-common/element',['lodash-amd/modern/collections/contains'], funct
     return contains(blockElementNames, node.nodeName);
   }
 
+  function isSelectionMarkerNode(node) {
+    return (node.nodeType === Node.ELEMENT_NODE && node.className === 'scribe-marker');
+  }
+
   function unwrap(node, childNode) {
     while (childNode.childNodes.length > 0) {
       node.insertBefore(childNode.childNodes[0], childNode);
@@ -9493,6 +9615,7 @@ define('scribe-common/element',['lodash-amd/modern/collections/contains'], funct
 
   return {
     isBlockElement: isBlockElement,
+    isSelectionMarkerNode: isSelectionMarkerNode,
     unwrap: unwrap
   };
 
@@ -10032,9 +10155,12 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
+    if (options.onChange) {
+      scribe.on('content-changed', options.onChange);
+    }
+
     var scribe = new Scribe(element, { allowBlockElements: true });      
 
-    console.log(scribe);
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 

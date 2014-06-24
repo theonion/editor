@@ -54,9 +54,12 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
+    if (options.onChange) {
+      scribe.on('content-changed', options.onChange);
+    }
+
     var scribe = new Scribe(element, { allowBlockElements: true });      
 
-    console.log(scribe);
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
