@@ -17,7 +17,8 @@ require.config({
     'scribe-plugin-onion-video': './plugins/scribe-plugin-onion-video',
     'scribe-plugin-hr': './plugins/scribe-plugin-hr',
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
-    'scribe-plugin-embed': './plugins/scribe-plugin-embed'
+    'scribe-plugin-embed': './plugins/scribe-plugin-embed',
+    'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder'
   },
   name: "../bower_components/almond/almond",
   wrap: {

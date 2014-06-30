@@ -15,7 +15,8 @@ define('onion-editor',[
   'scribe-plugin-youtube',
   'scribe-plugin-embed',
   'scribe-plugin-onion-video',
-  'scribe-plugin-hr'
+  'scribe-plugin-hr',
+  'scribe-plugin-placeholder'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -33,7 +34,8 @@ define('onion-editor',[
   scribePluginYoutube,
   scribePluginEmbed,
   scribePluginOnionVideo,
-  scribePluginHr
+  scribePluginHr,
+  scribePluginPlaceholder
 ) {
 
   'use strict';
@@ -58,6 +60,15 @@ define('onion-editor',[
 
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
+    }
+
+
+    if (options.placeholderElement) {
+      console.log("configuring placeholder");
+      scribe.use(scribePluginPlaceholder({
+        placeholderText: options.placeholderText || "Write here",
+        placeholderElement: options.placeholderElement
+      }));
     }
 
     var keyCommands = {};
@@ -110,7 +121,9 @@ define('onion-editor',[
     if (options.multiline &&  options.formatting.list) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
-      scribe.use(scribePluginSmartLists());
+      
+      /* Disable for now. There's an open issue that needs to get resolved */
+      // scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};

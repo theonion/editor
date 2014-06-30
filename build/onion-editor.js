@@ -9705,6 +9705,7 @@ define('scribe-plugin-smart-lists',['scribe-common/element'], function (element)
             scribe.getCommand(listCommand).execute();
 
             // Clear "* "/etc from the list item
+            
             removeSelectedTextNode();
           });
         }
@@ -10145,6 +10146,24 @@ define('scribe-plugin-hr',[],function () {
     };
   }
 });
+define('scribe-plugin-placeholder',[],function () {
+
+  return function (options) {
+    return function (scribe) {
+      scribe.on('content-changed', checkForEmpty);
+      options.placeholderElement.innerHTML = options.placeholderText;
+      function checkForEmpty() {
+        var content = scribe.getContent()
+        if (content === "<p><br></p>") {
+          options.placeholderElement.style.display = '';
+        }
+        else {
+          options.placeholderElement.style.display = 'none';
+        }
+      }
+    }
+  }
+});
 define('onion-editor',[
   'scribe',
   'scribe-plugin-blockquote-command',
@@ -10162,7 +10181,8 @@ define('onion-editor',[
   'scribe-plugin-youtube',
   'scribe-plugin-embed',
   'scribe-plugin-onion-video',
-  'scribe-plugin-hr'
+  'scribe-plugin-hr',
+  'scribe-plugin-placeholder'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -10180,7 +10200,8 @@ define('onion-editor',[
   scribePluginYoutube,
   scribePluginEmbed,
   scribePluginOnionVideo,
-  scribePluginHr
+  scribePluginHr,
+  scribePluginPlaceholder
 ) {
 
   
@@ -10205,6 +10226,15 @@ define('onion-editor',[
 
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
+    }
+
+
+    if (options.placeholderElement) {
+      console.log("configuring placeholder");
+      scribe.use(scribePluginPlaceholder({
+        placeholderText: options.placeholderText || "Write here",
+        placeholderElement: options.placeholderElement
+      }));
     }
 
     var keyCommands = {};
@@ -10257,7 +10287,9 @@ define('onion-editor',[
     if (options.multiline &&  options.formatting.list) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
-      scribe.use(scribePluginSmartLists());
+      
+      /* Disable for now. There's an open issue that needs to get resolved */
+      // scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};
