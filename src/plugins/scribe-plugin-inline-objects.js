@@ -187,8 +187,8 @@ define('scribe-plugin-inline-objects',[],function () {
           inline_remove: function () {
             scribe.transactionManager.run(function () {
               $(activeElement).remove();
+              hideToolbar()
             });
-            hideToolbar();
           },  
           inline_edit: function () {
             /* I think this should be a bit more like insert.

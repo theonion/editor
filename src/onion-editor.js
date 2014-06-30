@@ -54,11 +54,11 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
+    var scribe = new Scribe(element, { allowBlockElements: true });      
+
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
-
-    var scribe = new Scribe(element, { allowBlockElements: true });      
 
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
@@ -72,7 +72,7 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
 
-      ignoredTags.div = {}
+      ignoredTags.div = { class:'inline' } //ignore the contents of any di
     }
 
     // Bold
@@ -139,11 +139,18 @@ define('onion-editor',[
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
       
       // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
-      scribe.use(scribePluginBettyCropper());
+
+      scribe.use(scribePluginBettyCropper({
+        onInsert: options.bettyCropperOnInsert,
+        onEdit: options.bettyCropperOnEdit
+      }));
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
-      scribe.use(scribePluginOnionVideo());
+      scribe.use(scribePluginOnionVideo({
+        onInsert: options.onionVideoOnInsert,
+        onEdit: options.onionVideoOnEdit
+      }));
     }
 
     scribe.use(scribePluginSanitizer({
@@ -177,7 +184,8 @@ define('onion-editor',[
 
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
-      return element.textContent 
+
+      return scribe.getContent();
     }
     return this;
   } 

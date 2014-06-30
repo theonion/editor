@@ -6730,6 +6730,12 @@ define('scribe-plugin-link-prompt-command',[],function () {
 });
 
 //# sourceMappingURL=scribe-plugin-link-prompt-command.js.map;
+/*
+  
+  This is lifted from 
+
+*/
+
 // UMD
 (function (root, factory) {
   if (typeof define === 'function' && define.amd) {
@@ -6772,11 +6778,13 @@ define('scribe-plugin-link-prompt-command',[],function () {
         continue;
       }
 
-      // Do not do anything within the list of ignored tags. 
-      // TODO: add additional matching requirements. 
+
+      // Do not santiize blocks that match 
       if (this.config.ignoredTags[nodeName]) {
-        continue;
+        return;
       }
+
+
 
       if (node.nodeType === Node.TEXT_NODE) {
         // If this text node is just whitespace and the previous or next element
@@ -6822,8 +6830,6 @@ define('scribe-plugin-link-prompt-command',[],function () {
 
       // Drop tag entirely according to the whitelist *and* if the markup
       // is invalid.
-      
-
       if (!this.config.tags[nodeName] || isInvalid || isNestedBlockElement) {
         // Do not keep the inner text of SCRIPT/STYLE elements.
         if (! (node.nodeName === 'SCRIPT' || node.nodeName === 'STYLE')) {
@@ -9963,8 +9969,8 @@ define('scribe-plugin-inline-objects',[],function () {
           inline_remove: function () {
             scribe.transactionManager.run(function () {
               $(activeElement).remove();
+              hideToolbar()
             });
-            hideToolbar();
           },  
           inline_edit: function () {
             /* I think this should be a bit more like insert.
@@ -10080,9 +10086,49 @@ define('scribe-plugin-embed',[],function () {
 define('scribe-plugin-onion-video',[],function () {
   return function (config) {
     return function (scribe) {
-      scribe.on("inline:onion-video", showDialog);
-      function showDialog(block, callback) {
-        callback(block, {video_id: 0, caption: ""});
+
+
+
+      //scribe.on("inline:onion-video", showDialog);
+      //scribe.on("inline:edit:onion-video", editVideo);
+      //scribe.on("inline:insert:onion-video", uploadVideo);
+
+
+      function uploadVideo(block, callback) {
+
+        var activeElement = callback(options.block, {videoid:"NONE"});
+        return instanceOptions.uploadVideo().then(
+            function(videoObject){
+                setVideoID(videoObject.attrs.id);
+            }, function(error){
+                onError(error);
+            }, function(progress){
+                onProgress(progress);
+            }
+        );
+
+        function onProgress() {
+            //update an indicator
+        }
+
+        function setVideoID(id) {
+            $("iframe", activeElement).attr("src", instanceOptions.videoEmbedUrl + id);
+            $(activeElement).attr('data-videoid', id)
+        }
+
+        function onError() {
+            //show msg, allow user to trigger upload again
+        }
+
+        function onCancel() {
+            //remove placeholder. Call it a day.
+        }
+
+      }
+
+      function editVideo(block, callback) {
+          var id = $(block.element).data('videoid');
+          window.editVideo(id);
       }
     };
   }
@@ -10155,11 +10201,11 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
+    var scribe = new Scribe(element, { allowBlockElements: true });      
+
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
-
-    var scribe = new Scribe(element, { allowBlockElements: true });      
 
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
@@ -10173,7 +10219,7 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
 
-      ignoredTags.div = {}
+      ignoredTags.div = { class:'inline' } //ignore the contents of any di
     }
 
     // Bold
@@ -10240,11 +10286,18 @@ define('onion-editor',[
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
       
       // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
-      scribe.use(scribePluginBettyCropper());
+
+      scribe.use(scribePluginBettyCropper({
+        onInsert: options.bettyCropperOnInsert,
+        onEdit: options.bettyCropperOnEdit
+      }));
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
-      scribe.use(scribePluginOnionVideo());
+      scribe.use(scribePluginOnionVideo({
+        onInsert: options.onionVideoOnInsert,
+        onEdit: options.onionVideoOnEdit
+      }));
     }
 
     scribe.use(scribePluginSanitizer({
@@ -10278,7 +10331,8 @@ define('onion-editor',[
 
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
-      return element.textContent 
+
+      return scribe.getContent();
     }
     return this;
   } 

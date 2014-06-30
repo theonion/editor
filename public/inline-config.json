@@ -1,5 +1,5 @@
 {
-    "betty-cropper": {
+    "image": {
         "size": ["huge", "big", "medium", "small", "tiny"],
         "crop": ["original", "16x9", "1x1", "3x1"],
         "defaults": {
@@ -21,10 +21,6 @@
         },
         "template":
         "<div data-type=\"onion-video\" class=\"onion-video video inline size-{{size}} crop-{{crop}}\" data-video-id=\"{{image_id}}\" data-size=\"{{size}}\" data-crop=\"{{crop}}\"><iframe src=\"/videos/embed?id={{video_id}}\"></iframe></div>"
-    },
-    "image": {
-        "template":
-        "<div data-type=\"image\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-url=\"{{source}}\"><img src=\"{{url}}\"></div>"
     },
     "embed": {
         "size": ["big", "small"],
