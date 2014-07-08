@@ -20,35 +20,36 @@ define('scribe-plugin-inline-objects',[],function () {
           $(".embed-tools button", editorEl).click(insertObject);
 
           $(".inline-tools button", editorEl.parentNode).click(function(event) {
+
             var name = $(event.target).attr("name");
+            console.log("button clicked:", name);
             if (typeof actions[name] === "function") {
               actions[name]();
             }
           });
         }
-        
+
         function insertObject(event) {
           //derive type from button clicked.
           var type = $(event.target).closest("button").data("commandName");
           //emit an event, so handler plugin can pick up.
-          scribe.trigger("inline:" + type, [
+          scribe.trigger("inline:insert:" + type, [
             activeBlock, 
-            function(block, values) {
-                // 
-                scribe.transactionManager.run(function () {
-                  var html = render(
-                      templates[type].template, 
-                      $.extend(templates[type].defaults, values) 
-                  );
-                  $(block).before(html); 
-                  $(".inline", editorEl).attr("contenteditable", "false"); 
-                });
+            function(block, values) {              
+              updateContents(function() {
+                var html = render(
+                    templates[type].template, 
+                    $.extend(templates[type].defaults, values) 
+                );
+                $(block).before(html); 
+                $(".inline", editorEl).attr("contenteditable", "false"); 
+              });
+
             }
           ]);
           $(".embed-tools", editorEl).removeClass("active");
           activeBlock = undefined;
         }
-
 
         // Insert toolbar. 
         scribe.el.addEventListener('mouseover', function (event) {
@@ -61,7 +62,7 @@ define('scribe-plugin-inline-objects',[],function () {
           }
           if (blocks[i]) {
             var top = blocks[i].offsetTop;
-            $(".embed-tools",editorEl)
+            $(".embed-tools",editorEl)  
                 .css({ top: top   })
                 .addClass("active");
             activeBlock = blocks[i];
@@ -120,9 +121,8 @@ define('scribe-plugin-inline-objects',[],function () {
             .show();
         }
 
-
         function getSizes() {
-          return  templates[$(activeElement).attr("data-type")].size;
+          return templates[$(activeElement).attr("data-type")].size;
         }
 
         function getCrops() {
@@ -137,7 +137,7 @@ define('scribe-plugin-inline-objects',[],function () {
               $(".caption", activeElement).html()
             );
             if (caption) {
-              scribe.transactionManager.run(function () {
+              updateContents(function() {
                 $(".caption", activeElement).html(caption);
               });
             }
@@ -151,9 +151,7 @@ define('scribe-plugin-inline-objects',[],function () {
             var cropOptions = getCrops();
             //this crop isn't available for the new size option
             if (cropOptions.indexOf(currentCrop) === -1) {
-              scribe.transactionManager.run(function () {
-                setValue("crop", cropOptions[0]);
-              });
+              setValue("crop", cropOptions[0]);
             }
           },
           inline_crop: function() {
@@ -164,31 +162,32 @@ define('scribe-plugin-inline-objects',[],function () {
             var previousBlock = $(activeElement).prev()[0];
             if (previousBlock) {
               var top = $(activeElement).offset().top;
-              scribe.transactionManager.run(function () {
+
+              updateContents(function() {
                 $(activeElement).after(previousBlock);
+                showToolbar();
+                var newTop = $(activeElement).offset().top;
+                window.scrollBy(0, newTop - top)
               });
-              showToolbar();
-              var newTop = $(activeElement).offset().top;
-              window.scrollBy(0, newTop - top)
             }
           },
           inline_down: function() {
             var nextBlock = $(activeElement).next()[0];
             if (nextBlock) {
               var top = $(activeElement).offset().top;
-              scribe.transactionManager.run(function () {
+              updateContents(function() {
                 $(activeElement).before(nextBlock)
+                showToolbar();
+                var newTop = $(activeElement).offset().top;
+                window.scrollBy(0, newTop - top)
               });
-              showToolbar()
-              var newTop = $(activeElement).offset().top;
-              window.scrollBy(0, newTop - top)
             }
           },
           inline_remove: function () {
-            scribe.transactionManager.run(function () {
+            updateContents(function() {
               $(activeElement).remove();
-              hideToolbar()
             });
+            hideToolbar()
           },  
           inline_edit: function () {
             /* I think this should be a bit more like insert.
@@ -196,16 +195,18 @@ define('scribe-plugin-inline-objects',[],function () {
             For now, the module is responsible for making modifications to the markup. 
 
             */
-            scribe.trigger("inline:" + $(activeElement).attr("data-type"), 
+            scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"), 
               [
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr("data-type");
-                  element.outerHTML = 
-                    render(
-                      templates[type].template,
-                      $.extend(templates[type].defaults, values) 
-                    )
+                  updateContents(function() {
+                    element.outerHTML = 
+                      render(
+                        templates[type].template,
+                        $.extend(templates[type].defaults, values) 
+                      )
+                  });
                 }
               ]
             )
@@ -217,23 +218,22 @@ define('scribe-plugin-inline-objects',[],function () {
           var index = list.indexOf(currentValue) + 1;
           if (index >= list.length)
             index = 0;
-
           setValue(attribute, list[index]);
           if (typeof window.picturefill === "function") {
             setTimeout(window.picturefill, 100);
           }
-           
         } 
 
         function setValue(attribute, value) {
           var currentValue = $(activeElement).attr("data-" + attribute);
-          $(activeElement)
-            .removeClass(attribute + "-" + currentValue)
-            .addClass(attribute + "-" + value)
-            .attr("data-" + attribute, value)
-          showToolbar();
+          updateContents(function() {
+            $(activeElement)
+              .removeClass(attribute + "-" + currentValue)
+              .addClass(attribute + "-" + value)
+              .attr("data-" + attribute, value)
+              showToolbar();
+          });
         }
-
 
         function render(html, dict) {
           for (var k in dict) {
@@ -242,6 +242,17 @@ define('scribe-plugin-inline-objects',[],function () {
             }
           }
           return html;
+        }
+        
+
+        function updateContents(fn) {
+          setTimeout(function() {
+            scribe.el.focus();
+            setTimeout(function() {
+              console.log("DOING SHIT");
+              scribe.transactionManager.run(fn)
+            }, 0);
+          }, 0);
         }
     }
   }

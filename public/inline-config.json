@@ -30,7 +30,7 @@
             "crop": "16x9"
         },
         "template": 
-        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-source=\"{{source}}\"><div>{{embed_code}}</div><span class=\"caption\">{{caption}}</span><a class=\"source\" target=\"_blank\" href=\"{{source}}\">Source</a></div>"
+        "<div data-type=\"embed\" data-crop=\"{{crop}}\" class=\"inline embed size-{{size}} crop-{{crop}}\" data-code=\"{{escaped_code}}\" data-source=\"{{source}}\"><div>{{code}}</div><span class=\"caption\">{{caption}}</span></div>"
     },
     "youtube": {
         "size": ["big", "small"],

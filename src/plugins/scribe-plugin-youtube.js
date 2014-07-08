@@ -3,7 +3,8 @@ define('scribe-plugin-youtube',[],function () {
   return function (config) {
     return function (scribe) {
 
-        scribe.on("inline:youtube", showDialog);
+        scribe.on("inline:insert:youtube", showDialog);
+        scribe.on("inline:edit:youtube", showDialog);
 
         function parseYoutube(url){
           var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -15,9 +16,9 @@ define('scribe-plugin-youtube',[],function () {
             return false;
           }
         }
-
+        
         function showDialog(block, callback) {
-          var url = prompt("Youtube URL:", $("A", block).attr("href"));
+          var url = prompt("Youtube URL:", $(block).attr("data-youtube-id") || "");
           var youtube_id  = parseYoutube(url);
           if (youtube_id) {
             callback(

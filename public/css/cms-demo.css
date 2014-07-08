@@ -43,7 +43,7 @@ body {
     z-index: 10;
     position:absolute;
 }
-
+.editorPlaceholder p,
 .editor blockquote,
 .editor ul,
 .editor ol,
@@ -188,11 +188,14 @@ body {
 }
 
 }
-@media screen and (min-width: 320px) and (max-width: 800px) {
-    .editorPlaceholder,
-        .editor {
-            padding: 0 20px;
-        }
-    }
+#embed-modal textarea, 
+#embed-modal input[type=text] { 
+    width: 100%; 
+    max-width: 100%;
+    font-family: courier, fixed; 
+    font-size: 14px; 
+    padding: 5px; 
+    background-color: #F1F1F1; 
 }
 
+#embed-modal textarea { height: 200px; resize: vertical; }

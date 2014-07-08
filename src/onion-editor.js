@@ -6,7 +6,7 @@ define('onion-editor',[
   'scribe-plugin-heading-command',
   'scribe-plugin-intelligent-unlink-command',
   'scribe-plugin-keyboard-shortcuts',
-  'scribe-plugin-link-prompt-command',
+  'scribe-plugin-link-ui',
   'scribe-plugin-sanitizer',
   'scribe-plugin-smart-lists',
   'scribe-plugin-toolbar',
@@ -25,7 +25,7 @@ define('onion-editor',[
   scribePluginHeadingCommand,
   scribePluginIntelligentUnlinkCommand,
   scribePluginKeyboardShortcuts,
-  scribePluginLinkPromptCommand,
+  scribePluginLinkUI,
   scribePluginSanitizer,
   scribePluginSmartLists,
   scribePluginToolbar,
@@ -61,7 +61,6 @@ define('onion-editor',[
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
-
 
     if (options.placeholderElement) {
       console.log("configuring placeholder");
@@ -113,17 +112,17 @@ define('onion-editor',[
       keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
-      scribe.use(scribePluginLinkPromptCommand());
+      scribe.use(scribePluginLinkUI(options.link));
       tags.a = { href:true, target:true }
     }
 
     // Lists
-    if (options.multiline &&  options.formatting.list) {
+    if (options.multiline && options.formatting.list) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
       /* Disable for now. There's an open issue that needs to get resolved */
-      // scribe.use(scribePluginSmartLists());
+      //scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};
@@ -198,8 +197,15 @@ define('onion-editor',[
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
 
-      return scribe.getContent();
+      var contents = scribe.getContent();
+
+      // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
+      scribe.trigger('on-get-content', contents);
+
+      return contents;
     }
+
+    this.scribe = scribe;
     return this;
   } 
 

@@ -2921,7 +2921,9 @@ define('plugins/core/events',[
       }
 
       /**
-       * Run formatters on paste
+       * We have to hijack the paste event to ensure it uses
+       * `scribe.insertHTML`, which executes the Scribe version of the command
+       * and also runs the formatters.
        */
 
       /**
@@ -2938,6 +2940,7 @@ define('plugins/core/events',[
           event.preventDefault();
 
           if (contains(event.clipboardData.types, 'text/html')) {
+
             scribe.insertHTML(event.clipboardData.getData('text/html'));
           } else {
             scribe.insertPlainText(event.clipboardData.getData('text/plain'));
@@ -2973,7 +2976,7 @@ define('plugins/core/events',[
 
           // Wait for the paste to happen (next loop?)
           setTimeout(function () {
-            data = bin.innerHTML;
+            var data = bin.innerHTML;
             bin.parentNode.removeChild(bin);
 
             // Restore the caret position
@@ -3241,38 +3244,51 @@ define('plugins/core/formatters/html/enforce-p-elements',[
 
 });
 
-define('plugins/core/formatters/html/ensure-selectable-containers',[],function () {
+define('plugins/core/formatters/html/ensure-selectable-containers',[
+    'scribe-common/element',
+    'lodash-amd/modern/collections/contains'
+  ], function (
+    element,
+    contains
+  ) {
 
   /**
-   * Chrome and Firefox: Block-level elements like `<p>` or `<li>`
-   * need to contain either text or a `<br>` to remain selectable.
+   * Chrome and Firefox: All elements need to contain either text or a `<br>` to
+   * remain selectable. (Unless they have a width and height explicitly set with
+   * CSS(?), as per: http://jsbin.com/gulob/2/edit?html,css,js,output)
    */
 
   
 
-  function containsChild(node, elementType) {
-    // FIXME: do we need to recurse further down?
-    for (var n = node.firstChild; n; n = n.nextSibling) {
-      if (n.tagName === elementType) {
-        return true;
-      }
-    }
-
-    return false;
-  }
+  // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
+  var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
 
   function traverse(parentNode) {
-    var treeWalker = document.createTreeWalker(parentNode, NodeFilter.SHOW_ELEMENT);
-    var node = treeWalker.firstChild();
+    // Instead of TreeWalker, which gets confused when the BR is added to the dom,
+    // we recursively traverse the tree to look for an empty node that can have childNodes
+
+    var node = parentNode.firstElementChild;
+
+    function isEmpty(node) {
+      return node.children.length === 0
+        || (node.children.length === 1
+            && element.isSelectionMarkerNode(node.children[0]));
+    }
 
     while (node) {
-      // Find any block-level container that contains neither text nor a <br>
-      if ((node.nodeName === 'P' || node.nodeName === 'LI') &&
-          (node.textContent === '') &&
-          (! containsChild(node, 'BR'))) {
-        node.appendChild(document.createElement('br'));
+      if (!element.isSelectionMarkerNode(node)) {
+        // Find any node that contains no child *elements*, or just contains
+        // whitespace, and is not self-closing
+        if (isEmpty(node) &&
+          node.textContent.trim() === '' &&
+          !contains(html5VoidElements, node.nodeName))
+        {
+          node.appendChild(document.createElement('br'));
+        } else if (node.children.length > 0) {
+          traverse(node);
+        }
       }
-      node = treeWalker.nextSibling();
+      node = node.nextElementSibling;
     }
   }
 
@@ -4215,7 +4231,8 @@ define('api/selection',[],function () {
     Selection.prototype.getContaining = function (nodeFilter) {
       var node = new scribe.api.Node(this.range.commonAncestorContainer);
       var isTopContainerElement = node.node && node.node.attributes
-        && node.node.attributes.getNamedItem('contenteditable');
+         && node.node.attributes.getNamedItem('contenteditable');
+
       return ! isTopContainerElement && nodeFilter(node.node) ? node.node : node.getAncestor(nodeFilter);
     };
 
@@ -4231,14 +4248,74 @@ define('api/selection',[],function () {
       rangeEnd.insertNode(endMarker);
 
       /**
-       * Chrome: `Range.insertNode` inserts a bogus text node after the inserted
-       * element. We just remove it.
-       * As per: http://jsbin.com/ODapifEb/1/edit?js,console,output
+       * Chrome and Firefox: `Range.insertNode` inserts a bogus text node after
+       * the inserted element. We just remove it. This in turn creates several
+       * bugs when perfoming commands on selections that contain an empty text
+       * node (`removeFormat`, `unlink`).
+       * As per: http://jsbin.com/hajim/5/edit?js,console,output
        */
       // TODO: abstract into polyfill for `Range.insertNode`
-      if (endMarker.nextSibling && endMarker.nextSibling.nodeType === 3 && endMarker.nextSibling.data === '') {
+      if (endMarker.nextSibling &&
+          endMarker.nextSibling.nodeType === Node.TEXT_NODE
+          && endMarker.nextSibling.data === '') {
         endMarker.parentNode.removeChild(endMarker.nextSibling);
       }
+
+
+
+      /**
+       * Chrome and Firefox: `Range.insertNode` inserts a bogus text node before
+       * the inserted element when the child element is at the start of a block
+       * element. We just remove it.
+       * FIXME: Document why we need to remove this
+       * As per: http://jsbin.com/sifez/1/edit?js,console,output
+       */
+      if (endMarker.previousSibling &&
+          endMarker.previousSibling.nodeType === Node.TEXT_NODE
+          && endMarker.previousSibling.data === '') {
+        endMarker.parentNode.removeChild(endMarker.previousSibling);
+      }
+
+
+      /**
+       * This is meant to test Chrome inserting erroneous text blocks into
+       * the scribe el when focus switches from a scribe.el to a button to
+       * the scribe.el. However, this is impossible to simlulate correctly
+       * in a test.
+       *
+       * This behaviour does not happen in Firefox.
+       *
+       * See http://jsbin.com/quhin/2/edit?js,output,console
+       *
+       * To reproduce the bug, follow the following steps:
+       *    1. Select text and create H2
+       *    2. Move cursor to front of text.
+       *    3. Remove the H2 by clicking the button
+       *    4. Observe that you are left with an empty H2
+       *        after the element.
+       *
+       * The problem is caused by the Range being different, depending on
+       * the position of the marker.
+       *
+       * Consider the following two scenarios.
+       *
+       * A)
+       *   1. scribe.el contains: ["1", <em>scribe-marker</em>]
+       *   2. Click button and click the right of to scribe.el
+       *   3. scribe.el contains: ["1", <em>scribe-marker</em>. #text]
+       *
+       *   This is wrong but does not cause the problem.
+       *
+       * B)
+       *   1. scribe.el contains: ["1", <em>scribe-marker</em>]
+       *   2. Click button and click to left of scribe.el
+       *   3. scribe.el contains: [#text, <em>scribe-marker</em>, "1"]
+       *
+       * The second example sets the range in the wrong place, meaning
+       * that in the second case the formatBlock is executed on the wrong
+       * element [the text node] leaving the empty H2 behind.
+       **/
+
 
       if (! this.selection.isCollapsed) {
         // Start marker
@@ -4247,15 +4324,33 @@ define('api/selection',[],function () {
         rangeStart.insertNode(startMarker);
 
         /**
-         * Chrome: `Range.insertNode` inserts a bogus text node after the inserted
-         * element. We just remove it.
-         * As per: http://jsbin.com/ODapifEb/1/edit?js,console,output
+         * Chrome and Firefox: `Range.insertNode` inserts a bogus text node after
+         * the inserted element. We just remove it. This in turn creates several
+         * bugs when perfoming commands on selections that contain an empty text
+         * node (`removeFormat`, `unlink`).
+         * As per: http://jsbin.com/hajim/5/edit?js,console,output
          */
         // TODO: abstract into polyfill for `Range.insertNode`
-        if (startMarker.nextSibling && startMarker.nextSibling.nodeType === 3 && startMarker.nextSibling.data === '') {
+        if (startMarker.nextSibling &&
+            startMarker.nextSibling.nodeType === Node.TEXT_NODE
+            && startMarker.nextSibling.data === '') {
           startMarker.parentNode.removeChild(startMarker.nextSibling);
         }
+
+        /**
+         * Chrome and Firefox: `Range.insertNode` inserts a bogus text node
+         * before the inserted element when the child element is at the start of
+         * a block element. We just remove it.
+         * FIXME: Document why we need to remove this
+         * As per: http://jsbin.com/sifez/1/edit?js,console,output
+         */
+        if (startMarker.previousSibling &&
+            startMarker.previousSibling.nodeType === Node.TEXT_NODE
+            && startMarker.previousSibling.data === '') {
+          startMarker.parentNode.removeChild(startMarker.previousSibling);
+        }
       }
+
 
       this.selection.removeAllRanges();
       this.selection.addRange(this.range);
@@ -4717,6 +4812,7 @@ define('scribe',[
     this.use(escapeHtmlCharactersFormatter());
     this.use(replaceNbspCharsFormatter());
 
+
     // Patches
     this.use(patches.commands.bold());
     this.use(patches.commands.indent());
@@ -4830,9 +4926,23 @@ define('scribe',[
   };
 
   Scribe.prototype.insertHTML = function (html) {
+    /**
+     * When pasting text from Google Docs in both Chrome and Firefox,
+     * the resulting text will be wrapped in a B tag. So it would look
+     * something like <b><p>Text</p></b>, which is invalid HTML. The command
+     * insertHTML will then attempt to fix this content by moving the B tag
+     * inside the P. The result is: <p><b></b></p><p>Text</p>, which is valid
+     * but means an extra P is inserted into the text. To avoid this we run the
+     * formatters before the insertHTML command as the formatter will
+     * unwrap the P and delete the B tag. It is acceptable to remove invalid
+     * HTML as Scribe should only accept valid HTML.
+     *
+     * See http://jsbin.com/cayosada/3/edit for more
+     **/
+
     // TODO: error if the selection is not within the Scribe instance? Or
     // focus the Scribe instance if it is not already focused?
-    this.getCommand('insertHTML').execute(html);
+    this.getCommand('insertHTML').execute(this._htmlFormatterFactory.format(html));
   };
 
   Scribe.prototype.isDebugModeEnabled = function () {
@@ -6654,28 +6764,50 @@ define('scribe-plugin-keyboard-shortcuts',[
 });
 
 //# sourceMappingURL=scribe-plugin-keyboard-shortcuts.js.map;
-define('scribe-plugin-link-prompt-command',[],function () {
+/* replacement for scribe's default plug in */
+
+define('scribe-plugin-link-ui',[],function () {
 
   /**
    * This plugin adds a command for creating links, including a basic prompt.
    */
-
-  
-
-  return function () {
+  return function (config) {
     return function (scribe) {
+
+
+      var editorEl = scribe.el.parentNode;
+
       var linkPromptCommand = new scribe.api.Command('createLink');
 
       linkPromptCommand.nodeName = 'A';
 
       linkPromptCommand.execute = function () {
+
+        function showInput() {
+          $("body").bind('click', closeByClick);
+          $(".link-tools", editorEl).show();
+        }
+
+        function closeByClick() {
+          confirmInput();
+        }
+
+        var cmd = this; 
+
+        function confirmInput() {
+          $("body").unbind('click', closeByClick);
+          $(".link-tools", editorEl).show();
+        }
+
+
+        var initialLink = anchorNode ? anchorNode.href : 'http://';
+        //var link = window.prompt('Enter a link.', initialLink);
         var selection = new scribe.api.Selection();
         var range = selection.range;
         var anchorNode = selection.getContaining(function (node) {
           return node.nodeName === this.nodeName;
         }.bind(this));
-        var initialLink = anchorNode ? anchorNode.href : 'http://';
-        var link = window.prompt('Enter a link.', initialLink);
+
 
         if (anchorNode) {
           range.selectNode(anchorNode);
@@ -6683,32 +6815,12 @@ define('scribe-plugin-link-prompt-command',[],function () {
           selection.selection.addRange(range);
         }
 
-        // FIXME: I don't like how plugins like this do so much. Is there a way
-        // to compose?
+        var rangeCopy = selection.clone();
 
-        if (link) {
-          // Prepend href protocol if missing
-          // For emails we just look for a `@` symbol as it is easier.
-          if (! /^mailto\:/.test(link) && /@/.test(link)) {
-            var shouldPrefixEmail = window.confirm(
-              'The URL you entered appears to be an email address. ' +
-              'Do you want to add the required “mailto:” prefix?'
-            );
-            if (shouldPrefixEmail) {
-              link = 'mailto:' + link;
-            }
-          } else if (! /^https?\:\/\//.test(link)) {
-            var shouldPrefixLink = window.confirm(
-              'The URL you entered appears to be a link. ' +
-              'Do you want to add the required “http://” prefix?'
-            );
-            if (shouldPrefixLink) {
-              link = 'http://' + link;
-            }
-          }
-
-          scribe.api.SimpleCommand.prototype.execute.call(this, link);
-        }
+        console.log(rangeCopy);
+        scribe.api.SimpleCommand.prototype.execute.call(cmd, "#");
+        
+        
       };
 
       linkPromptCommand.queryState = function () {
@@ -9803,35 +9915,36 @@ define('scribe-plugin-inline-objects',[],function () {
           $(".embed-tools button", editorEl).click(insertObject);
 
           $(".inline-tools button", editorEl.parentNode).click(function(event) {
+
             var name = $(event.target).attr("name");
+            console.log("button clicked:", name);
             if (typeof actions[name] === "function") {
               actions[name]();
             }
           });
         }
-        
+
         function insertObject(event) {
           //derive type from button clicked.
           var type = $(event.target).closest("button").data("commandName");
           //emit an event, so handler plugin can pick up.
-          scribe.trigger("inline:" + type, [
+          scribe.trigger("inline:insert:" + type, [
             activeBlock, 
-            function(block, values) {
-                // 
-                scribe.transactionManager.run(function () {
-                  var html = render(
-                      templates[type].template, 
-                      $.extend(templates[type].defaults, values) 
-                  );
-                  $(block).before(html); 
-                  $(".inline", editorEl).attr("contenteditable", "false"); 
-                });
+            function(block, values) {              
+              updateContents(function() {
+                var html = render(
+                    templates[type].template, 
+                    $.extend(templates[type].defaults, values) 
+                );
+                $(block).before(html); 
+                $(".inline", editorEl).attr("contenteditable", "false"); 
+              });
+
             }
           ]);
           $(".embed-tools", editorEl).removeClass("active");
           activeBlock = undefined;
         }
-
 
         // Insert toolbar. 
         scribe.el.addEventListener('mouseover', function (event) {
@@ -9844,7 +9957,7 @@ define('scribe-plugin-inline-objects',[],function () {
           }
           if (blocks[i]) {
             var top = blocks[i].offsetTop;
-            $(".embed-tools",editorEl)
+            $(".embed-tools",editorEl)  
                 .css({ top: top   })
                 .addClass("active");
             activeBlock = blocks[i];
@@ -9903,9 +10016,8 @@ define('scribe-plugin-inline-objects',[],function () {
             .show();
         }
 
-
         function getSizes() {
-          return  templates[$(activeElement).attr("data-type")].size;
+          return templates[$(activeElement).attr("data-type")].size;
         }
 
         function getCrops() {
@@ -9920,7 +10032,7 @@ define('scribe-plugin-inline-objects',[],function () {
               $(".caption", activeElement).html()
             );
             if (caption) {
-              scribe.transactionManager.run(function () {
+              updateContents(function() {
                 $(".caption", activeElement).html(caption);
               });
             }
@@ -9934,9 +10046,7 @@ define('scribe-plugin-inline-objects',[],function () {
             var cropOptions = getCrops();
             //this crop isn't available for the new size option
             if (cropOptions.indexOf(currentCrop) === -1) {
-              scribe.transactionManager.run(function () {
-                setValue("crop", cropOptions[0]);
-              });
+              setValue("crop", cropOptions[0]);
             }
           },
           inline_crop: function() {
@@ -9947,31 +10057,32 @@ define('scribe-plugin-inline-objects',[],function () {
             var previousBlock = $(activeElement).prev()[0];
             if (previousBlock) {
               var top = $(activeElement).offset().top;
-              scribe.transactionManager.run(function () {
+
+              updateContents(function() {
                 $(activeElement).after(previousBlock);
+                showToolbar();
+                var newTop = $(activeElement).offset().top;
+                window.scrollBy(0, newTop - top)
               });
-              showToolbar();
-              var newTop = $(activeElement).offset().top;
-              window.scrollBy(0, newTop - top)
             }
           },
           inline_down: function() {
             var nextBlock = $(activeElement).next()[0];
             if (nextBlock) {
               var top = $(activeElement).offset().top;
-              scribe.transactionManager.run(function () {
+              updateContents(function() {
                 $(activeElement).before(nextBlock)
+                showToolbar();
+                var newTop = $(activeElement).offset().top;
+                window.scrollBy(0, newTop - top)
               });
-              showToolbar()
-              var newTop = $(activeElement).offset().top;
-              window.scrollBy(0, newTop - top)
             }
           },
           inline_remove: function () {
-            scribe.transactionManager.run(function () {
+            updateContents(function() {
               $(activeElement).remove();
-              hideToolbar()
             });
+            hideToolbar()
           },  
           inline_edit: function () {
             /* I think this should be a bit more like insert.
@@ -9979,16 +10090,18 @@ define('scribe-plugin-inline-objects',[],function () {
             For now, the module is responsible for making modifications to the markup. 
 
             */
-            scribe.trigger("inline:" + $(activeElement).attr("data-type"), 
+            scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"), 
               [
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr("data-type");
-                  element.outerHTML = 
-                    render(
-                      templates[type].template,
-                      $.extend(templates[type].defaults, values) 
-                    )
+                  updateContents(function() {
+                    element.outerHTML = 
+                      render(
+                        templates[type].template,
+                        $.extend(templates[type].defaults, values) 
+                      )
+                  });
                 }
               ]
             )
@@ -10000,23 +10113,22 @@ define('scribe-plugin-inline-objects',[],function () {
           var index = list.indexOf(currentValue) + 1;
           if (index >= list.length)
             index = 0;
-
           setValue(attribute, list[index]);
           if (typeof window.picturefill === "function") {
             setTimeout(window.picturefill, 100);
           }
-           
         } 
 
         function setValue(attribute, value) {
           var currentValue = $(activeElement).attr("data-" + attribute);
-          $(activeElement)
-            .removeClass(attribute + "-" + currentValue)
-            .addClass(attribute + "-" + value)
-            .attr("data-" + attribute, value)
-          showToolbar();
+          updateContents(function() {
+            $(activeElement)
+              .removeClass(attribute + "-" + currentValue)
+              .addClass(attribute + "-" + value)
+              .attr("data-" + attribute, value)
+              showToolbar();
+          });
         }
-
 
         function render(html, dict) {
           for (var k in dict) {
@@ -10025,6 +10137,17 @@ define('scribe-plugin-inline-objects',[],function () {
             }
           }
           return html;
+        }
+        
+
+        function updateContents(fn) {
+          setTimeout(function() {
+            scribe.el.focus();
+            setTimeout(function() {
+              console.log("DOING SHIT");
+              scribe.transactionManager.run(fn)
+            }, 0);
+          }, 0);
         }
     }
   }
@@ -10045,7 +10168,8 @@ define('scribe-plugin-youtube',[],function () {
   return function (config) {
     return function (scribe) {
 
-        scribe.on("inline:youtube", showDialog);
+        scribe.on("inline:insert:youtube", showDialog);
+        scribe.on("inline:edit:youtube", showDialog);
 
         function parseYoutube(url){
           var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
@@ -10057,9 +10181,9 @@ define('scribe-plugin-youtube',[],function () {
             return false;
           }
         }
-
+        
         function showDialog(block, callback) {
-          var url = prompt("Youtube URL:", $("A", block).attr("href"));
+          var url = prompt("Youtube URL:", $(block).attr("data-youtube-id") || "");
           var youtube_id  = parseYoutube(url);
           if (youtube_id) {
             callback(
@@ -10077,9 +10201,65 @@ define('scribe-plugin-youtube',[],function () {
 define('scribe-plugin-embed',[],function () {
   return function (config) {
     return function (scribe) {
-      scribe.on("inline:embed", showDialog);
-      function showDialog(block, callback) {
-        callback(block, {html: "", caption: ""});
+      scribe.on("inline:insert:embed", insert);
+      scribe.on("inline:edit:embed", edit);
+
+      $("#embed-modal").on("hide.bs.modal", function() {
+        $("#set-embed-button").unbind("click");
+        $(".embed-error").hide();
+      });
+
+
+      function edit(block, callback) {
+        //populate modal contents
+
+        $("#embed-modal .embed-body").val(unescape($(block).attr("data-code")));
+        $("#embed-modal .embed-source").val($(block).attr("data-source"));
+        $("#embed-modal .embed-caption").val($(".caption", block).text());
+
+
+        $("#embed-modal").modal("show");
+        $("#set-embed-button").click(function () {
+          var embed_body = $("#embed-modal .embed-body").val();
+          if (embed_body.trim() === "") {
+             $(".embed-error").show();
+          }
+          else {
+            $(".embed-error").hide();
+            callback(block,
+              {body: embed_body,
+              caption: $("#embed-modal .embed-caption").val(),
+              source: $("#embed-modal .embed-source").val(),
+              escapedbody: escape(embed_body)
+            })
+            $("#embed-modal").modal("hide");
+
+          }
+        });
+        $("#embed-modal").modal("show");
+      }
+
+      function insert(block, callback) {
+        $("#embed-modal input, #embed-modal textarea").val("")
+        $("#embed-modal").modal("show");
+
+        $("#set-embed-button").click(function () {
+          var embed_body = $("#embed-modal .embed-body").val();
+
+          if (embed_body.trim() === "") {
+             $(".embed-error").show();
+          }
+          else {
+            $(".embed-error").hide();
+            callback(block,
+              {code: embed_body,
+              caption: $("#embed-modal .embed-caption").val(),
+              source: $("#embed-modal .embed-source").val(),
+              escaped_code: escape(embed_body)
+            })
+            $("#embed-modal").modal("hide");
+          }
+        });
       }
     };
   }
@@ -10172,7 +10352,7 @@ define('onion-editor',[
   'scribe-plugin-heading-command',
   'scribe-plugin-intelligent-unlink-command',
   'scribe-plugin-keyboard-shortcuts',
-  'scribe-plugin-link-prompt-command',
+  'scribe-plugin-link-ui',
   'scribe-plugin-sanitizer',
   'scribe-plugin-smart-lists',
   'scribe-plugin-toolbar',
@@ -10191,7 +10371,7 @@ define('onion-editor',[
   scribePluginHeadingCommand,
   scribePluginIntelligentUnlinkCommand,
   scribePluginKeyboardShortcuts,
-  scribePluginLinkPromptCommand,
+  scribePluginLinkUI,
   scribePluginSanitizer,
   scribePluginSmartLists,
   scribePluginToolbar,
@@ -10227,7 +10407,6 @@ define('onion-editor',[
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
-
 
     if (options.placeholderElement) {
       console.log("configuring placeholder");
@@ -10279,17 +10458,17 @@ define('onion-editor',[
       keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
-      scribe.use(scribePluginLinkPromptCommand());
+      scribe.use(scribePluginLinkUI(options.link));
       tags.a = { href:true, target:true }
     }
 
     // Lists
-    if (options.multiline &&  options.formatting.list) {
+    if (options.multiline && options.formatting.list) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
       /* Disable for now. There's an open issue that needs to get resolved */
-      // scribe.use(scribePluginSmartLists());
+      //scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};
@@ -10364,8 +10543,15 @@ define('onion-editor',[
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
 
-      return scribe.getContent();
+      var contents = scribe.getContent();
+
+      // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
+      scribe.trigger('on-get-content', contents);
+
+      return contents;
     }
+
+    this.scribe = scribe;
     return this;
   } 
 
