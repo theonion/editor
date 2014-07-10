@@ -3998,6 +3998,7 @@ define('plugins/core/patches/events',['../../../api/element'], function (element
                 // Store the caret position
                 selection.placeMarkers();
 
+
                 // We clone the childNodes into an Array so that it's
                 // not affected by any manipulation below when we
                 // iterate over it
@@ -4023,7 +4024,7 @@ define('plugins/core/patches/events',['../../../api/element'], function (element
                   }
                 });
 
-                selection.selectMarkers();
+                selection.selectMarkers(false);
               });
             }
           }
@@ -6764,7 +6765,7 @@ define('scribe-plugin-keyboard-shortcuts',[
 });
 
 //# sourceMappingURL=scribe-plugin-keyboard-shortcuts.js.map;
-/* replacement for scribe's default plug in */
+/* A friendly UI for adding links. */
 
 define('scribe-plugin-link-ui',[],function () {
 
@@ -6775,53 +6776,83 @@ define('scribe-plugin-link-ui',[],function () {
     return function (scribe) {
 
 
-      var editorEl = scribe.el.parentNode;
+      var editorEl = scribe.el.parentNode,
+        linkPromptCommand = new scribe.api.Command('createLink');
+      var linkToolsEl = $('.link-tools', editorEl),
+        inputEl = $('.link-tools input', editorEl),
+        placeHolder = '#replaceme';
 
-      var linkPromptCommand = new scribe.api.Command('createLink');
 
       linkPromptCommand.nodeName = 'A';
 
       linkPromptCommand.execute = function () {
-
-        function showInput() {
-          $("body").bind('click', closeByClick);
-          $(".link-tools", editorEl).show();
+        var cmd = this,
+          selection = new scribe.api.Selection();
+        if (selection.range) {
+          scribe.api.SimpleCommand.prototype.execute.call(cmd, placeHolder);  
+          showInput($('a[href=' + placeHolder + ']')); 
         }
+      };
 
-        function closeByClick() {
+      $('.remove', linkToolsEl).click(function() {
+        inputEl.val('');
+      });
+
+      inputEl.bind('keydown', function(e) {
+        if (e.keyCode === 13) {
           confirmInput();
         }
+      });
 
-        var cmd = this; 
-
-        function confirmInput() {
-          $("body").unbind('click', closeByClick);
-          $(".link-tools", editorEl).show();
-        }
-
-
-        var initialLink = anchorNode ? anchorNode.href : 'http://';
-        //var link = window.prompt('Enter a link.', initialLink);
+      scribe.el.addEventListener('click', function(e) {
+        // is there a link
         var selection = new scribe.api.Selection();
-        var range = selection.range;
-        var anchorNode = selection.getContaining(function (node) {
-          return node.nodeName === this.nodeName;
-        }.bind(this));
-
-
-        if (anchorNode) {
-          range.selectNode(anchorNode);
-          selection.selection.removeAllRanges(range);
-          selection.selection.addRange(range);
+        if (selection.range) {
+          var linkElement = $(e.target).closest('a');
+          if (linkElement.length === 1) {
+            showInput(linkElement);
+          }
         }
+      })
 
-        var rangeCopy = selection.clone();
+      function showInput(linkElement) {
+        linkToolsEl.show();
+        linkElement.addClass('link-edit');
 
-        console.log(rangeCopy);
-        scribe.api.SimpleCommand.prototype.execute.call(cmd, "#");
-        
-        
-      };
+        setTimeout(function() {
+          $("body, .link-tools .close").bind('click', closeByClick);
+          inputEl
+            .val(linkElement.attr('href').replace(placeHolder, ""))
+          inputEl[0].focus();
+        }, 10)
+      }
+
+      function closeByClick(e) {
+        if ($(e.target).closest(".link-tools input").length === 0) {
+          confirmInput();
+        }
+      }
+
+      function confirmInput() {
+        scribe.updateContents(function() {
+          var linkVal = inputEl.val();
+          if (linkVal === "") {
+            removeLink();
+          }
+          else {
+            $('.link-edit, [href=' + placeHolder + ']')
+              .attr('href', linkVal)
+              .removeClass('link-edit');
+          }
+        });
+        $('body, .link-tools .close').unbind('click');
+        linkToolsEl.hide();
+      }
+
+      function removeLink() {
+        var link = $('.link-edit, [href=' + placeHolder + ']');
+        link[0].outerHTML = link[0].innerHTML;
+      }
 
       linkPromptCommand.queryState = function () {
         /**
@@ -6835,13 +6866,11 @@ define('scribe-plugin-link-ui',[],function () {
         }.bind(this));
       };
 
-      scribe.commands.linkPrompt = linkPromptCommand;
+      scribe.commands.linkUI = linkPromptCommand;
     };
   };
 
 });
-
-//# sourceMappingURL=scribe-plugin-link-prompt-command.js.map;
 /*
   
   This is lifted from 
@@ -10455,7 +10484,7 @@ define('onion-editor',[
 
     // Links
     if (options.multiline && options.formatting.link) {
-      keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
+      keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
@@ -10517,12 +10546,21 @@ define('onion-editor',[
     }));
 
 
+    scribe.updateContents = function(fn) {
+        setTimeout(function() {
+          scribe.el.focus();
+          setTimeout(function() {
+            scribe.transactionManager.run(fn)
+          }, 0);
+        }, 0);
+      }
+
     // initialize Scribe plugins
     
     scribe.use(scribePluginCurlyQuotes());
 
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
-
+    
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));

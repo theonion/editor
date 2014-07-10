@@ -109,7 +109,7 @@ define('onion-editor',[
 
     // Links
     if (options.multiline && options.formatting.link) {
-      keyCommands.linkPrompt = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
+      keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
@@ -171,12 +171,21 @@ define('onion-editor',[
     }));
 
 
+    scribe.updateContents = function(fn) {
+        setTimeout(function() {
+          scribe.el.focus();
+          setTimeout(function() {
+            scribe.transactionManager.run(fn)
+          }, 0);
+        }, 0);
+      }
+
     // initialize Scribe plugins
     
     scribe.use(scribePluginCurlyQuotes());
 
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
-
+    
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
