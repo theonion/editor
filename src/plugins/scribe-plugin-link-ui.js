@@ -21,7 +21,9 @@ define('scribe-plugin-link-ui',[],function () {
       linkPromptCommand.execute = function () {
         var cmd = this,
           selection = new scribe.api.Selection();
-        if (selection.range) {
+
+        //TODO: Make sure there isn't a link in here, or any other block elements. Make sure there is a 
+        if (!selection.range.collapsed) {
           scribe.api.SimpleCommand.prototype.execute.call(cmd, placeHolder);  
           showInput($('a[href=' + placeHolder + ']')); 
         }
@@ -32,7 +34,7 @@ define('scribe-plugin-link-ui',[],function () {
       });
 
       inputEl.bind('keydown', function(e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13 || e.keyCode === 27) {
           confirmInput();
         }
       });

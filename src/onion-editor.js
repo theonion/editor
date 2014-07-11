@@ -16,7 +16,8 @@ define('onion-editor',[
   'scribe-plugin-embed',
   'scribe-plugin-onion-video',
   'scribe-plugin-hr',
-  'scribe-plugin-placeholder'
+  'scribe-plugin-placeholder',
+  'link-formatter'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -35,7 +36,8 @@ define('onion-editor',[
   scribePluginEmbed,
   scribePluginOnionVideo,
   scribePluginHr,
-  scribePluginPlaceholder
+  scribePluginPlaceholder,
+  linkFormatter
 ) {
 
   'use strict';
@@ -63,7 +65,6 @@ define('onion-editor',[
     }
 
     if (options.placeholderElement) {
-      console.log("configuring placeholder");
       scribe.use(scribePluginPlaceholder({
         placeholderText: options.placeholderText || "Write here",
         placeholderElement: options.placeholderElement
@@ -113,6 +114,7 @@ define('onion-editor',[
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
+      scribe.use(linkFormatter(options.link));
       tags.a = { href:true, target:true }
     }
 
@@ -185,7 +187,7 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
 
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
-    
+
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));

@@ -18,7 +18,8 @@ require.config({
     'scribe-plugin-hr': './plugins/scribe-plugin-hr',
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
     'scribe-plugin-embed': './plugins/scribe-plugin-embed',
-    'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder'
+    'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder',
+    'link-formatter': './formatters/link-formatter'
   },
   name: "../bower_components/almond/almond",
   wrap: {

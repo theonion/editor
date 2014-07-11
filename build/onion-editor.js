@@ -6788,7 +6788,9 @@ define('scribe-plugin-link-ui',[],function () {
       linkPromptCommand.execute = function () {
         var cmd = this,
           selection = new scribe.api.Selection();
-        if (selection.range) {
+
+        //TODO: Make sure there isn't a link in here, or any other block elements. Make sure there is a 
+        if (!selection.range.collapsed) {
           scribe.api.SimpleCommand.prototype.execute.call(cmd, placeHolder);  
           showInput($('a[href=' + placeHolder + ']')); 
         }
@@ -6799,7 +6801,7 @@ define('scribe-plugin-link-ui',[],function () {
       });
 
       inputEl.bind('keydown', function(e) {
-        if (e.keyCode === 13) {
+        if (e.keyCode === 13 || e.keyCode === 27) {
           confirmInput();
         }
       });
@@ -9960,7 +9962,7 @@ define('scribe-plugin-inline-objects',[],function () {
           scribe.trigger("inline:insert:" + type, [
             activeBlock, 
             function(block, values) {              
-              updateContents(function() {
+              scribe.updateContents(function() {
                 var html = render(
                     templates[type].template, 
                     $.extend(templates[type].defaults, values) 
@@ -10013,7 +10015,6 @@ define('scribe-plugin-inline-objects',[],function () {
           else {
             hideToolbar();
           }
-
         });
 
         function hideToolbar() {
@@ -10061,7 +10062,7 @@ define('scribe-plugin-inline-objects',[],function () {
               $(".caption", activeElement).html()
             );
             if (caption) {
-              updateContents(function() {
+              scribe.updateContents(function() {
                 $(".caption", activeElement).html(caption);
               });
             }
@@ -10083,48 +10084,51 @@ define('scribe-plugin-inline-objects',[],function () {
             toggleAttribute("crop", l);
           },
           inline_up: function() {
+             hideToolbar();
             var previousBlock = $(activeElement).prev()[0];
             if (previousBlock) {
               var top = $(activeElement).offset().top;
 
-              updateContents(function() {
+              scribe.updateContents(function() {
                 $(activeElement).after(previousBlock);
-                showToolbar();
-                var newTop = $(activeElement).offset().top;
-                window.scrollBy(0, newTop - top)
+               
+                setTimeout(function() {
+                  showToolbar();
+                  var newTop = $(activeElement).offset().top;
+                  window.scrollBy(0, newTop - top)
+                }, 0);
               });
             }
           },
           inline_down: function() {
+            hideToolbar();
             var nextBlock = $(activeElement).next()[0];
             if (nextBlock) {
               var top = $(activeElement).offset().top;
-              updateContents(function() {
-                $(activeElement).before(nextBlock)
-                showToolbar();
-                var newTop = $(activeElement).offset().top;
-                window.scrollBy(0, newTop - top)
+              scribe.updateContents(function() {
+                $(activeElement).before(nextBlock);
+                
+                setTimeout(function() {
+                  showToolbar();
+                  var newTop = $(activeElement).offset().top;
+                  window.scrollBy(0, newTop - top)
+                }, 0);
               });
             }
           },
           inline_remove: function () {
-            updateContents(function() {
+            scribe.updateContents(function() {
               $(activeElement).remove();
             });
             hideToolbar()
           },  
           inline_edit: function () {
-            /* I think this should be a bit more like insert.
-            We establish an onChange callback where we update the template with new values. 
-            For now, the module is responsible for making modifications to the markup. 
-
-            */
             scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"), 
               [
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr("data-type");
-                  updateContents(function() {
+                  scribe.updateContents(function() {
                     element.outerHTML = 
                       render(
                         templates[type].template,
@@ -10150,7 +10154,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
         function setValue(attribute, value) {
           var currentValue = $(activeElement).attr("data-" + attribute);
-          updateContents(function() {
+          scribe.updateContents(function() {
             $(activeElement)
               .removeClass(attribute + "-" + currentValue)
               .addClass(attribute + "-" + value)
@@ -10166,17 +10170,6 @@ define('scribe-plugin-inline-objects',[],function () {
             }
           }
           return html;
-        }
-        
-
-        function updateContents(fn) {
-          setTimeout(function() {
-            scribe.el.focus();
-            setTimeout(function() {
-              console.log("DOING SHIT");
-              scribe.transactionManager.run(fn)
-            }, 0);
-          }, 0);
         }
     }
   }
@@ -10373,6 +10366,65 @@ define('scribe-plugin-placeholder',[],function () {
     }
   }
 });
+define('link-formatter',[
+    'scribe-common/element',
+    'lodash-amd/modern/collections/contains'
+
+  ], function (
+    element,
+    contains
+  ) {
+
+  /**
+   * This formatter will make sure any urls
+   * that are supposed to be relative stay relative to a configured
+   * http://www.avclub.com/some-article ==> /some-article
+   */
+
+  
+
+  // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
+
+  function traverse(parentNode) {
+    // Instead of TreeWalker, which gets confused when the BR is added to the dom,
+    // we recursively traverse the tree to look for an empty node that can have childNodes
+
+    var node = parentNode.firstElementChild;
+
+    function isEmpty(node) {
+      return node.children.length === 0
+        || (node.children.length === 1
+            && element.isSelectionMarkerNode(node.children[0]));
+    }
+
+    while (node) {
+      if (node.nodeName === "A") {
+        console.log(node.getAttribute("href"));
+      }
+      else if (node.children.length > 0) {
+        traverse(node);
+      }
+      node = node.nextElementSibling;
+    }
+  }
+
+  return function () {
+    return function (scribe) {
+
+      scribe.registerHTMLFormatter('normalize', function (html) {
+        var bin = document.createElement('div');
+        bin.innerHTML = html;
+
+        traverse(bin);
+
+        return bin.innerHTML;
+      });
+
+    };
+  };
+
+});
+
 define('onion-editor',[
   'scribe',
   'scribe-plugin-blockquote-command',
@@ -10391,7 +10443,8 @@ define('onion-editor',[
   'scribe-plugin-embed',
   'scribe-plugin-onion-video',
   'scribe-plugin-hr',
-  'scribe-plugin-placeholder'
+  'scribe-plugin-placeholder',
+  'link-formatter'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -10410,7 +10463,8 @@ define('onion-editor',[
   scribePluginEmbed,
   scribePluginOnionVideo,
   scribePluginHr,
-  scribePluginPlaceholder
+  scribePluginPlaceholder,
+  linkFormatter
 ) {
 
   
@@ -10438,7 +10492,6 @@ define('onion-editor',[
     }
 
     if (options.placeholderElement) {
-      console.log("configuring placeholder");
       scribe.use(scribePluginPlaceholder({
         placeholderText: options.placeholderText || "Write here",
         placeholderElement: options.placeholderElement
@@ -10488,6 +10541,7 @@ define('onion-editor',[
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
+      scribe.use(linkFormatter(options.link));
       tags.a = { href:true, target:true }
     }
 
@@ -10560,7 +10614,7 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
 
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
-    
+
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
     if (options.multiline) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));

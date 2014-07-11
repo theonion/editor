@@ -36,7 +36,7 @@ define('scribe-plugin-inline-objects',[],function () {
           scribe.trigger("inline:insert:" + type, [
             activeBlock, 
             function(block, values) {              
-              updateContents(function() {
+              scribe.updateContents(function() {
                 var html = render(
                     templates[type].template, 
                     $.extend(templates[type].defaults, values) 
@@ -89,7 +89,6 @@ define('scribe-plugin-inline-objects',[],function () {
           else {
             hideToolbar();
           }
-
         });
 
         function hideToolbar() {
@@ -137,7 +136,7 @@ define('scribe-plugin-inline-objects',[],function () {
               $(".caption", activeElement).html()
             );
             if (caption) {
-              updateContents(function() {
+              scribe.updateContents(function() {
                 $(".caption", activeElement).html(caption);
               });
             }
@@ -159,48 +158,51 @@ define('scribe-plugin-inline-objects',[],function () {
             toggleAttribute("crop", l);
           },
           inline_up: function() {
+             hideToolbar();
             var previousBlock = $(activeElement).prev()[0];
             if (previousBlock) {
               var top = $(activeElement).offset().top;
 
-              updateContents(function() {
+              scribe.updateContents(function() {
                 $(activeElement).after(previousBlock);
-                showToolbar();
-                var newTop = $(activeElement).offset().top;
-                window.scrollBy(0, newTop - top)
+               
+                setTimeout(function() {
+                  showToolbar();
+                  var newTop = $(activeElement).offset().top;
+                  window.scrollBy(0, newTop - top)
+                }, 0);
               });
             }
           },
           inline_down: function() {
+            hideToolbar();
             var nextBlock = $(activeElement).next()[0];
             if (nextBlock) {
               var top = $(activeElement).offset().top;
-              updateContents(function() {
-                $(activeElement).before(nextBlock)
-                showToolbar();
-                var newTop = $(activeElement).offset().top;
-                window.scrollBy(0, newTop - top)
+              scribe.updateContents(function() {
+                $(activeElement).before(nextBlock);
+                
+                setTimeout(function() {
+                  showToolbar();
+                  var newTop = $(activeElement).offset().top;
+                  window.scrollBy(0, newTop - top)
+                }, 0);
               });
             }
           },
           inline_remove: function () {
-            updateContents(function() {
+            scribe.updateContents(function() {
               $(activeElement).remove();
             });
             hideToolbar()
           },  
           inline_edit: function () {
-            /* I think this should be a bit more like insert.
-            We establish an onChange callback where we update the template with new values. 
-            For now, the module is responsible for making modifications to the markup. 
-
-            */
             scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"), 
               [
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr("data-type");
-                  updateContents(function() {
+                  scribe.updateContents(function() {
                     element.outerHTML = 
                       render(
                         templates[type].template,
@@ -226,7 +228,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
         function setValue(attribute, value) {
           var currentValue = $(activeElement).attr("data-" + attribute);
-          updateContents(function() {
+          scribe.updateContents(function() {
             $(activeElement)
               .removeClass(attribute + "-" + currentValue)
               .addClass(attribute + "-" + value)
@@ -242,17 +244,6 @@ define('scribe-plugin-inline-objects',[],function () {
             }
           }
           return html;
-        }
-        
-
-        function updateContents(fn) {
-          setTimeout(function() {
-            scribe.el.focus();
-            setTimeout(function() {
-              console.log("DOING SHIT");
-              scribe.transactionManager.run(fn)
-            }, 0);
-          }, 0);
         }
     }
   }
