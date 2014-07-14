@@ -4,15 +4,14 @@ define('scribe-plugin-onion-video',[],function () {
 
 
 
-      //scribe.on("inline:onion-video", showDialog);
-      //scribe.on("inline:edit:onion-video", editVideo);
-      //scribe.on("inline:insert:onion-video", uploadVideo);
+      scribe.on("inline:edit:onion-video", edit);
+      scribe.on("inline:insert:onion-video", insert);
 
 
-      function uploadVideo(block, callback) {
+      function insert(block, callback) {
 
-        var activeElement = callback(options.block, {videoid:"NONE"});
-        return instanceOptions.uploadVideo().then(
+        var activeElement = callback(block, {videoid:"NONE"});
+        return config.insertDialog().then(
             function(videoObject){
                 setVideoID(videoObject.attrs.id);
             }, function(error){
@@ -27,8 +26,8 @@ define('scribe-plugin-onion-video',[],function () {
         }
 
         function setVideoID(id) {
-            $("iframe", activeElement).attr("src", instanceOptions.videoEmbedUrl + id);
-            $(activeElement).attr('data-videoid', id)
+            $("iframe", activeElement).attr("src", config.videoEmbedUrl + id);
+            $(activeElement).attr('data-video-id', id)
         }
 
         function onError() {
@@ -41,9 +40,9 @@ define('scribe-plugin-onion-video',[],function () {
 
       }
 
-      function editVideo(block, callback) {
-          var id = $(block.element).data('videoid');
-          window.editVideo(id);
+      function edit(block, callback) {
+          var id = $(block).data('video-id');
+          config.editDialog(id);
       }
     };
   }

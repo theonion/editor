@@ -54,6 +54,15 @@ define('onion-editor',[
     },
     link: {
       domain: 'avclub.com'
+    },
+    video: {
+      videoEmbedUrl: "http://example.com?videoid=",
+      onInsert: function() {  },
+      onEdit: function() {  }
+    },
+    image: {
+      onInsert: function() {  },
+      onEdit: function() {  }
     }
   }
 
@@ -86,7 +95,7 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
 
-      ignoredTags.div = { class:'inline' } //ignore the contents of any di
+      ignoredTags.div = { class:'inline' } //ignore the contents of any div
     }
 
     // Bold
@@ -157,17 +166,11 @@ define('onion-editor',[
       
       // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
 
-      scribe.use(scribePluginBettyCropper({
-        onInsert: options.bettyCropperOnInsert,
-        onEdit: options.bettyCropperOnEdit
-      }));
+      scribe.use(scribePluginBettyCropper(options.image));
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
-      scribe.use(scribePluginOnionVideo({
-        onInsert: options.onionVideoOnInsert,
-        onEdit: options.onionVideoOnEdit
-      }));
+      scribe.use(scribePluginOnionVideo(options.video));
     }
 
     scribe.use(scribePluginSanitizer({

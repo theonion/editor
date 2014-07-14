@@ -21,15 +21,12 @@ define([
   return function (config) {
     return function (scribe) {
 
-
       function fixLink(url) {
-        console.log("in: ", url);
         url = url.trim();
         url = fixProtocol(url);
         if (config.domain) {
           url = makeRelative(url, config.domain);
         }
-        console.log(url);
         return url
       }
 
@@ -86,9 +83,7 @@ define([
       scribe.registerHTMLFormatter('sanitize', function (html) {
         var bin = document.createElement('div');
         bin.innerHTML = html;
-        console.log("Scrubbing links");
         traverse(bin);
-
         return bin.innerHTML;
       });
 

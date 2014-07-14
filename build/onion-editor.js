@@ -10177,11 +10177,56 @@ define('scribe-plugin-inline-objects',[],function () {
 define('scribe-plugin-betty-cropper',[],function () {
   return function (config) {
     return function (scribe) {
-        function showDialog(block, callback) {
-            console.log("show dialog args", block, callback);
-            callback(block, {image_id: 5});
+
+        scribe.on("inline:edit:image", edit);
+        scribe.on("inline:insert:image", insert);
+
+        function insert(block, callback) {
+          config.insertDialog().then(
+            function(success){
+              var format;
+              if (success.name.toUpperCase().indexOf("GIF") !== -1) {
+                format = "gif";
+              }
+              else {
+                format = "jpg";
+              }
+              callback(block, {image_id: success.id, format: format});
+              if (window.picturefill) {
+                window.picturefill();
+              }
+            },
+            function(error){
+              console.log(error);
+            },
+            function(progress){
+              console.log(progress);
+            }
+          );
         }
-        scribe.on("inline:betty-cropper", showDialog);
+
+        var activeElement,
+          current_id;
+
+        function edit(block, callback) {
+          current_id = options.element.getAttribute('data-image-id');
+          config.editDialog({id: current_id, caption: '', alt: ''}).then(
+            function (image) {
+
+              if (image.id === null) {
+                $(block).remove();
+              } else {
+                $(block).attr('data-image-id', image.id);
+                $(block).attr('data-alt', image.alt);
+                $(".caption", block).html(image.caption);
+              }
+              if (window.picturefill) {
+                window.picturefill();
+              }
+            }
+          );
+
+        }
       };
     }
 }); 
@@ -10292,15 +10337,14 @@ define('scribe-plugin-onion-video',[],function () {
 
 
 
-      //scribe.on("inline:onion-video", showDialog);
-      //scribe.on("inline:edit:onion-video", editVideo);
-      //scribe.on("inline:insert:onion-video", uploadVideo);
+      scribe.on("inline:edit:onion-video", edit);
+      scribe.on("inline:insert:onion-video", insert);
 
 
-      function uploadVideo(block, callback) {
+      function insert(block, callback) {
 
-        var activeElement = callback(options.block, {videoid:"NONE"});
-        return instanceOptions.uploadVideo().then(
+        var activeElement = callback(block, {videoid:"NONE"});
+        return config.insertDialog().then(
             function(videoObject){
                 setVideoID(videoObject.attrs.id);
             }, function(error){
@@ -10315,8 +10359,8 @@ define('scribe-plugin-onion-video',[],function () {
         }
 
         function setVideoID(id) {
-            $("iframe", activeElement).attr("src", instanceOptions.videoEmbedUrl + id);
-            $(activeElement).attr('data-videoid', id)
+            $("iframe", activeElement).attr("src", config.videoEmbedUrl + id);
+            $(activeElement).attr('data-video-id', id)
         }
 
         function onError() {
@@ -10329,9 +10373,9 @@ define('scribe-plugin-onion-video',[],function () {
 
       }
 
-      function editVideo(block, callback) {
-          var id = $(block.element).data('videoid');
-          window.editVideo(id);
+      function edit(block, callback) {
+          var id = $(block).data('video-id');
+          config.editDialog(id);
       }
     };
   }
@@ -10389,15 +10433,12 @@ define('link-formatter',[
   return function (config) {
     return function (scribe) {
 
-
       function fixLink(url) {
-        console.log("in: ", url);
         url = url.trim();
         url = fixProtocol(url);
         if (config.domain) {
           url = makeRelative(url, config.domain);
         }
-        console.log(url);
         return url
       }
 
@@ -10454,9 +10495,7 @@ define('link-formatter',[
       scribe.registerHTMLFormatter('sanitize', function (html) {
         var bin = document.createElement('div');
         bin.innerHTML = html;
-        console.log("Scrubbing links");
         traverse(bin);
-
         return bin.innerHTML;
       });
 
@@ -10521,6 +10560,15 @@ define('onion-editor',[
     },
     link: {
       domain: 'avclub.com'
+    },
+    video: {
+      videoEmbedUrl: "http://example.com?videoid=",
+      onInsert: function() {  },
+      onEdit: function() {  }
+    },
+    image: {
+      onInsert: function() {  },
+      onEdit: function() {  }
     }
   }
 
@@ -10553,7 +10601,7 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
 
-      ignoredTags.div = { class:'inline' } //ignore the contents of any di
+      ignoredTags.div = { class:'inline' } //ignore the contents of any div
     }
 
     // Bold
@@ -10624,17 +10672,11 @@ define('onion-editor',[
       
       // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
 
-      scribe.use(scribePluginBettyCropper({
-        onInsert: options.bettyCropperOnInsert,
-        onEdit: options.bettyCropperOnEdit
-      }));
+      scribe.use(scribePluginBettyCropper(options.image));
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
-      scribe.use(scribePluginOnionVideo({
-        onInsert: options.onionVideoOnInsert,
-        onEdit: options.onionVideoOnEdit
-      }));
+      scribe.use(scribePluginOnionVideo(options.video));
     }
 
     scribe.use(scribePluginSanitizer({
