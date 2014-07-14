@@ -24,8 +24,9 @@ define('scribe-plugin-link-ui',[],function () {
 
         //TODO: Make sure there isn't a link in here, or any other block elements. Make sure there is a 
         if (!selection.range.collapsed) {
+          scribe._skipFormatters = true; // This is a little fucked... 
           scribe.api.SimpleCommand.prototype.execute.call(cmd, placeHolder);  
-          showInput($('a[href=' + placeHolder + ']')); 
+          showInput($('a[href*=' + placeHolder + ']')); 
         }
       };
 
@@ -85,7 +86,7 @@ define('scribe-plugin-link-ui',[],function () {
       }
 
       function removeLink() {
-        var link = $('.link-edit, [href=' + placeHolder + ']');
+        var link = $('.link-edit, [href*=' + placeHolder + ']');
         link[0].outerHTML = link[0].innerHTML;
       }
 

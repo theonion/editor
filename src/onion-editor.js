@@ -51,6 +51,9 @@ define('onion-editor',[
       blockquote: true,
       heading: true,
       list: true,
+    },
+    link: {
+      domain: 'avclub.com'
     }
   }
 

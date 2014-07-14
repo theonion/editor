@@ -3998,7 +3998,6 @@ define('plugins/core/patches/events',['../../../api/element'], function (element
                 // Store the caret position
                 selection.placeMarkers();
 
-
                 // We clone the childNodes into an Array so that it's
                 // not affected by any manipulation below when we
                 // iterate over it
@@ -4024,7 +4023,7 @@ define('plugins/core/patches/events',['../../../api/element'], function (element
                   }
                 });
 
-                selection.selectMarkers(false);
+                selection.selectMarkers();
               });
             }
           }
@@ -6791,8 +6790,9 @@ define('scribe-plugin-link-ui',[],function () {
 
         //TODO: Make sure there isn't a link in here, or any other block elements. Make sure there is a 
         if (!selection.range.collapsed) {
+          scribe._skipFormatters = true; // This is a little fucked... 
           scribe.api.SimpleCommand.prototype.execute.call(cmd, placeHolder);  
-          showInput($('a[href=' + placeHolder + ']')); 
+          showInput($('a[href*=' + placeHolder + ']')); 
         }
       };
 
@@ -6852,7 +6852,7 @@ define('scribe-plugin-link-ui',[],function () {
       }
 
       function removeLink() {
-        var link = $('.link-edit, [href=' + placeHolder + ']');
+        var link = $('.link-edit, [href*=' + placeHolder + ']');
         link[0].outerHTML = link[0].innerHTML;
       }
 
@@ -10385,36 +10385,76 @@ define('link-formatter',[
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
 
-  function traverse(parentNode) {
-    // Instead of TreeWalker, which gets confused when the BR is added to the dom,
-    // we recursively traverse the tree to look for an empty node that can have childNodes
-
-    var node = parentNode.firstElementChild;
-
-    function isEmpty(node) {
-      return node.children.length === 0
-        || (node.children.length === 1
-            && element.isSelectionMarkerNode(node.children[0]));
-    }
-
-    while (node) {
-      if (node.nodeName === "A") {
-        console.log(node.getAttribute("href"));
-      }
-      else if (node.children.length > 0) {
-        traverse(node);
-      }
-      node = node.nextElementSibling;
-    }
-  }
-
-  return function () {
+  
+  return function (config) {
     return function (scribe) {
 
-      scribe.registerHTMLFormatter('normalize', function (html) {
+
+      function fixLink(url) {
+        console.log("in: ", url);
+        url = url.trim();
+        url = fixProtocol(url);
+        if (config.domain) {
+          url = makeRelative(url, config.domain);
+        }
+        console.log(url);
+        return url
+      }
+
+      function makeRelative(url, domain) {
+          var a = document.createElement("a");
+          a.href = url;
+          // check if it's an avclub link
+          var host = a.hostname;
+          // also check that there's a path at the end
+          if (host.indexOf(domain) > -1 && a.pathname.length > 1) {
+              url = a.pathname + a.search + a.hash;
+          }
+          return url;
+      }
+
+      function fixProtocol(url) {
+        if (
+            url.substr(0, 7) !== "http://" &&
+            url.substr(0, 8) !== "https://" &&
+            url.substr(0, 6) !== "mailto:" &&
+            url.substr(0, 1) !== "/" 
+            ) {
+            // check for email, but default to http
+            if (url.indexOf("@") != -1) {
+              return "mailto:" + url;
+            } else {
+              return "http://" + url;
+            }
+        } else {
+            return url;
+        }
+      }
+
+      function traverse(parentNode) {
+        var node = parentNode.firstElementChild;
+
+        function isEmpty(node) {
+          return node.children.length === 0
+            || (node.children.length === 1
+                && element.isSelectionMarkerNode(node.children[0]));
+        }
+
+        while (node) {
+          if (node.nodeName === 'A') {
+            node.setAttribute('href', fixLink(node.getAttribute('href')));
+          }
+          else if (node.children.length > 0) {
+            traverse(node);
+          }
+          node = node.nextElementSibling;
+        }
+      }
+
+      scribe.registerHTMLFormatter('sanitize', function (html) {
         var bin = document.createElement('div');
         bin.innerHTML = html;
-
+        console.log("Scrubbing links");
         traverse(bin);
 
         return bin.innerHTML;
@@ -10478,6 +10518,9 @@ define('onion-editor',[
       blockquote: true,
       heading: true,
       list: true,
+    },
+    link: {
+      domain: 'avclub.com'
     }
   }
 
