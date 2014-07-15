@@ -10384,7 +10384,7 @@ define('scribe-plugin-hr',[],function () {
   return function (config) {
     return function (scribe) {
 
-      scribe.on("inline:hr", insert);
+      scribe.on("inline:insert:hr", insert);
 
       function insert(block, callback) {
         callback(block, {});
@@ -10550,14 +10550,7 @@ define('onion-editor',[
 
   var defaults = {
     multiline: true,
-    formatting: [
-      'link',
-      'bold',
-      'italic',
-      'blockquote',
-      'heading',
-      'list',
-    ],
+    formatting: ['link', 'bold', 'italic', 'blockquote', 'heading', 'list'],
     link: {
       domain: 'avclub.com'
     },

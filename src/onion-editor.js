@@ -44,14 +44,7 @@ define('onion-editor',[
 
   var defaults = {
     multiline: true,
-    formatting: [
-      'link',
-      'bold',
-      'italic',
-      'blockquote',
-      'heading',
-      'list',
-    ],
+    formatting: ['link', 'bold', 'italic', 'blockquote', 'heading', 'list'],
     link: {
       domain: 'avclub.com'
     },
