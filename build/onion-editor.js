@@ -10400,7 +10400,7 @@ define('scribe-plugin-placeholder',[],function () {
       config.container.innerHTML = config.text;
       function checkForEmpty() {
         var content = scribe.getContent()
-        if (content === "<p><br></p>") {
+        if (content === "<p><br></p>" || content === "") {
           config.container.style.display = '';
         }
         else {
@@ -10550,14 +10550,14 @@ define('onion-editor',[
 
   var defaults = {
     multiline: true,
-    formatting: {
-      link: true,
-      bold: true,
-      italic: true,
-      blockquote: true,
-      heading: true,
-      list: true,
-    },
+    formatting: [
+      'link',
+      'bold',
+      'italic',
+      'blockquote',
+      'heading',
+      'list',
+    ],
     link: {
       domain: 'avclub.com'
     },
@@ -10604,20 +10604,20 @@ define('onion-editor',[
     }
 
     // Bold
-    if (options.formatting.bold) {
+    if (options.formatting.indexOf('bold') !== -1) {
       keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
       tags.b = {};
     }
 
     // Italics
-    if (options.formatting.italic) {
+    if (options.formatting.indexOf('italic') !== -1) {
       keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
       tags.i = {};
       tags.em = {};
     }
 
     // Strike
-    if (options.formatting.strike) {
+    if (options.formatting.indexOf('strike') !== -1) {
       keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
       tags.s = {};
     }
@@ -10626,7 +10626,7 @@ define('onion-editor',[
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
 
     // Links
-    if (options.multiline && options.formatting.link) {
+    if (options.multiline && options.formatting.indexOf('link') !== -1) {
       keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
       scribe.use(scribePluginIntelligentUnlinkCommand());
@@ -10636,7 +10636,7 @@ define('onion-editor',[
     }
 
     // Lists
-    if (options.multiline && options.formatting.list) {
+    if (options.multiline && options.formatting.indexOf('list') !== -1) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
@@ -10648,14 +10648,14 @@ define('onion-editor',[
     }
 
     //Blockquotes
-    if (options.multiline && options.formatting.blockquote) {
+    if (options.multiline && options.formatting.indexOf('blockquote') !== -1) {
       keyCommands.blockquote = function (event) { return event.altKey && event.shiftKey && event.keyCode === 87; }; // w
       scribe.use(scribePluginBlockquoteCommand());
       tags.blockquote = {};
     }
 
     // Headings
-    if (options.multiline && options.formatting.heading) {
+    if (options.multiline && options.formatting.indexOf('heading') !== -1) {
       keyCommands.h3 = function (event) { return ctrlKey(event) && event.keyCode === 50; }; // 2
       keyCommands.h4 = function (event) { return ctrlKey(event) && event.keyCode === 51; }; // 2
       scribe.use(scribePluginHeadingCommand(3));

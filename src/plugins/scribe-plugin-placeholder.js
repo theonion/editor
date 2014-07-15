@@ -6,7 +6,7 @@ define('scribe-plugin-placeholder',[],function () {
       config.container.innerHTML = config.text;
       function checkForEmpty() {
         var content = scribe.getContent()
-        if (content === "<p><br></p>") {
+        if (content === "<p><br></p>" || content === "") {
           config.container.style.display = '';
         }
         else {
