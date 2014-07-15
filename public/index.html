@@ -134,8 +134,6 @@
     
     <script src="//ajax.googleapis.com/ajax/libs/jquery/2.1.0/jquery.min.js"></script>
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
-    <script src="//cdnjs.cloudflare.com/ajax/libs/q.js/1.0.1/q.js"></script>
-
 
 
     <script src="../build/onion-editor.js"></script>
@@ -143,8 +141,10 @@
       var editor = new OnionEditor(document.getElementById("editor"), {
         inlineObjects: "/public/inline-config.json", 
         multiline:true, 
-        placeholderText: "<p>WRITE HERE, COWBOY</p>",
-        placeholderElement  : document.getElementsByClassName('editorPlaceholder')[0],
+        placeholder: {
+          text: "<p>WRITE HERE, COWBOY</p>",
+          container: document.getElementsByClassName('editorPlaceholder')[0]
+        },
         link: {
           domain: 'avclub.com'
         }

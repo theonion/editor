@@ -70,17 +70,16 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
-    var scribe = new Scribe(element, { allowBlockElements: true });      
+
+
+    var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
 
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
 
-    if (options.placeholderElement) {
-      scribe.use(scribePluginPlaceholder({
-        placeholderText: options.placeholderText || "Write here",
-        placeholderElement: options.placeholderElement
-      }));
+    if (options.placeholder) {
+      scribe.use(scribePluginPlaceholder(options.placeholder));
     }
 
     var keyCommands = {};
@@ -217,8 +216,6 @@ define('onion-editor',[
       var contents = scribe.getContent();
 
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
-      scribe.trigger('on-get-content', contents);
-
       return contents;
     }
 

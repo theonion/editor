@@ -10394,17 +10394,17 @@ define('scribe-plugin-hr',[],function () {
 });
 define('scribe-plugin-placeholder',[],function () {
 
-  return function (options) {
+  return function (config) {
     return function (scribe) {
       scribe.on('content-changed', checkForEmpty);
-      options.placeholderElement.innerHTML = options.placeholderText;
+      config.container.innerHTML = config.text;
       function checkForEmpty() {
         var content = scribe.getContent()
         if (content === "<p><br></p>") {
-          options.placeholderElement.style.display = '';
+          config.container.style.display = '';
         }
         else {
-          options.placeholderElement.style.display = 'none';
+          config.container.style.display = 'none';
         }
       }
     }
@@ -10576,17 +10576,16 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
-    var scribe = new Scribe(element, { allowBlockElements: true });      
+
+
+    var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
 
     if (options.onChange) {
       scribe.on('content-changed', options.onChange);
     }
 
-    if (options.placeholderElement) {
-      scribe.use(scribePluginPlaceholder({
-        placeholderText: options.placeholderText || "Write here",
-        placeholderElement: options.placeholderElement
-      }));
+    if (options.placeholder) {
+      scribe.use(scribePluginPlaceholder(options.placeholder));
     }
 
     var keyCommands = {};
@@ -10723,8 +10722,6 @@ define('onion-editor',[
       var contents = scribe.getContent();
 
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
-      scribe.trigger('on-get-content', contents);
-
       return contents;
     }
 
