@@ -50,12 +50,12 @@ define('onion-editor',[
     },
     video: {
       videoEmbedUrl: "http://example.com?videoid=",
-      onInsert: function() {  },
-      onEdit: function() {  }
+      insertDialog: function() {  },
+      editDialog: function() {  }
     },
     image: {
-      onInsert: function() {  },
-      onEdit: function() {  }
+      insertDialog: function() {  },
+      editDialog: function() {  }
     }
   }
 
@@ -176,8 +176,8 @@ define('onion-editor',[
           scribe.el.focus();
           setTimeout(function() {
             scribe.transactionManager.run(fn)
-          }, 0);
-        }, 0);
+          }, 20);
+        }, 20);
       }
 
     // initialize Scribe plugins

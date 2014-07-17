@@ -215,90 +215,9 @@
     margin-bottom: 0px
 }
 
-/* inline tools */
-.inline-tools {
-    position:absolute;
-    display:none;
-    background-color: rgba(200,200,200,.5);
-    z-index: 100;
-}
-.inline-tools button {
-    display:inline-block;
-    width:auto;
-}
-
-.inline-tools  span.inline-attribute {
-    font-size: 11px;
-    text-transform:uppercase;
-}
-
-.inline-tools .remove {
-    position: absolute;
-    right: 10px;
-    bottom: 10px;
-    background-color: #930900;
-    border-radius: 4px;
-}
-.inline-tools .edit button,
-.inline-tools .remove button {
-    color: white;
-} 
-
-.inline-tools .remove button:hover {
-    background-color: #C70A00;
-}
-
-.inline-tools .edit {
-    position: absolute;
-    left: 10px;
-    bottom: 10px;
-    border-radius: 4px;
-    background-color: #333;
-    color: white;
-}
-
-.inline-tools .edit button:hover {
-    background-color: #444;
-}
-
-.inline-tools .toolbar-contents {
-    margin-top: 20px;
-    left: 50%;
-    margin-left: -96px;
-}
-
 
 span.highlight {
     background-color: #EC7000;
-}
-
-.find-replace-dialog {
-    position:fixed;
-    width: 820px;
-    margin: 0 auto;
-    height: 56px; 
-    top:0px;
-    left: 50%;
-    margin-left: -410px;
-    background-color:#EEEEEE;
-    border:1px #DADADA solid;
-    border-radius: 4px;
-    z-index:10000;
-    padding: 10px 20px;
-    box-shadow: 1px 3px 5px 0px rgba(50, 50, 50, 0.3);
-}
-.find-replace-dialog .close {
-
-}
-
-.find-replace-dialog>.btn {
-    margin-top:-3px;
-}
-
-.find-replace-dialog input {
-    width: 200px;
-    font-size: 14px; 
-    padding: 3px;
 }
 
 .editor span.searchResult {

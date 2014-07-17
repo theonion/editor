@@ -7,6 +7,7 @@ define('scribe-plugin-youtube',[],function () {
         scribe.on("inline:edit:youtube", showDialog);
 
         function parseYoutube(url){
+          if (!url) return false;
           var regExp = /^.*((youtu.be\/)|(v\/)|(\/u\/\w\/)|(embed\/)|(watch\?))\??v?=?([^#\&\?]*).*/;
           var match = url.match(regExp);
           if (match && match[7].length == 11) {

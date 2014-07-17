@@ -17,55 +17,75 @@ define('scribe-plugin-inline-objects',[],function () {
 
         function configLoaded(data) {
           templates = data;
-          $(".embed-tools button", editorEl).click(insertObject);
+          $(".embed-button", editorEl).click(openFlyout);
+
 
           $(".inline-tools button", editorEl.parentNode).click(function(event) {
-
             var name = $(event.target).attr("name");
-            console.log("button clicked:", name);
             if (typeof actions[name] === "function") {
               actions[name]();
             }
           });
         }
 
-        function insertObject(event) {
-          //derive type from button clicked.
-          var type = $(event.target).closest("button").data("commandName");
-          //emit an event, so handler plugin can pick up.
-          scribe.trigger("inline:insert:" + type, [
-            activeBlock, 
-            function(block, values) {              
-              scribe.updateContents(function() {
-                var html = render(
-                    templates[type].template, 
-                    $.extend(templates[type].defaults, values) 
-                );
-                $(block).before(html); 
-                $(".inline", editorEl).attr("contenteditable", "false"); 
-              });
+        function openFlyout(event) {
+          var insertFunction;
 
-            }
-          ]);
-          $(".embed-tools", editorEl).removeClass("active");
-          activeBlock = undefined;
+          $(".embed-fly-out", editorEl)
+            .css({
+              top:0
+            })
+            .show();
+          
+          var command = $(event.target).closest("button").data("commandName");
+          
+          if (command == "embed-before") {
+            insertFunction = $(activeBlock).before;
+          }
+          else {
+            insertFunction = $(activeBlock).after;
+          }
+
+          var type = $(event.target).closest("button").data("commandName");
         }
+
+
+          function insertObject(type, insertFunction) {
+            //derive type from button clicked.
+            
+            //emit an event, so handler plugin can pick up.
+            scribe.trigger("inline:insert:" + type, [
+              activeBlock, 
+              function(block, values) {              
+                scribe.updateContents(function() {
+                  var html = render(
+                      templates[type].template, 
+                      $.extend(templates[type].defaults, values) 
+                  );
+                  insertFunction(html); 
+                  $(".inline", editorEl).attr("contenteditable", "false"); 
+                });
+              }
+            ]);
+            $(".embed-tools", editorEl).removeClass("active");
+            activeBlock = undefined;
+          }
+
 
         // Insert toolbar. 
         scribe.el.addEventListener('mouseover', function (event) {
-          var blocks = scribe.el.children;
-          var cursorOffset = event.y;
-          for (var i = 0; i < blocks.length; i++) {
-            if (cursorOffset < blocks[i].offsetTop + 25  ) {
-              break;
-            }
-          }
-          if (blocks[i]) {
-            var top = blocks[i].offsetTop;
-            $(".embed-tools",editorEl)  
-                .css({ top: top   })
+
+          var block = $(event.target).closest(".editor>*");
+
+          if (block.length === 1) {
+            //var top = blocks[i].offsetTop;
+            $(".embed-tools",editorEl)
+                .css({ 
+                  top: block.position().top + block.css('margin-top').replace(/[^-\d\.]/g, '') / 2,
+                  height: block.height()
+                })
                 .addClass("active");
-            activeBlock = blocks[i];
+            activeBlock = block;
           }
           else {
             $(".embed-tools", editorEl).removeClass("active");
@@ -75,6 +95,12 @@ define('scribe-plugin-inline-objects',[],function () {
         scribe.el.parentNode.addEventListener('mouseleave', function (event) {
           $(".embed-tools", editorEl).removeClass("active");
         });
+
+        // put the actve class back on if hover back into a button
+        $(".embed-tools", editorEl).mouseover(function() {
+          $(".embed-tools", editorEl).addClass("active");
+        });
+
 
 
         // Overlay options

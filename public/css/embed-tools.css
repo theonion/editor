@@ -1,0 +1,80 @@
+.embed-tools {
+    height: 100%;
+    position:absolute;
+    margin: 12px 0;
+    padding: 0px 0px;
+    width: 100%;
+    opacity:0;
+    transition: opacity .1s ease-in-out;
+    transition-delay: 1s;
+}
+
+.embed-tools.active {
+    display:block;
+    opacity:1;
+    transition-delay: 0s;
+}
+.embed-tools .embed-button span.fa {
+    color: #333;
+}
+
+.embed-tools .embed-button span.btn-label {
+    font-size:12px;
+}
+
+
+.embed-tools button {
+    width:100%;
+    display:block;
+}
+.embed-tools.active .embed-button:hover {
+    transition: opacity .2 linear;
+
+    opacity:1;
+}
+.embed-tools .embed-button{
+    display:block;
+    opacity: .5;
+}
+
+
+.embed-tools.embed-underlay {
+
+    border-top: 1px #111 solid;
+    border-bottom: 1px #111 solid;  
+    background-color:red;
+    z-index: 10;
+    width: auto;
+}
+.embed-tools.embed-overlay {
+    z-index: 300;
+    width:100px;
+}
+
+.embed-tools .embed-button{
+    right:-20px;
+    width: 30px;
+    line-height: 24px;
+    border: 1px #ccc solid;
+    font-size:16px;
+    border-radius: 15px;
+    background-color:#eee;
+}
+
+.embed-tools .insert-above {
+    top:-24px;
+    position:absolute;
+    right:0px;
+}
+
+.embed-tools .insert-below {
+    bottom:-24px;
+    position:absolute;
+    right:0px;
+}
+
+
+.embed-fly-out {
+
+
+}

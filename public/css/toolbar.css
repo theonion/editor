@@ -117,42 +117,7 @@
     opacity: 1;
 }
 
-.embed-tools {
-    left:10px;
-    margin-left:0px;
-    padding: 0 00px;
-    position:absolute;
-    width: 100%;
-    display:none;
-    transition: opacity .3s ease-in-out;
 
-    /*border-bottom:1px #C3D1E9 solid;*/
-}
-
-.embed-tools .embed-button span.fa {
-    color: green;
-}
-
-.embed-tools .embed-button span.btn-label {
-    font-size:12px;
-}
-
-
-.embed-tools button {
-    width:100%;
-    display:block;
-    font-size:16px
-}
-.embed-tools.active:hover {
-    opacity:1;
-}
-.embed-tools.active {
-    display:block;
-    opacity: 1;
-    z-index: 100;
-    /*transition: opacity 0s ease-in-out;*/
-
-}
 
 .toolbar button [class^="icon-"], .toolbar button [class*=" icon-"] {
     width: 15px;

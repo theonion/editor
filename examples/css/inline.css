@@ -126,6 +126,10 @@
     margin-left: 20px;
 }
 
+hr {
+    border: 2px red solid;
+}
+
 
 /* smaller screens */
 @media screen and (min-width: 320px) and (max-width: 1024px) {
