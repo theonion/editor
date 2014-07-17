@@ -1,7 +1,7 @@
 define('scribe-plugin-inline-objects',[],function () {
 
   /**
-   * Adds support for inserting, like embeds, videos and images.
+   * Adds support for inserting inline objects, like embeds, videos and images.
    */
   return function (config) {
     return function (scribe) {
@@ -21,7 +21,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
 
           $(".inline-tools button", editorEl.parentNode).click(function(event) {
-            var name = $(event.target).attr("name");
+            var name = $(event.target).data("commandName");
             if (typeof actions[name] === "function") {
               actions[name]();
             }
@@ -29,54 +29,76 @@ define('scribe-plugin-inline-objects',[],function () {
         }
 
         function openFlyout(event) {
-          var insertFunction;
+          var insertFunction ,
+              blockPosition,
+              flyoutHeight = $(".embed-fly-out").height(),
+              buttonHeight = $(".embed-button").height(),
+              beforeOrAfter;
 
-          $(".embed-fly-out", editorEl)
-            .css({
-              top:0
-            })
-            .show();
-          
+
           var command = $(event.target).closest("button").data("commandName");
-          
           if (command == "embed-before") {
-            insertFunction = $(activeBlock).before;
+            blockPosition = activeBlock.position().top - flyoutHeight/2 + buttonHeight /2;
+            beforeOrAfter = "before";
           }
           else {
-            insertFunction = $(activeBlock).after;
+            blockPosition = activeBlock.position().top +
+              activeBlock.height() 
+              + parseInt(activeBlock.css('margin-top')) 
+              - flyoutHeight/2 + buttonHeight / 2;
+            beforeOrAfter = "after";
           }
 
-          var type = $(event.target).closest("button").data("commandName");
+          $(".embed-fly-out", editorEl)
+            .css({top: blockPosition})
+            .show();
+
+
+          //register click handler for toolbar
+          var elementToPlaceNear = activeBlock;
+          $(".embed-fly-out button").bind("click.inline", function(e) {
+            var type = $(e.target).closest("button").data("commandName");
+            insertObject(type, elementToPlaceNear, beforeOrAfter);
+          })
+
+
+          $("body").bind("click.inline", function(e) {
+            // if a click happens outside of the flyout, close it.
+            if ($(e.target).closest(".embed-tools").length === 0) {
+              closeFlyout();
+            }
+          });
         }
 
 
-          function insertObject(type, insertFunction) {
-            //derive type from button clicked.
-            
-            //emit an event, so handler plugin can pick up.
-            scribe.trigger("inline:insert:" + type, [
-              activeBlock, 
-              function(block, values) {              
-                scribe.updateContents(function() {
-                  var html = render(
-                      templates[type].template, 
-                      $.extend(templates[type].defaults, values) 
-                  );
-                  insertFunction(html); 
-                  $(".inline", editorEl).attr("contenteditable", "false"); 
-                });
-              }
-            ]);
-            $(".embed-tools", editorEl).removeClass("active");
-            activeBlock = undefined;
-          }
+        function closeFlyout() {
+          $("body").unbind("click.inline");
+          $(".embed-fly-out button").unbind("click.inline")
+          $(".embed-fly-out").hide();
+        }
 
+
+        function insertObject(objectType, elementToPlaceNear, beforeOrAfter) {
+          //derive type from button clicked.
+          //emit an event, so handler plugin can pick up.
+          scribe.trigger("inline:insert:" + objectType, [
+            function(values) {              
+              scribe.updateContents(function() {
+                var html = render(
+                    templates[objectType].template, 
+                    $.extend(templates[objectType].defaults, values) 
+                );
+                $(elementToPlaceNear)[beforeOrAfter](html); 
+                $(".inline", editorEl).attr("contenteditable", "false"); 
+              });
+            }
+          ]);
+          $(".embed-tools", editorEl).removeClass("active");
+        }
 
         // Insert toolbar. 
         scribe.el.addEventListener('mouseover', function (event) {
-
           var block = $(event.target).closest(".editor>*");
-
           if (block.length === 1) {
             //var top = blocks[i].offsetTop;
             $(".embed-tools",editorEl)

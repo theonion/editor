@@ -75,6 +75,36 @@
 
 
 .embed-fly-out {
+    width: auto;
+    height: auto;
+    position:absolute;
+    top: 200px;
+    z-index: 400;
+    border: 1px #ccc solid;
+    background-color: #ddd;
+    padding: 5px;
+    left: 100px;
+    text-align:center;
+}
+.embed-fly-out button:hover {
+    background-color: #333;
+    color: #fff;
 
+}
+.embed-fly-out button {
+    float:left;
+    border: 1px #ddd solid;
+    width: 80px;
+    height: 80px;
+    background-color:#eee;
+    margin: 3px;
+}
 
+.embed-fly-out button span.fa {
+    font-size: 24px;
+    display:block;
+}
+
+.embed-fly-out button span.btn-label {
+    font-size: 12px;
 }

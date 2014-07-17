@@ -39,7 +39,7 @@ define('scribe-plugin-embed',[],function () {
         $("#embed-modal").modal("show");
       }
 
-      function insert(block, callback) {
+      function insert(callback) {
         $("#embed-modal input, #embed-modal textarea").val("")
         $("#embed-modal").modal("show");
 
@@ -51,7 +51,7 @@ define('scribe-plugin-embed',[],function () {
           }
           else {
             $(".embed-error").hide();
-            callback(block,
+            callback(
               {code: embed_body,
               caption: $("#embed-modal .embed-caption").val(),
               source: $("#embed-modal .embed-source").val(),

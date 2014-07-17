@@ -52,7 +52,7 @@
             <button data-command-name="embed-before" class="embed-button insert-above"><span class="fa fa-plus-circle" data-command-name="show"></span></button>
             <button data-command-name="embed-after" class="embed-button insert-below"><span class="fa fa-plus-circle"></span></button>
           </div>
-          <div class="embed-fly-out">
+          <div class="embed-fly-out" style="display: none;">
             <button data-command-name="image" title="Image">
                 <span class="fa fa-picture-o"></span><span class="btn-label">Image</span>
             </button>
@@ -63,7 +63,7 @@
                 <span class="fa fa-youtube"></span><span class="btn-label">Youtube Video</span>
             </button>
             <button data-command-name="embed" title="Embed Something">
-                <span class="fa fa-code"></span><span class="btn-label">Embed Something</span>
+                <span class="fa fa-code"></span><span class="btn-label">Embed</span>
             </button>
 
             <button data-command-name="hr" title="HR">
@@ -76,18 +76,18 @@
         <div class="inline-tools toolbar" style="display: none;">
             <div class="top toolbar-contents">
                 <div>
-                    <button name="inline_up" class="fa fa-arrow-up"></button>
-                    <button name="inline_down" class="fa fa-arrow-down"></button>
-                    <button class="size inline-attribute" name="inline_size"></button>
+                    <button data-command-name="inline_up" class="fa fa-arrow-up"></button>
+                    <button data-command-name="inline_down" class="fa fa-arrow-down"></button>
+                    <button class="size inline-attribute" data-command-name="inline_size"></button>
                     <button class="crop inline-attribute" name="inline_crop"></button>
                 </div>
             </div>
             <div class="remove">
-                <button name="inline_remove" class="fa fa-trash-o"></button>
+                <button data-command-name="inline_remove" class="fa fa-trash-o"></button>
             </div>
             <div class="edit">
-                <button name="inline_edit">Edit</button>
-                <button name="inline_caption">Caption</button>
+                <button data-command-name="inline_edit">Edit</button>
+                <button data-command-name="inline_caption">Caption</button>
             </div>
         </div>
         <div class="link-tools toolbar" style="display:none">
@@ -100,8 +100,6 @@
       </div>
 
     </div>
-
-
 
 
     <div id="embed-modal"

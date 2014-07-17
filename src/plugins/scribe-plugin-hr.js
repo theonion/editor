@@ -4,8 +4,8 @@ define('scribe-plugin-hr',[],function () {
 
       scribe.on("inline:insert:hr", insert);
 
-      function insert(block, callback) {
-        callback(block, {});
+      function insert(callback) {
+        callback({});
       }
     };
   }

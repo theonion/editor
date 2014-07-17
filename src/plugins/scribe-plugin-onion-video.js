@@ -8,9 +8,9 @@ define('scribe-plugin-onion-video',[],function () {
       scribe.on("inline:insert:onion-video", insert);
 
 
-      function insert(block, callback) {
+      function insert(callback) {
 
-        var activeElement = callback(block, {videoid:"NONE"});
+        var activeElement = callback({videoid:"NONE"});
         return config.insertDialog().then(
             function(videoObject){
                 setVideoID(videoObject.attrs.id);
