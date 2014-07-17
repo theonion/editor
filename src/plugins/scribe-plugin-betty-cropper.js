@@ -5,7 +5,7 @@ define('scribe-plugin-betty-cropper',[],function () {
         scribe.on("inline:edit:image", edit);
         scribe.on("inline:insert:image", insert);
 
-        function insert(block, callback) {
+        function insert(callback) {
           config.insertDialog().then(
             function(success){
               var format;
@@ -15,7 +15,7 @@ define('scribe-plugin-betty-cropper',[],function () {
               else {
                 format = "jpg";
               }
-              callback(block, {image_id: success.id, format: format});
+              callback({image_id: success.id, format: format});
               if (window.picturefill) {
                 window.picturefill();
               }
