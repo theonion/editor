@@ -27,9 +27,20 @@ module.exports = function(grunt) {
           'build/inline.css': ['src/less/inline.less']
         }
       }
+    },
+    uglify: {
+      options: {
+        banner: banner
+      },
+      build: {
+        src: 'build/<%= pkg.name %>.js',
+        dest: 'build/<%= pkg.name %>.min.js'
+      }
     }
   });
   // Load external tasks
+  grunt.loadNpmTasks('grunt-contrib-uglify');
+
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');

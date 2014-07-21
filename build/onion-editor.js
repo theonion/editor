@@ -10708,15 +10708,14 @@ define('onion-editor',[
 
 
     scribe.updateContents = function(fn) {
-        console.log("UPDATING CONTENT, MAYBE?");
-        scribe._skipFormatters = true; 
-        setTimeout(function() {        
-          scribe.el.focus();
-          setTimeout(function() {
-            scribe.transactionManager.run(fn)    
-          }, 20);
+      scribe._skipFormatters = true; 
+      setTimeout(function() {        
+        scribe.el.focus();
+        setTimeout(function() {
+          scribe.transactionManager.run(fn)    
         }, 20);
-      }
+      }, 20);
+    }
 
     // initialize Scribe plugins
     
