@@ -429,7 +429,7 @@ var requirejs, require, define;
     };
 }());
 
-define("../bower_components/almond/almond", function(){});
+define("../../bower_components/almond/almond", function(){});
 
 /**
  * Lo-Dash 2.4.1 (Custom Build) <http://lodash.com/>
@@ -3006,11 +3006,10 @@ define('plugins/core/formatters/html/replace-nbsp-chars',[],function () {
 
   return function () {
     return function (scribe) {
-      var nbspChar = '&nbsp;|\xA0';
-      var nbspCharRegExp = new RegExp(nbspChar, 'g');
+      var nbspCharRegExp = /(\s|&nbsp;)+/g;
 
       // TODO: should we be doing this on paste?
-      scribe.registerHTMLFormatter('normalize', function (html) {
+      scribe.registerHTMLFormatter('export', function (html) {
         return html.replace(nbspCharRegExp, ' ');
       });
     };
@@ -4711,7 +4710,7 @@ define('scribe',[
   './api',
   './transaction-manager',
   './undo-manager',
-  './event-emitter',
+  './event-emitter'
 ], function (
   defaults,
   flatten,
@@ -4830,7 +4829,7 @@ define('scribe',[
 
   Scribe.prototype.getContent = function () {
     // Remove bogus BR element for Firefox — see explanation in BR mode files.
-    return this.getHTML().replace(/<br>$/, '');
+    return this._htmlFormatterFactory.formatForExport(this.getHTML().replace(/<br>$/, ''));
   };
 
   Scribe.prototype.getTextContent = function () {
@@ -4955,7 +4954,8 @@ define('scribe',[
       // elements
       sanitize: [],
       // Normalize content to ensure it is ready for interaction
-      normalize: []
+      normalize: [],
+      export: []
     };
   }
 
@@ -4971,6 +4971,12 @@ define('scribe',[
     }, html);
 
     return formatted;
+  };
+
+  HTMLFormatterFactory.prototype.formatForExport = function (html) {
+    return this.formatters.export.reduce(function (formattedData, formatter) {
+      return formatter(formattedData);
+    }, html);
   };
 
   return Scribe;

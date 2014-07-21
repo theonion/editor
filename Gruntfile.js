@@ -12,7 +12,7 @@ module.exports = function(grunt) {
     },
     watch: {
       scripts: {
-        files: ['src/js/*.js', 'src/js/*/*.js', 'src/less/*/*.js','src/less/*/*.js'],
+        files: ['src/js/*.js', 'src/js/*/*.js', 'src/less/*.less','src/less/*/*.less'],
         tasks: ['requirejs', 'less'],
       }
     },
@@ -33,5 +33,5 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
-  grunt.registerTask('default', 'requirejs', 'less');
+  grunt.registerTask('default', ['requirejs', 'less']);
 };

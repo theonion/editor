@@ -101,7 +101,6 @@
 #editor-wrapper.mobile .inline .caption {
   margin-left: 20px;
 }
-/* smaller screens */
 /* embed css */
 div[data-type="embed"].center {
   width: 100%;
@@ -122,4 +121,5 @@ div.embed > div > * {
 }
 hr {
   border-top: 1px #111 solid;
+  float: left;
 }

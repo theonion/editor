@@ -164,6 +164,163 @@ div[data-picture] img {
 .link-search-results ul {
   margin-bottom: 0px;
 }
+/* FROM BULBS, LINK BROWSER 
+    .link-tools {
+        padding:4px;
+        position:absolute;
+        z-index: 100;   
+        display:none;
+        background-color: #eee;
+        border:1px #ccc solid;
+        border-radius: 4px;
+        white-space:nowrap;
+
+        .link-view-dialog { width: auto; }
+
+        .link-edit-dialog{ width: 400px; }
+
+        .link-url {
+            margin: 0 15px;
+            max-width: 220px;
+            font-size:10px;
+            line-height:20px;
+            text-overflow: ellipsis;
+            white-space: nowrap;
+            overflow: hidden;
+            display: block;
+            margin-top: 10px;
+            float:left }
+
+        input {
+            margin-top: 4px;
+            margin-right: 15px;
+            width: 320px;
+            border-radius: 4px;
+            background-color: #f1f1f1;
+            border:1px solid #ddd;
+            float:left;
+            font-size: 12px;
+            padding-left: 4px;
+            padding: 6px 4px;
+            line-height: 12px; }
+
+        button {
+            display:block;
+            width:auto;
+            margin-top:2px;
+            float:left;
+            text-transform:uppercase;
+            font-size: 12px;
+            background-color: #e0e0e0; }
+
+        .dropdown {
+            position: absolute;
+            width: 316px;
+            margin-top: 40px;
+            margin-left: 2px;
+            -webkit-touch-callout: none;
+            -webkit-user-select: none;
+            -khtml-user-select: none;
+            -moz-user-select: none;
+            -ms-user-select: none;
+            user-select: none;
+
+            .tabs {
+                position: relative;
+                clear: both; }
+
+            .tab { float: left;
+
+                label {
+                    text-align: center;
+                    background: #f1f1f1;
+                    font-weight: lighter;
+                    font-size: 11px;
+                    margin-bottom: 0px;
+                    padding: 4px 6px;
+                    border-left: 1px solid #ddd;
+                    border-bottom: 1px solid #ddd;
+                    margin-left: -1px;
+                    position: relative;
+                    left: 1px;
+                }
+
+                &:last-child label { border-right: 1px solid #ddd; }
+
+                [type=radio] { 
+                    display: none; 
+
+                    ~ label ~ .entries { display: none; }
+
+                    &:checked ~ label {
+                        background: #4A88CE;
+                        color: white;
+                        z-index: 2;
+
+                        ~ .entries {
+                            z-index: 1;
+                            display: block;
+                            &:empty { display: none; } } } }
+
+                // sorry shawn ;_;
+                &:first-child label { width: 72px; }
+                &:nth-child(2) label { width: 72px; }
+                &:nth-child(3) label { width: 104px; }
+                &:last-child label { width: 71px; } }
+
+            .entries {
+                position: absolute;
+                top: 39px;
+                left: 0;
+                right: 0;
+                width: 316px;
+                max-height: 320px;
+                padding-top: 4px;
+                background: #f1f1f1;
+                border: 1px solid #ddd;
+                border-top: 0;
+                overflow-x: hidden;
+                overflow-y: scroll;
+
+                .entry {
+                    background: #f1f1f1;
+                    margin-bottom:8px;
+                    border-bottom:1px #ccc solid;
+
+                    .glyphicon-new-window {
+                        font-size: 9px;
+                        top: 0;
+                        margin-left: 2px; }
+
+                    &.content {
+                        font-size: 12px;
+                        padding: 2px 15px;
+
+                        .title {
+                            width: 282px;
+                            line-height: 14px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis; }
+
+                        .published { color: #7b7c7c; }
+
+                        .middot_separator { margin: 0px 4px; }
+
+                        .feature_type {
+                            display: inline-block;
+                            vertical-align: top;
+                            max-width: 180px;
+                            white-space: nowrap;
+                            overflow: hidden;
+                            text-overflow: ellipsis; } }
+
+                    &.things {
+                        padding: 8px 15px;
+                        font-size: 17px; } } } } }
+
+    .link-search-results ul { margin-bottom: 0px; }
+*/
 
 * {
   margin: 0px;
@@ -188,11 +345,9 @@ body {
 .editor-wrapper {
   margin: 0px auto;
   position: relative;
-  background-color: #F1F1F1;
 }
 .editorPlaceholder,
 .editor {
-  background-color: transparent;
   position: relative;
   z-index: 20;
   width: auto;
@@ -248,36 +403,8 @@ body {
   width: auto;
   padding: 0px;
 }
-/* some mediaquery stuff */
-#content-title .editor,
-#content-title .editorPlaceholder {
-  padding-bottom: 10px;
-}
-#content-subhead .editor,
-#content-subhead .editorPlaceholder {
-  padding-bottom: 10px;
-  padding-top: 10px;
-}
-#content-body .editor {
-  min-height: 600px;
-  padding-bottom: 800px;
-}
 .label {
   opacity: .7;
-}
-.visualize .editor ul,
-.visualize .editor ol {
-  background-color: rgba(166, 226, 45, 0.1);
-}
-.visualize .editor div {
-  background-color: rgba(249, 39, 114, 0.5);
-  /* don't want these to appear */
-}
-.visualize .editor p {
-  background-color: rgba(102, 217, 239, 0.1);
-}
-.visualize .editor blockquote {
-  background-color: rgba(174, 129, 255, 0.1);
 }
 /* status bar */
 #statusbar {
@@ -329,57 +456,6 @@ body {
 #embed-modal textarea {
   height: 200px;
   resize: vertical;
-}
-
-.editor {
-  color: #101010;
-  background-color: #e0e0e0;
-}
-.editor a {
-  color: #1155CC;
-}
-/* fonts */
-.editorPlaceholder,
-.editor {
-  font-family: Georgia, sans-serif;
-  line-height: 32px;
-  font-size: 18px;
-}
-blockquote p {
-  line-height: 32px;
-}
-.title .editorPlaceholder,
-.title .editor {
-  font-family: Georgia, sans-serif;
-  font-size: 28px;
-  line-height: 42px;
-}
-.subhead .editorPlaceholder,
-.subhead .editor {
-  font-family: Georgia, sans-serif;
-  font-size: 22px;
-  line-height: 32px;
-  color: #444;
-}
-.editorPlaceholder {
-  color: #B3B3B3 !important;
-}
-@media screen and (min-width: 320px) and (max-width: 800px) {
-  .title .editorPlaceholder,
-  .title .editor {
-    font-size: 20px;
-    line-height: 30px;
-  }
-  .subhead .editorPlaceholder,
-  .subhead .editor {
-    font-size: 16px;
-    line-height: 24px;
-  }
-  .editorPlaceholder,
-  .editor {
-    line-height: 24px;
-    font-size: 16px;
-  }
 }
 
 /* Menus + Buttons */
