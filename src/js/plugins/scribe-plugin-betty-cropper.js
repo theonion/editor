@@ -33,7 +33,7 @@ define('scribe-plugin-betty-cropper',[],function () {
           current_id;
 
         function edit(block, callback) {
-          current_id = options.element.getAttribute('data-image-id');
+          current_id = block.getAttribute('data-image-id');
           config.editDialog({id: current_id, caption: '', alt: ''}).then(
             function (image) {
 

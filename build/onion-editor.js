@@ -10238,7 +10238,7 @@ define('scribe-plugin-betty-cropper',[],function () {
           current_id;
 
         function edit(block, callback) {
-          current_id = options.element.getAttribute('data-image-id');
+          current_id = block.getAttribute('data-image-id');
           config.editDialog({id: current_id, caption: '', alt: ''}).then(
             function (image) {
 
@@ -10300,61 +10300,68 @@ define('scribe-plugin-embed',[],function () {
     return function (scribe) {
       scribe.on("inline:insert:embed", insert);
       scribe.on("inline:edit:embed", edit);
+      var editorEl = scribe.el.parentNode;
+      var $modal = $(".embed-modal", editorEl);
 
-      $("#embed-modal").on("hide.bs.modal", function() {
-        $("#set-embed-button").unbind("click");
-        $(".embed-error").hide();
+      var $bodyInput = $(".embed-body", $modal),
+          $captionInput = $(".embed-caption", $modal),
+          $embedBtn = $(".set-embed-button", $modal),
+          $error = $(".embed-error", $modal);
+
+
+
+
+      $modal.on("hide.bs.modal", function() {
+        $embedBtn.unbind("click");
+        $error.hide();
       });
 
 
       function edit(block, callback) {
         //populate modal contents
 
-        $("#embed-modal .embed-body").val(unescape($(block).attr("data-code")));
-        $("#embed-modal .embed-source").val($(block).attr("data-source"));
-        $("#embed-modal .embed-caption").val($(".caption", block).text());
+        $bodyInput.val(unescape($(block).attr("data-code")));
+        $captionInput.val($(".caption", block).text());
 
-
-        $("#embed-modal").modal("show");
-        $("#set-embed-button").click(function () {
-          var embed_body = $("#embed-modal .embed-body").val();
+        $modal.modal("show");
+        $embedBtn.click(function () {
+          var embed_body = $bodyInput.val();
           if (embed_body.trim() === "") {
-             $(".embed-error").show();
+             $error.show();
           }
           else {
-            $(".embed-error").hide();
+            $error.hide();
             callback(block,
-              {body: embed_body,
-              caption: $("#embed-modal .embed-caption").val(),
-              source: $("#embed-modal .embed-source").val(),
-              escapedbody: escape(embed_body)
+              {code: embed_body,
+              caption: $captionInput.val(),
+              escaped_code: escape(embed_body)
             })
-            $("#embed-modal").modal("hide");
+            $modal.modal("hide");
 
           }
         });
-        $("#embed-modal").modal("show");
+        $modal.modal("show");
       }
 
       function insert(callback) {
-        $("#embed-modal input, #embed-modal textarea").val("")
-        $("#embed-modal").modal("show");
+        $bodyInput.val("");
+        $captionInput.val("");
+        $modal.modal("show");
 
-        $("#set-embed-button").click(function () {
-          var embed_body = $("#embed-modal .embed-body").val();
+        $embedBtn.click(function () {
+          var embed_body = $bodyInput.val();
 
           if (embed_body.trim() === "") {
-             $(".embed-error").show();
+             $error.show();
           }
           else {
-            $(".embed-error").hide();
+            $error.hide();
             callback(
               {code: embed_body,
-              caption: $("#embed-modal .embed-caption").val(),
-              source: $("#embed-modal .embed-source").val(),
+              caption: $captionInput.val(),
               escaped_code: escape(embed_body)
             })
-            $("#embed-modal").modal("hide");
+            $modal.modal("hide");
           }
         });
       }
