@@ -10610,10 +10610,6 @@ define('onion-editor',[
 
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
 
-    if (options.onChange) {
-      scribe.on('content-changed', options.onChange);
-    }
-
     if (options.placeholder) {
       scribe.use(scribePluginPlaceholder(options.placeholder));
     }
@@ -10739,6 +10735,10 @@ define('onion-editor',[
     }
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
+
+    this.setChangeHandler = function(func) {
+      scribe.on('content-changed', func); 
+    }
 
     this.setContent = function(content) {
       if (!content) {
