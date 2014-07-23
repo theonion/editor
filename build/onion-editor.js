@@ -9721,7 +9721,7 @@ define('lodash-amd/modern/collections/contains',['../internals/baseIndexOf', '..
   return contains;
 });
 
-define('scribe-common/element',['lodash-amd/modern/collections/contains'], function (contains) {
+define('scribe-common/src/element',['lodash-amd/modern/collections/contains'], function (contains) {
 
   
 
@@ -9751,7 +9751,7 @@ define('scribe-common/element',['lodash-amd/modern/collections/contains'], funct
 
 });
 
-define('scribe-plugin-smart-lists',['scribe-common/element'], function (element) {
+define('scribe-plugin-smart-lists',['scribe-common/src/element'], function (element) {
 
   
 
@@ -9785,9 +9785,30 @@ define('scribe-plugin-smart-lists',['scribe-common/element'], function (element)
 
       function removeSelectedTextNode() {
         var selection = new scribe.api.Selection();
-        var container = selection.range.commonAncestorContainer;
+        var container = selection.selection.anchorNode;
+        /**
+         * Firefox: Selection object never gets access to text nodes, only
+         * parent elements.
+         * As per: http://jsbin.com/rotus/2/edit?js,output,console
+         * Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=1042701
+         */
+        var textNode;
         if (container.nodeType === Node.TEXT_NODE) {
-          container.parentNode.removeChild(container);
+          textNode = container;
+        } else if (container.firstChild.nodeType === Node.TEXT_NODE) {
+          textNode = container.firstChild;
+        }
+
+        if (textNode) {
+          var parentNode = textNode.parentNode;
+          /**
+           * Firefox: Given text of "1.", we sometimes have two text nodes
+           * (why?): "1" and "."
+           */
+          if (textNode.previousSibling) {
+            parentNode.removeChild(textNode.previousSibling);
+          }
+          parentNode.removeChild(textNode);
         } else {
           throw new Error('Cannot empty non-text node!');
         }
@@ -9810,12 +9831,29 @@ define('scribe-plugin-smart-lists',['scribe-common/element'], function (element)
         // If in a <p>
         var blockContainer = findBlockContainer(container);
         if (blockContainer && blockContainer.tagName === 'P') {
+          // Warning: There is no guarantee that `container` will be a text node
+          // Failing Firefox tests
+
           var startOfLineIsUList = isUnorderedListChar(container.textContent[0]);
           if (isUnorderedListChar(lastChar) && currentChar === 'Space' && startOfLineIsUList) {
             listCommand = 'insertUnorderedList';
           }
 
-          var startOfLineIsOList = container.textContent === '1.';
+          /**
+           * Firefox: Selection object never gets access to text nodes, only
+           * parent elements. This means that *sometimes* unordered lists
+           * will not work.
+           * As per: http://jsbin.com/rotus/2/edit?js,output,console
+           * Bugzilla: https://bugzilla.mozilla.org/show_bug.cgi?id=1042701
+           */
+
+          // Some browsers split text nodes randomly, so we can't be sure the
+          // prefix will be contained within a single text node (observed in
+          // Firefox)
+          var startOfLineIsOList = [
+            container.previousSibling && container.previousSibling.textContent,
+            container.textContent
+          ].join('').slice(0, 2) === '1.';
           if (preLastChar === '1' && lastChar === '.' && currentChar === 'Space' && startOfLineIsOList) {
             listCommand = 'insertOrderedList';
           }
@@ -9829,7 +9867,6 @@ define('scribe-plugin-smart-lists',['scribe-common/element'], function (element)
             scribe.getCommand(listCommand).execute();
 
             // Clear "* "/etc from the list item
-            
             removeSelectedTextNode();
           });
         }
@@ -10448,7 +10485,7 @@ define('scribe-plugin-placeholder',[],function () {
   }
 });
 define('link-formatter',[
-    'scribe-common/element',
+    'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
 
   ], function (
@@ -10666,8 +10703,7 @@ define('onion-editor',[
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
-      /* Disable for now. There's an open issue that needs to get resolved */
-      //scribe.use(scribePluginSmartLists());
+      scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};
