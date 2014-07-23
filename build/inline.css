@@ -124,3 +124,7 @@ div.embed > div > * {
 hr {
   border-top: 1px #111 solid;
 }
+
+.hr.inline {
+  border:0px;
+}

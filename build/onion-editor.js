@@ -10774,6 +10774,20 @@ define('onion-editor',[
       $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
 
+    // a little hacky to prevent deletion of images and other inline elements via the backspace key. 
+    scribe.el.addEventListener("keydown", function(event) {
+      if (event.keyCode === 8) {
+        // is the previous immediate child of editor an inline item?
+        var sel = new scribe.api.Selection();
+        var prev = $(sel.selection.anchorNode).closest(".editor>*").prev();
+        if (prev.hasClass("inline") 
+          && sel.selection.anchorOffset === 0 
+          && sel.selection.isCollapsed) {
+          event.preventDefault();
+        }
+      }
+    })
+
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
     this.setChangeHandler = function(func) {
