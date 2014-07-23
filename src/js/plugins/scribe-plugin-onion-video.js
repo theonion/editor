@@ -10,7 +10,8 @@ define('scribe-plugin-onion-video',[],function () {
 
       function insert(callback) {
 
-        var activeElement = callback({videoid:"NONE"});
+        var activeElement = callback({video_id:"NONE"});
+        console.log("active video element", activeElement);
         return config.insertDialog().then(
             function(videoObject){
                 setVideoID(videoObject.attrs.id);
@@ -41,7 +42,7 @@ define('scribe-plugin-onion-video',[],function () {
       }
 
       function edit(block, callback) {
-          var id = $(block).data('video-id');
+          var id = $(block).attr('data-video-id');
           config.editDialog(id);
       }
     };
