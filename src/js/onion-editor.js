@@ -166,12 +166,22 @@ define('onion-editor',[
     }));
 
 
+    /* This is necessary for a few dumb reasons. Scribe's transaction manager doesn't work when there 
+      ins't a selection inside of the editor. This means any changes made when the editor ins't in focus,
+      like adding an image, stuff breaks. This works around that particular issue. 
+
+      I'm not really sure the right way to fix this or how to avoid this problem altogether.
+
+      The scroll stuff is a consequence of this. 
+    */
     scribe.updateContents = function(fn) {
-      scribe._skipFormatters = true; 
+      scribe._skipFormatters = true;
+      var scrollY = window.scrollY;
       setTimeout(function() {        
         scribe.el.focus();
         setTimeout(function() {
-          scribe.transactionManager.run(fn)    
+          scribe.transactionManager.run(fn)
+          window.scrollTo(0, scrollY);
         }, 20);
       }, 20);
     }
