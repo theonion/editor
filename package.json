@@ -14,6 +14,9 @@
     "grunt-contrib-qunit": "~0.2.2",
     "grunt-contrib-watch": "~0.4.4",
     "grunt-contrib-concat": "~0.3.0",
-    "grunt-contrib-copy": "~0.4.0"
+    "grunt-contrib-copy": "~0.4.0",
+    "grunt-contrib-requirejs": "~0.4.3",
+    "grunt-contrib-less": "~0.11.0",
+    "requirejs": "~2.1.11"
   }
 } 

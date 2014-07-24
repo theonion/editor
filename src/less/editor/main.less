@@ -1,0 +1,128 @@
+* {
+    margin:0px;
+    padding:0px;
+        
+}
+
+a {
+    cursor:pointer;
+}
+
+input,textarea, button,
+.editor:focus {
+    outline: none;
+}
+
+::selection {
+    background-color: #FEFEBA;
+}
+
+body {
+    font-family: Helvetica, Arial, sans-serif;
+    background-color: #eee;
+}
+
+
+.editor-wrapper {   
+    margin: 0px auto;
+    position:relative;
+}
+
+
+.editorPlaceholder,
+.editor {
+    position:relative;
+    z-index:20;
+    width: auto;
+    margin: 0px;
+    padding: 30px 100px;
+}
+.editorPlaceholder {
+    z-index: 10;
+    position:absolute;
+}
+.editorPlaceholder p,
+.editor blockquote,
+.editor ul,
+.editor ol,
+.editor p,
+.editor>div { 
+    min-height:24px;
+    margin: 24px 0;
+}
+
+.editor blockquote {
+    clear:both;
+    padding: 0 30px;
+    border-left: 5px solid #ddd;
+}
+
+
+.editor ul,
+.editor ol {
+    clear:both;
+    padding-left:  45px;
+    padding-right:  45px;
+    
+}
+
+.editor li {
+    margin-bottom: 4px;
+}
+
+
+.editor h3 {
+    margin-top:16px;
+    margin-bottom:12px;
+    font-size: 32px;
+    font-weight:normal;
+}
+
+.editor h4 {
+    margin-top:16px;
+    font-size: 24px;
+    font-weight:normal;
+}
+
+
+#content-wrapper {
+    margin-top: 100px;
+    margin: 20px auto 0;
+    border:1px #ddd solid;
+}
+
+#content-wrapper.container {
+    max-width: 820px;
+    min-width: 400px;
+    width: auto;
+    padding:0px;
+}
+
+
+.label {
+    opacity: .7;
+}
+
+/* status bar */
+
+#statusbar {
+    display:none;
+    position: fixed;
+    bottom: 0;
+    right : 0;
+    width : 100px;
+    height : 40px;
+    background-color: #ddd;
+    border-top: 1px #ccc solid;
+    border-left: 1px #ccc solid;
+    border-top-left-radius: 4px;
+    padding: 4px;
+    font-size: 12px;
+    color: #333;
+}
+
+#statusbar button {
+    display:inline-block;
+    width: auto;
+    text-align:center;
+}
