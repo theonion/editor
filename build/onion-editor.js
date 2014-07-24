@@ -9994,7 +9994,10 @@ define('scribe-plugin-inline-objects',[],function () {
           }
 
           $(".embed-fly-out", editorEl)
-            .css({top: blockPosition})
+            .css({
+              top: blockPosition,
+              left: $(scribe.el).css('padding-left')
+            })
             .show();
 
 
@@ -10047,6 +10050,7 @@ define('scribe-plugin-inline-objects',[],function () {
             //var top = blocks[i].offsetTop;
             $(".embed-tools",editorEl)
                 .css({ 
+                  width: $(scribe.el).css('padding-left'),
                   top: block.position().top + block.css('margin-top').replace(/[^-\d\.]/g, '') / 2,
                   height: block.height()
                 })
