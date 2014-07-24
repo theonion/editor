@@ -10260,7 +10260,8 @@ define('scribe-plugin-betty-cropper',[],function () {
               callback({image_id: success.id, format: format});
               if (window.picturefill) {
                 setTimeout(function() {
-                  window.picturefill(scribe.el);
+                  // this could be nicer...
+                  window.picturefill($('[data-image-id=' + image.id + ']')[0]);
                 }, 10)
               }
             },
@@ -10287,11 +10288,11 @@ define('scribe-plugin-betty-cropper',[],function () {
                 $(block).attr('data-image-id', image.id);
                 $(block).attr('data-alt', image.alt);
                 $(".caption", block).html(image.caption);
-              }
-              if (window.picturefill) {
-                setTimeout(function() {
-                  window.picturefill(scribe.el);
-                }, 10);
+                if (window.picturefill) {
+                  setTimeout(function() {
+                    window.picturefill($('[data-image-id=' + image.id + ']')[0]);
+                  }, 10);
+                }
               }
             }
           );
@@ -10708,7 +10709,7 @@ define('onion-editor',[
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
-      scribe.use(scribePluginSmartLists());
+      //scribe.use(scribePluginSmartLists());
       tags.ol = {};
       tags.ul = {};
       tags.li = {};
