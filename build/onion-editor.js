@@ -10261,8 +10261,7 @@ define('scribe-plugin-betty-cropper',[],function () {
               if (window.picturefill) {
                 setTimeout(function() {
                   // this could be nicer...
-                  console.log('Inserting [data-image-id=' + image.id + ']');
-                  window.picturefill($('[data-image-id=' + image.id + ']')[0]);
+                  window.picturefill($('[data-image-id=' + success.id + ']')[0]);
                 }, 10)
               }
             },
@@ -10291,7 +10290,6 @@ define('scribe-plugin-betty-cropper',[],function () {
                 $(".caption", block).html(image.caption);
                 if (window.picturefill) {
                   setTimeout(function() {
-                    console.log('Editing [data-image-id=' + image.id + ']');
                     window.picturefill($('[data-image-id=' + image.id + ']')[0]);
                   }, 10);
                 }
