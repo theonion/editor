@@ -16,11 +16,9 @@ define('scribe-plugin-betty-cropper',[],function () {
                 format = "jpg";
               }
               callback({image_id: success.id, format: format});
-              console.log("SUCCESS, calling picturefill from insert");
               if (window.picturefill) {
                 setTimeout(function() {
                   // this could be nicer...
-                  console.log("image_id", success.id, $('[data-image-id=' + success.id + ']')[0]);
                   window.picturefill($('[data-image-id=' + success.id + ']')[0]);
                 }, 100)
               }
@@ -51,7 +49,7 @@ define('scribe-plugin-betty-cropper',[],function () {
                 if (window.picturefill) {
                   setTimeout(function() {
                     window.picturefill($('[data-image-id=' + image.id + ']')[0]);
-                  }, 10);
+                  }, 100);
                 }
               }
             }

@@ -270,7 +270,9 @@ define('scribe-plugin-inline-objects',[],function () {
             index = 0;
           setValue(attribute, list[index]);
           if (typeof window.picturefill === "function") {
-            setTimeout(window.picturefill, 100);
+            setTimeout(function() {
+              window.picturefill(activeElement);
+            }, 100);
           }
         } 
 
