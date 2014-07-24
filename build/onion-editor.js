@@ -10264,7 +10264,7 @@ define('scribe-plugin-betty-cropper',[],function () {
                   // this could be nicer...
                   console.log("image_id", success.id, $('[data-image-id=' + success.id + ']')[0]);
                   window.picturefill($('[data-image-id=' + success.id + ']')[0]);
-                }, 10)
+                }, 100)
               }
             },
             function(error){
