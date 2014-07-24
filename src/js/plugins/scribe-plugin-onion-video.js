@@ -27,8 +27,10 @@ define('scribe-plugin-onion-video',[],function () {
         }
 
         function setVideoID(id) {
+          scribe.updateContent(function() {
             $("iframe", activeElement).attr("src", config.videoEmbedUrl + id);
             $(activeElement).attr('data-video-id', id)
+          });
         }
 
         function onError() {
