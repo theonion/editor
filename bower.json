@@ -1,6 +1,6 @@
 {
   "name": "onion-editor",
-  "version": "0.2.0",
+  "version": "0.2.1",
   "homepage": "https://github.com/theonion/editor",
   "authors": [
     "Mike Wnuk <mwnuk@theonion.com>"
@@ -9,7 +9,7 @@
   "main": "build/onion-editor.min.js",
   "keywords": [
     "editor"
-  ],  
+  ],
   "license": "MIT",
   "ignore": [
     "**/.*",

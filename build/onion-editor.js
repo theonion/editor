@@ -9950,14 +9950,14 @@ define('scribe-plugin-inline-objects',[],function () {
   return function (config) {
     return function (scribe) {
         // define inline objects
-        
+
         var editorEl = scribe.el.parentNode;
-        
+
         var templates;
         var activeBlock, activeElement;
 
-        // Load the config. 
-        $.ajax(config, {success: configLoaded});
+        // Load the config.
+        $.ajax(config, {success: configLoaded, dataType: 'json'});
 
         function configLoaded(data) {
           templates = data;
@@ -9987,8 +9987,8 @@ define('scribe-plugin-inline-objects',[],function () {
           }
           else {
             blockPosition = activeBlock.position().top +
-              activeBlock.height() 
-              + parseInt(activeBlock.css('margin-top')) 
+              activeBlock.height()
+              + parseInt(activeBlock.css('margin-top'))
               - flyoutHeight/2 + buttonHeight / 2;
             beforeOrAfter = "after";
           }
@@ -10029,27 +10029,27 @@ define('scribe-plugin-inline-objects',[],function () {
           //derive type from button clicked.
           //emit an event, so handler plugin can pick up.
           scribe.trigger("inline:insert:" + objectType, [
-            function(values) {              
+            function(values) {
               scribe.updateContents(function() {
                 var html = render(
-                    templates[objectType].template, 
-                    $.extend(templates[objectType].defaults, values) 
+                    templates[objectType].template,
+                    $.extend(templates[objectType].defaults, values)
                 );
-                $(elementToPlaceNear)[beforeOrAfter](html); 
-                $(".inline", editorEl).attr("contenteditable", "false"); 
+                $(elementToPlaceNear)[beforeOrAfter](html);
+                $(".inline", editorEl).attr("contenteditable", "false");
               });
             }
           ]);
           $(".embed-tools", editorEl).removeClass("active");
         }
 
-        // Insert toolbar. 
+        // Insert toolbar.
         scribe.el.addEventListener('mouseover', function (event) {
           var block = $(event.target).closest(".editor>*");
           if (block.length === 1) {
             //var top = blocks[i].offsetTop;
             $(".embed-tools",editorEl)
-                .css({ 
+                .css({
                   width: $(scribe.el).css('padding-left'),
                   top: block.position().top + block.css('margin-top').replace(/[^-\d\.]/g, '') / 2,
                   height: block.height()
@@ -10090,13 +10090,13 @@ define('scribe-plugin-inline-objects',[],function () {
         function hideToolbar() {
           $(".inline-tools").hide();
           $(editorEl).removeClass("inline-active")
-        } 
+        }
 
         function showToolbar() {
           var el = $(activeElement);
           var pos = el.position();
           $(editorEl).addClass("inline-active");
-          
+
           //set size buttons.
 
           $(".inline-tools .size", editorEl)
@@ -10108,7 +10108,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
           $(".inline-tools", editorEl)
             .css({
-              top: pos.top + parseInt(el.css('margin-top')), 
+              top: pos.top + parseInt(el.css('margin-top')),
               left: pos.left + parseInt(el.css('margin-left')) + parseInt($(".editor", editorEl).css('margin-left')),
               width: el.width(),
               height: el.height()
@@ -10128,7 +10128,7 @@ define('scribe-plugin-inline-objects',[],function () {
         var actions = {
 
           inline_caption: function() {
-            var caption = prompt("Caption", 
+            var caption = prompt("Caption",
               $(".caption", activeElement).html()
             );
             if (caption) {
@@ -10161,7 +10161,7 @@ define('scribe-plugin-inline-objects',[],function () {
 
               scribe.updateContents(function() {
                 $(activeElement).after(previousBlock);
-               
+
                 setTimeout(function() {
                   showToolbar();
                   var newTop = $(activeElement).offset().top;
@@ -10177,7 +10177,7 @@ define('scribe-plugin-inline-objects',[],function () {
               var top = $(activeElement).offset().top;
               scribe.updateContents(function() {
                 $(activeElement).before(nextBlock);
-                
+
                 setTimeout(function() {
                   showToolbar();
                   var newTop = $(activeElement).offset().top;
@@ -10191,18 +10191,18 @@ define('scribe-plugin-inline-objects',[],function () {
               $(activeElement).remove();
             });
             hideToolbar()
-          },  
+          },
           inline_edit: function () {
-            scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"), 
+            scribe.trigger("inline:edit:" + $(activeElement).attr("data-type"),
               [
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr("data-type");
                   scribe.updateContents(function() {
-                    element.outerHTML = 
+                    element.outerHTML =
                       render(
                         templates[type].template,
-                        $.extend(templates[type].defaults, values) 
+                        $.extend(templates[type].defaults, values)
                       )
                   });
                 }
@@ -10222,7 +10222,7 @@ define('scribe-plugin-inline-objects',[],function () {
               window.picturefill(activeElement);
             }, 100);
           }
-        } 
+        }
 
         function setValue(attribute, value) {
           var currentValue = $(activeElement).attr("data-" + attribute);
