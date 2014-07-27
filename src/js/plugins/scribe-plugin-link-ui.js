@@ -8,7 +8,6 @@ define('scribe-plugin-link-ui',[],function () {
   return function (config) {
     return function (scribe) {
 
-
       var editorEl = scribe.el.parentNode,
           linkPromptCommand = new scribe.api.Command('createLink');
       var $linkTools = $('.link-tools', editorEl),
