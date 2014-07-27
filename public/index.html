@@ -106,18 +106,15 @@
                 <button data-command-name="inline_caption">Caption</button>
             </div>
         </div>
+
         <div class="link-tools toolbar" style="display:none">
-          <div class="toolbar-contents">
-            <input type="text">
-            <button class="close">OK</button>
+            <input class="link-url" type="text" placeholder="Enter URL or Search">
+            <button class="ok">OK</button>
             <button class="remove">Remove</button>
-          </div>
+            <div class="search-results"></div>
         </div>
       </div>
     </div>
-
-
-
 
     
     <div style="display:none" id="content">
@@ -141,9 +138,15 @@
           container: document.getElementsByClassName('editorPlaceholder')[0]
         },
         link: {
-          domain: 'avclub.com'
+          domain: 'avclub.com',
+          searchHandler: function(term, resultsElement) {
+            resultsElement.html("<b>" + term + "</b><br><a href='/fart/'>Fart</a><br><a href='/butt/'>Butt</a><br><a href='/dumb/'>Dumb</a><br>");
+          }
         }
       });
+
+
+
 
       editor.setContent($("#content").html());
     </script>

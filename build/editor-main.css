@@ -1,12 +1,14 @@
 /* embed modal */
-.embed-modal textarea,
-.embed-modal input[type=text] {
+.embed-modal textarea {
   width: 100%;
   max-width: 100%;
   font-family: courier, fixed;
   font-size: 14px;
   padding: 5px;
   background-color: #F1F1F1;
+}
+.embed-modal .embed-caption {
+  width: 100%;
 }
 .embed-modal textarea {
   height: 200px;
@@ -131,25 +133,21 @@ div[data-picture] img {
   height: 100%;
 }
 
-.link-tools {
-  position: absolute;
-  top: 0px;
-  bottom: 0px;
-  left: 0px;
-  right: 0px;
-  background-color: rgba(0, 0, 0, 0.2);
-}
 /* TODO: GRAB STYLES FROM AVCLUB */
 /* Link tools */
 .link-tools {
   padding: 4px;
-  position: absolute;
+  position: fixed;
   z-index: 100;
+  top: 20px;
+  right: 20px;
+  width: auto;
   display: none;
-  background-color: #eee;
-  border: 1px #ccc solid;
   border-radius: 4px;
   white-space: nowrap;
+  width: 400px;
+  background-color: #ddd;
+  border: 1px #ccc solid;
 }
 .link-tools .link-view-dialog {
   width: auto;
@@ -157,21 +155,16 @@ div[data-picture] img {
 .link-tools .link-edit-dialog {
   width: 410px;
 }
-.link-tools .link-url {
-  margin: 0 15px;
-  max-width: 200px;
-  text-overflow: ellipsis;
-  white-space: nowrap;
-  overflow: hidden;
-}
-.link-tools button {
+.toolbar.link-tools button {
   display: inline-block;
   width: auto;
+  font-size: 11px;
+  text-transform: uppercase;
 }
 .link-tools input {
   padding: 8px;
   margin-top: 4px;
-  width: 320px;
+  width: 280px;
   border-radius: 4px;
   background-color: #f1f1f1;
   border: 1px #ddd solid;
@@ -179,163 +172,6 @@ div[data-picture] img {
 .link-search-results ul {
   margin-bottom: 0px;
 }
-/* FROM BULBS, LINK BROWSER 
-    .link-tools {
-        padding:4px;
-        position:absolute;
-        z-index: 100;   
-        display:none;
-        background-color: #eee;
-        border:1px #ccc solid;
-        border-radius: 4px;
-        white-space:nowrap;
-
-        .link-view-dialog { width: auto; }
-
-        .link-edit-dialog{ width: 400px; }
-
-        .link-url {
-            margin: 0 15px;
-            max-width: 220px;
-            font-size:10px;
-            line-height:20px;
-            text-overflow: ellipsis;
-            white-space: nowrap;
-            overflow: hidden;
-            display: block;
-            margin-top: 10px;
-            float:left }
-
-        input {
-            margin-top: 4px;
-            margin-right: 15px;
-            width: 320px;
-            border-radius: 4px;
-            background-color: #f1f1f1;
-            border:1px solid #ddd;
-            float:left;
-            font-size: 12px;
-            padding-left: 4px;
-            padding: 6px 4px;
-            line-height: 12px; }
-
-        button {
-            display:block;
-            width:auto;
-            margin-top:2px;
-            float:left;
-            text-transform:uppercase;
-            font-size: 12px;
-            background-color: #e0e0e0; }
-
-        .dropdown {
-            position: absolute;
-            width: 316px;
-            margin-top: 40px;
-            margin-left: 2px;
-            -webkit-touch-callout: none;
-            -webkit-user-select: none;
-            -khtml-user-select: none;
-            -moz-user-select: none;
-            -ms-user-select: none;
-            user-select: none;
-
-            .tabs {
-                position: relative;
-                clear: both; }
-
-            .tab { float: left;
-
-                label {
-                    text-align: center;
-                    background: #f1f1f1;
-                    font-weight: lighter;
-                    font-size: 11px;
-                    margin-bottom: 0px;
-                    padding: 4px 6px;
-                    border-left: 1px solid #ddd;
-                    border-bottom: 1px solid #ddd;
-                    margin-left: -1px;
-                    position: relative;
-                    left: 1px;
-                }
-
-                &:last-child label { border-right: 1px solid #ddd; }
-
-                [type=radio] { 
-                    display: none; 
-
-                    ~ label ~ .entries { display: none; }
-
-                    &:checked ~ label {
-                        background: #4A88CE;
-                        color: white;
-                        z-index: 2;
-
-                        ~ .entries {
-                            z-index: 1;
-                            display: block;
-                            &:empty { display: none; } } } }
-
-                // sorry shawn ;_;
-                &:first-child label { width: 72px; }
-                &:nth-child(2) label { width: 72px; }
-                &:nth-child(3) label { width: 104px; }
-                &:last-child label { width: 71px; } }
-
-            .entries {
-                position: absolute;
-                top: 39px;
-                left: 0;
-                right: 0;
-                width: 316px;
-                max-height: 320px;
-                padding-top: 4px;
-                background: #f1f1f1;
-                border: 1px solid #ddd;
-                border-top: 0;
-                overflow-x: hidden;
-                overflow-y: scroll;
-
-                .entry {
-                    background: #f1f1f1;
-                    margin-bottom:8px;
-                    border-bottom:1px #ccc solid;
-
-                    .glyphicon-new-window {
-                        font-size: 9px;
-                        top: 0;
-                        margin-left: 2px; }
-
-                    &.content {
-                        font-size: 12px;
-                        padding: 2px 15px;
-
-                        .title {
-                            width: 282px;
-                            line-height: 14px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis; }
-
-                        .published { color: #7b7c7c; }
-
-                        .middot_separator { margin: 0px 4px; }
-
-                        .feature_type {
-                            display: inline-block;
-                            vertical-align: top;
-                            max-width: 180px;
-                            white-space: nowrap;
-                            overflow: hidden;
-                            text-overflow: ellipsis; } }
-
-                    &.things {
-                        padding: 8px 15px;
-                        font-size: 17px; } } } } }
-
-    .link-search-results ul { margin-bottom: 0px; }
-*/
 
 * {
   margin: 0px;
@@ -631,4 +467,8 @@ span.highlight {
 }
 .editor [contenteditable=false] span.searchResult {
   background-color: transparent;
+}
+.document-tools,
+embed-tools {
+  font-family: Helvetica, Arial, sans-serif;
 }
