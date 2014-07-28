@@ -10322,7 +10322,9 @@ define('scribe-plugin-betty-cropper',[],function () {
 
         function edit(block, callback) {
           current_id = block.getAttribute('data-image-id');
-          config.editDialog({id: current_id, caption: '', alt: ''}).then(
+          caption = $('.caption', block).html();
+          alt = block.getAttribute('data-alt');
+          config.editDialog({id: current_id, caption: caption, alt: alt}).then(
             function (image) {
 
               if (image.id === null) {
@@ -10343,7 +10345,7 @@ define('scribe-plugin-betty-cropper',[],function () {
         }
       };
     }
-}); 
+});
 define('scribe-plugin-youtube',[],function () {
 
   return function (config) {
@@ -10694,8 +10696,6 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
-
-
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
 
     if (options.placeholder) {
@@ -10816,11 +10816,8 @@ define('onion-editor',[
         }, 20);
       }, 20);
     }
-
-    // initialize Scribe plugins
     
     scribe.use(scribePluginCurlyQuotes());
-
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar

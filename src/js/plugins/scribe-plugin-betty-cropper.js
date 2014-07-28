@@ -37,7 +37,9 @@ define('scribe-plugin-betty-cropper',[],function () {
 
         function edit(block, callback) {
           current_id = block.getAttribute('data-image-id');
-          config.editDialog({id: current_id, caption: '', alt: ''}).then(
+          caption = $('.caption', block).html();
+          alt = block.getAttribute('data-alt');
+          config.editDialog({id: current_id, caption: caption, alt: alt}).then(
             function (image) {
 
               if (image.id === null) {
@@ -58,4 +60,4 @@ define('scribe-plugin-betty-cropper',[],function () {
         }
       };
     }
-}); 
+});

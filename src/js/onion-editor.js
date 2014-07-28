@@ -63,8 +63,6 @@ define('onion-editor',[
 
     options = $.extend(defaults, options);
 
-
-
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
 
     if (options.placeholder) {
@@ -185,11 +183,8 @@ define('onion-editor',[
         }, 20);
       }, 20);
     }
-
-    // initialize Scribe plugins
     
     scribe.use(scribePluginCurlyQuotes());
-
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
     //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
