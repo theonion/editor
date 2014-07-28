@@ -57,12 +57,10 @@ define('scribe-plugin-link-ui',[],function () {
       scribe.el.addEventListener('click', function(e) {
         // is there a link
         var selection = new scribe.api.Selection();
-        if (selection.range) {
-          var linkElement = $(e.target).closest('a');
-          if (linkElement.length === 1) {
-            showInput(linkElement);
-            e.preventDefault();
-          }
+        var linkElement = $(e.target).closest('a');
+        if (linkElement.length === 1) {
+          showInput(linkElement);
+          e.preventDefault();
         }
       })
 
