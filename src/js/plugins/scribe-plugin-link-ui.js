@@ -61,6 +61,7 @@ define('scribe-plugin-link-ui',[],function () {
           var linkElement = $(e.target).closest('a');
           if (linkElement.length === 1) {
             showInput(linkElement);
+            e.preventDefault();
           }
         }
       })
