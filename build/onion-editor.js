@@ -10466,12 +10466,14 @@ define('scribe-plugin-onion-video',[],function () {
 
 
       function insert(callback) {
+        
+        //TODO: Show some kind of use status while waiting for the initial response.
 
-        var activeElement = callback({video_id:"NONE"});
-        console.log("active video element", activeElement);
         return config.insertDialog().then(
             function(videoObject){
-                setVideoID(videoObject.attrs.id);
+              scribe.updateContents(function() {
+                callback({embed_url: config.videoEmbedUrl, video_id:videoObject.attrs.id});
+              });
             }, function(error){
                 onError(error);
             }, function(progress){
@@ -10483,12 +10485,6 @@ define('scribe-plugin-onion-video',[],function () {
             //update an indicator
         }
 
-        function setVideoID(id) {
-          scribe.updateContent(function() {
-            $("iframe", activeElement).attr("src", config.videoEmbedUrl + id);
-            $(activeElement).attr('data-video-id', id)
-          });
-        }
 
         function onError() {
             //show msg, allow user to trigger upload again
