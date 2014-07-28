@@ -118,7 +118,7 @@ define('scribe-plugin-link-ui',[],function () {
               .attr('href', linkVal)
               .removeClass('link-edit');
           }
-        });
+        }, false);
         $('body, .link-tools .close').unbind('click');
         $linkTools.hide();
       }
