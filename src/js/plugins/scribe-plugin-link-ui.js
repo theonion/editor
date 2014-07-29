@@ -38,9 +38,10 @@ define('scribe-plugin-link-ui',[],function () {
       $('.ok', $linkTools).click(confirmInput);
 
       $results.click(function(e) {
-        if (e.target.tagName == "A") {
+        var linkElement = $(e.target).closest('a');
+        if (linkElement.length === 1) {
           e.preventDefault();
-          $input.val(e.target.getAttribute("href"));
+          $input.val(linkElement.attr("href"));
           updateResults();
         }
       });
