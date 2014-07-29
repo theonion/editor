@@ -73,15 +73,17 @@ define('onion-editor',[
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
     // Allowable Tags
-    var tags = {}, ignoredTags = {};
+    var tags = {}, 
+        /* if a node running throught the sanitizer passes this test, it won't get santized true */
+        skipSanitization = function(node) {
+          return ($(node).is("div.inline"));
+        };
     
     // Multiline
     if (options.multiline) {
       tags.p = {};
       tags.br = {};
       tags.hr = {};
-
-      ignoredTags.div = { class:'inline' } //ignore the contents of any div
     }
 
     // Bold
@@ -160,7 +162,7 @@ define('onion-editor',[
 
     scribe.use(scribePluginSanitizer({
       tags: tags,
-      ignoredTags: ignoredTags
+      skipSanitization: skipSanitization
     }));
 
 

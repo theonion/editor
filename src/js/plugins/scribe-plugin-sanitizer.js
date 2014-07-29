@@ -48,7 +48,7 @@
 
 
       // Do not santiize blocks that match 
-      if (this.config.ignoredTags[nodeName]) {
+      if (this.config.skipSanitization(node)) {
         return;
       }
 
