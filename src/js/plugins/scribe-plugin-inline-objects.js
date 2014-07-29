@@ -86,6 +86,8 @@ define('scribe-plugin-inline-objects',[],function () {
           //emit an event, so handler plugin can pick up.
           scribe.trigger("inline:insert:" + objectType, [
             function(values) {
+              console.log("inside callback", values);
+
               scribe.updateContents(function() {
                 var html = render(
                     templates[objectType].template,

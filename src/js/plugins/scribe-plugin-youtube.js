@@ -3,8 +3,8 @@ define('scribe-plugin-youtube',[],function () {
   return function (config) {
     return function (scribe) {
 
-        scribe.on("inline:insert:youtube", showDialog);
-        scribe.on("inline:edit:youtube", showDialog);
+        scribe.on("inline:insert:youtube", insert);
+        scribe.on("inline:edit:youtube", edit);
 
         function parseYoutube(url){
           if (!url) return false;
@@ -17,8 +17,21 @@ define('scribe-plugin-youtube',[],function () {
             return false;
           }
         }
+
+        function insert(callback) {
+          var url = prompt("Youtube URL:");
+          var youtube_id  = parseYoutube(url);
+          if (youtube_id) {
+            callback(
+              {
+                "youtube_id": youtube_id, 
+                "caption": ""
+              }
+            );
+          }
+        }
         
-        function showDialog(block, callback) {
+        function edit(block, callback) {
           var url = prompt("Youtube URL:", $(block).attr("data-youtube-id") || "");
           var youtube_id  = parseYoutube(url);
           if (youtube_id) {
