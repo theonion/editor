@@ -10068,8 +10068,6 @@ define('scribe-plugin-inline-objects',[],function () {
           //emit an event, so handler plugin can pick up.
           scribe.trigger("inline:insert:" + objectType, [
             function(values) {
-              console.log("inside callback", values);
-
               scribe.updateContents(function() {
                 var html = render(
                     templates[objectType].template,
@@ -10831,6 +10829,7 @@ define('onion-editor',[
         setTimeout(function() {
           scribe.transactionManager.run(fn)
           window.scrollTo(0, scrollY);
+          scribe.trigger('content-changed');
         }, 20);
       }, 20);
     }

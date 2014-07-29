@@ -144,6 +144,7 @@
           }
         }
       });
+      editor.setChangeHandler(function() { console.log("REGISTERED A CHANGE UPSTREAM, BRO") });
       editor.setContent($("#content").html());
     </script>
   </body>

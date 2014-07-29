@@ -186,6 +186,7 @@ define('onion-editor',[
         setTimeout(function() {
           scribe.transactionManager.run(fn)
           window.scrollTo(0, scrollY);
+          scribe.trigger('content-changed');
         }, 20);
       }, 20);
     }
