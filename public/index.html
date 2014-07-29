@@ -18,6 +18,7 @@
   </head>
 
   <body>  
+    <div>WORDCOUNT <span class="wordcount"></span></div>
     <div id="content-wrapper" class="container">
       <div class="editor-wrapper">
         <div class="editorPlaceholder" style="display: block;"></div>
@@ -137,6 +138,7 @@
           text: "<p>WRITE HERE, COWBOY</p>",
           container: document.getElementsByClassName('editorPlaceholder')[0]
         },
+        statsContainer: ".wordcount",
         link: {
           domain: 'avclub.com',
           searchHandler: function(term, resultsElement) {
@@ -144,7 +146,7 @@
           }
         }
       });
-      editor.setChangeHandler(function() { console.log("REGISTERED A CHANGE UPSTREAM, BRO") });
+      editor.setChangeHandler(function() {  });
       editor.setContent($("#content").html());
     </script>
   </body>

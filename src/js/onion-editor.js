@@ -164,6 +164,18 @@ define('onion-editor',[
     }));
 
 
+    // Word count 
+    
+    if (options.statsContainer) {
+      function wordcount() {
+        $(options.statsContainer).html(
+          $(scribe.el).text().split(' ').length
+        );
+      }
+      setInterval(wordcount, 3000);
+    }
+
+
     /* This is necessary for a few dumb reasons. Scribe's transaction manager doesn't work when there 
       ins't a selection inside of the editor. This means any changes made when the editor ins't in focus,
       like adding an image, stuff breaks. This works around that particular issue. 
