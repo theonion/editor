@@ -434,6 +434,17 @@ body {
   left: 50%;
   margin-left: -96px;
 }
+/* Customize toolbar for various object types */
+.inline-tools[data-type="hr"] .edit,
+.inline-tools[data-type="hr"] .size,
+.inline-tools[data-type="hr"] .crop {
+  display: none;
+}
+/* size and crop are handled inside of the embed modal, for simplictiy */
+.inline-tools[data-type="embed"] .size,
+.inline-tools[data-type="embed"] .crop {
+  display: none;
+}
 span.highlight {
   background-color: #EC7000;
 }

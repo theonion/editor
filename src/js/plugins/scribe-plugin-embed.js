@@ -26,6 +26,8 @@ define('scribe-plugin-embed',[],function () {
         $bodyInput.val(unescape($(block).attr("data-code")));
         $captionInput.val($(".caption", block).text());
 
+        var sizeCropPair = $(block).attr("data-size") + "-" + $(block).attr("data-crop");
+        $("[value=" + sizeCropPair + "]", $modal).attr("checked", true);
         $modal.modal("show");
         $embedBtn.click(function () {
           var embed_body = $bodyInput.val();
@@ -37,7 +39,9 @@ define('scribe-plugin-embed',[],function () {
             callback(block,
               {code: embed_body,
               caption: $captionInput.val(),
-              escaped_code: escape(embed_body)
+              escaped_code: escape(embed_body),
+              size: getSize(),
+              crop: getCrop()
             })
             $modal.modal("hide");
 
@@ -62,12 +66,22 @@ define('scribe-plugin-embed',[],function () {
             callback(
               {code: embed_body,
               caption: $captionInput.val(),
-              escaped_code: escape(embed_body)
+              escaped_code: escape(embed_body),
+              size: getSize(),
+              crop: getCrop()
             })
             $modal.modal("hide");
           }
         });
       }
+      function getSize() {
+        return $("[name=size]:checked", $modal).val().split("-")[0];
+      }
+
+      function getCrop() {
+        return $("[name=size]:checked", $modal).val().split("-")[1];
+      }
+
     };
   }
 });

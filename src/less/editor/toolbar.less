@@ -189,6 +189,22 @@
 }
 
 
+/* Customize toolbar for various object types */
+
+.inline-tools[data-type="hr"] {
+    .edit, .size, .crop {
+        display:none;
+    }
+}
+
+/* size and crop are handled inside of the embed modal, for simplictiy */
+.inline-tools[data-type="embed"] {
+    .size, .crop {
+        display:none;
+    }
+}
+
+
 span.highlight {
     background-color: #EC7000;
 }
