@@ -30,7 +30,6 @@
 
 .inline>div {
     position: relative;
-    padding-bottom: 56.25%; /* default is 16x9 */
     height: 0;
     overflow: hidden;
     background-color: #e0e0e0;
@@ -130,29 +129,23 @@
 
 
 /* embed css */
+div.embed {
+    &.inline { min-height: 30px; }
 
+    &.size-big { width: 100%; }  /* some videos did not migrate properly. Remove when fixed */
 
-div[data-type="embed"].center {
-    width: 100%;
-    float:none;
-}
-div[data-type="embed"].full {
+    &.size-small { width: 80%; }
 
-}
-div[data-type="embed"]>div {
-    width: 100%;
-    padding-bottom: 56.25%;
-    position:relative;
-}
+    &.size-big, &.size-small {
 
-div.embed>div embed,
-div.embed>div>* {
-    position: absolute;
-    top: 0;
-    left: 0;
-    height: 100%;
-    width: 100%;    
-}
+        > div > * { position: absolute; top: 0; left: 0; height: 100%; width: 100%; } }
+
+    &.crop-original {
+        > div { height:auto }
+        > div > * { position:relative; width: 100%; } }
+
+    & > div { width: 100%; position:relative; } }
+
 
 hr {
     border-top: 1px #111 solid;

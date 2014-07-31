@@ -153,6 +153,11 @@ define('scribe-plugin-inline-objects',[],function () {
           var pos = el.position();
           $(editorEl).addClass("inline-active");
 
+
+          // set the type attribute on the overlay, for custom styling.
+          $(".inline-tools").attr("data-type", el.attr("data-type"));
+
+
           //set size buttons.
 
           $(".inline-tools .size", editorEl)
