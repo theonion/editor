@@ -19,7 +19,7 @@ module.exports = function(grunt) {
     less: {
       production: {
         options: {
-          paths: ["src/less"],
+          paths: ['src/less'],
           cleancss: false
         },
         files: {
@@ -36,6 +36,11 @@ module.exports = function(grunt) {
         src: 'build/<%= pkg.name %>.js',
         dest: 'build/<%= pkg.name %>.min.js'
       }
+    },
+    karma: {
+      unit: {
+        configFile: 'karma.conf.js'
+      }
     }
   });
   // Load external tasks
@@ -44,5 +49,6 @@ module.exports = function(grunt) {
   grunt.loadNpmTasks('grunt-contrib-less');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
+  grunt.loadNpmTasks('grunt-karma');
   grunt.registerTask('default', ['requirejs', 'less', 'uglify']);
 };
