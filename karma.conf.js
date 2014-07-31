@@ -2,6 +2,25 @@
 // Generated on Thu Jul 31 2014 11:09:41 GMT-0500 (CDT)
 
 module.exports = function(config) {
+
+  var customLaunchers = {
+    'SL_Chrome': {
+      base: 'SauceLabs',
+      browserName: 'chrome'
+    },
+    'SL_Firefox': {
+      base: 'SauceLabs',
+      browserName: 'firefox',
+      version: '27'
+    },
+    'SL_Safari': {
+      base: 'SauceLabs',
+      browserName: 'safari',
+      platform: 'OS X 10.9',
+      version: '7'
+    }
+  };
+
   config.set({
 
     // base path that will be used to resolve all patterns (eg. files, exclude)
@@ -75,4 +94,23 @@ module.exports = function(config) {
     // if true, Karma captures browsers, runs the tests and exits
     singleRun: false
   });
+
+  if (process.env.TRAVIS) {
+    var buildLabel = 'TRAVIS #' + process.env.TRAVIS_BUILD_NUMBER + ' (' + process.env.TRAVIS_BUILD_ID + ')';
+
+    config.logLevel = config.LOG_DEBUG;
+    config.captureTimeout = 0; // rely on SL timeout
+
+    config.browserStack.build = buildLabel;
+    config.browserStack.startTunnel = false;
+
+    config.sauceLabs.build = buildLabel;
+    config.sauceLabs.startConnect = false;
+    config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+
+    config.customLaunchers = customLaunchers;
+    config.browsers = Object.keys(customLaunchers);
+    config.singleRun = true;
+    config.reporters.push('saucelabs');
+  }
 };
