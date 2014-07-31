@@ -3,21 +3,32 @@ define(['scribe', 'formatters/link-formatter'], function(Scribe, LinkFormatter) 
 
   describe('Link formatter', function () {
 
-    var element = document.createElement('div');
-    var scribe = new Scribe(element, { allowBlockElements: true });   
+    var scribe;   
 
     beforeEach(function () {
+      var element = document.createElement('div');
       scribe = new Scribe(element, { allowBlockElements: true }); 
     });
 
-    it('formats things', function(){
+    it('corrects non-existent schemes', function () {
       
       scribe.use(new LinkFormatter({domain: 'example2.com'}));
       // console.log(formatter);
-      var badHTML = '<a href="htp://example.com">Testing</a>';
+      var html = '<p><a href="example.com">Testing</a></p>';
       
-      expect(scribe._htmlFormatterFactory.format(badHTML), '<a href="http://example.com">Testing</a>');
-      expect(true).toBe(true);
+      expect(scribe._htmlFormatterFactory.format(html)).toBe('<p><a href="http://example.com">Testing</a></p>');
+    });
+
+    it('makes links relative', function () {
+      scribe.use(new LinkFormatter({domain: 'example.com'}));
+
+      expect(scribe._htmlFormatterFactory.format(
+        '<p><a href="http://example.com/tv/">Testing</a></p>')
+      ).toBe('<p><a href="/tv/">Testing</a></p>');
+
+      expect(scribe._htmlFormatterFactory.format(
+        '<p><a href="example.com/tv/">Testing</a></p>')
+      ).toBe('<p><a href="/tv/">Testing</a></p>');
     });
 
   });
