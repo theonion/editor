@@ -101,12 +101,11 @@ module.exports = function(config) {
     config.logLevel = config.LOG_DEBUG;
     config.captureTimeout = 0; // rely on SL timeout
 
-    config.browserStack.build = buildLabel;
-    config.browserStack.startTunnel = false;
-
-    config.sauceLabs.build = buildLabel;
-    config.sauceLabs.startConnect = false;
-    config.sauceLabs.tunnelIdentifier = process.env.TRAVIS_JOB_NUMBER;
+    config.sauceLabs = {
+      build: buildLabel,
+      startConnect: false,
+      tunnelIdentifier: process.env.TRAVIS_JOB_NUMBER
+    };
 
     config.customLaunchers = customLaunchers;
     config.browsers = Object.keys(customLaunchers);
