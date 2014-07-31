@@ -24,6 +24,7 @@ module.exports = function(config) {
       'test-main.js',
 
       'bower_components/scribe/scribe.js',
+      'bower_components/jquery/dist/jquery.js',
 
       {pattern: 'src/js/*/*.js', included: false},
       {pattern: 'test/**/*spec.js', included: false}

@@ -19,7 +19,15 @@ require.config({
   baseUrl: '/base/src/js/',
 
   paths: {
-    'scribe': '../../bower_components/scribe/scribe'
+    'bower': '../../bower_components/',
+    'scribe': '../../bower_components/scribe/scribe',
+    'jquery': '../../bower_components/jquery/dist/jquery',
+  },
+
+  shim: {
+    'jquery': {
+      exports: '$'
+    }
   },
 
   // dynamically load all test files
