@@ -30,7 +30,9 @@ module.exports = function(config) {
       'karma-coverage',
       'karma-jasmine',
       'karma-chrome-launcher',
-      'karma-requirejs'
+      'karma-requirejs',
+      'karma-saucelabs',
+      'karma-sauce-launcher'
     ],
 
     // frameworks to use
