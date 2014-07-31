@@ -1,26 +1,25 @@
-define('scribe-plugin-betty-cropper',[],function () {
+'use strict';
+define([],function () {
   return function (config) {
     return function (scribe) {
 
-        scribe.on("inline:edit:image", edit);
-        scribe.on("inline:insert:image", insert);
-
         function insert(callback) {
+          console.log(callback);
           config.insertDialog().then(
             function(success){
               var format;
-              if (success.name.toUpperCase().indexOf("GIF") !== -1) {
-                format = "gif";
+              if (success.name.toUpperCase().indexOf('GIF') !== -1) {
+                format = 'gif';
               }
               else {
-                format = "jpg";
+                format = 'jpg';
               }
               callback({image_id: success.id, format: format});
               if (window.picturefill) {
                 setTimeout(function() {
                   // this could be nicer...
                   window.picturefill($('[data-image-id=' + success.id + ']')[0]);
-                }, 100)
+                }, 100);
               }
             },
             function(error){
@@ -32,13 +31,12 @@ define('scribe-plugin-betty-cropper',[],function () {
           );
         }
 
-        var activeElement,
-          current_id;
+        var current_id;
 
         function edit(block, callback) {
           current_id = block.getAttribute('data-image-id');
-          caption = $('.caption', block).html();
-          alt = block.getAttribute('data-alt');
+          var caption = $('.caption', block).html();
+          var alt = block.getAttribute('data-alt');
           config.editDialog({id: current_id, caption: caption, alt: alt}).then(
             function (image) {
 
@@ -47,7 +45,7 @@ define('scribe-plugin-betty-cropper',[],function () {
               } else {
                 $(block).attr('data-image-id', image.id);
                 $(block).attr('data-alt', image.alt);
-                $(".caption", block).html(image.caption);
+                $('.caption', block).html(image.caption);
                 if (window.picturefill) {
                   setTimeout(function() {
                     window.picturefill($('[data-image-id=' + image.id + ']')[0]);
@@ -56,8 +54,10 @@ define('scribe-plugin-betty-cropper',[],function () {
               }
             }
           );
-
         }
+
+        scribe.on('inline:edit:image', edit);
+        scribe.on('inline:insert:image', insert);
       };
-    }
+    };
 });
