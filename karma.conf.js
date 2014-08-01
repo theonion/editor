@@ -18,10 +18,6 @@ module.exports = function(config) {
       browserName: 'safari',
       platform: 'OS X 10.9',
       version: '7'
-    },
-    Chrome_insecure: {
-      base: 'Chrome',
-      flags: ['--allow-file-access-from-files']
     }
   };
 
@@ -101,7 +97,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome_insecure'],
+    browsers: ['Chrome'],
 
 
     // Continuous Integration mode
