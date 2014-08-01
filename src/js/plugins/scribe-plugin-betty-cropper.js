@@ -4,7 +4,6 @@ define([],function () {
     return function (scribe) {
 
         function insert(callback) {
-          console.log(callback);
           config.insertDialog().then(
             function(success){
               var format;
