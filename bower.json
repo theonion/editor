@@ -24,6 +24,7 @@
   "dependencies": {
   },
   "devDependencies": {
+    "jasmine-jquery": "~2.0.5",
     "requirejs": "~2.1.9",
     "scribe": "0.1.17",
     "scribe-plugin-blockquote-command": "0.1.0",

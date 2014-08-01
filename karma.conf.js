@@ -46,6 +46,11 @@ module.exports = function(config) {
       'node_modules/es6-promise/dist/promise-1.0.0.js',
       'bower_components/scribe/scribe.js',
       'bower_components/jquery/dist/jquery.js',
+      'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
+
+      'src/js/onion-editor.js',
+
+      {pattern: 'bower_components/scribe-plugin-*/*.js', included: false},
 
       {pattern: 'src/js/*/*.js', included: false},
       {pattern: 'test/**/*spec.js', included: false}

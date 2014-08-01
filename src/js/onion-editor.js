@@ -169,12 +169,11 @@ define('onion-editor',[
     // Word count 
     
     if (options.statsContainer) {
-      function wordcount() {
+      setInterval(function () {
         $(options.statsContainer).html(
           $(scribe.el).text().split(' ').length
         );
-      }
-      setInterval(wordcount, 3000);
+      }, 3000);
     }
 
 
