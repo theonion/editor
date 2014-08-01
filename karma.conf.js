@@ -44,6 +44,7 @@ module.exports = function(config) {
     files: [
       'test-main.js',
 
+      'node_modules/es6-promise/dist/promise-1.0.0.js',
       'bower_components/scribe/scribe.js',
       'bower_components/jquery/dist/jquery.js',
 
