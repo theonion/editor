@@ -31,7 +31,6 @@ module.exports = function(config) {
       'karma-jasmine',
       'karma-chrome-launcher',
       'karma-requirejs',
-      'karma-saucelabs',
       'karma-sauce-launcher'
     ],
 

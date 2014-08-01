@@ -1,4 +1,4 @@
-# Onion Editor Readme
+# Onion Editor [![Build Status](https://travis-ci.org/theonion/editor.svg?branch=master)](https://travis-ci.org/theonion/editor)
 
 ## Overview
 
