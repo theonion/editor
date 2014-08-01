@@ -38,7 +38,9 @@ require.config({
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
     'scribe-plugin-embed': './plugins/scribe-plugin-embed',
     'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder',
-    'link-formatter': './formatters/link-formatter'
+    'link-formatter': './formatters/link-formatter',
+
+    'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 
   shim: {

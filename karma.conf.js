@@ -18,6 +18,10 @@ module.exports = function(config) {
       browserName: 'safari',
       platform: 'OS X 10.9',
       version: '7'
+    },
+    Chrome_insecure: {
+      base: 'Chrome',
+      flags: ['--allow-file-access-from-files']
     }
   };
 
@@ -52,8 +56,10 @@ module.exports = function(config) {
 
       {pattern: 'bower_components/scribe-plugin-*/*.js', included: false},
 
+      {pattern: 'test/fixtures/*.html', included: false},
       {pattern: 'src/js/*/*.js', included: false},
-      {pattern: 'test/**/*spec.js', included: false}
+      {pattern: 'test/**/*spec.js', included: false},
+      {pattern: 'test/*/*spec.js', included: false}
     ],
 
 
@@ -85,16 +91,17 @@ module.exports = function(config) {
 
     // level of logging
     // possible values: config.LOG_DISABLE || config.LOG_ERROR || config.LOG_WARN || config.LOG_INFO || config.LOG_DEBUG
-    logLevel: config.LOG_INFO,
+    logLevel: config.LOG_DEBUG,
 
 
     // enable / disable watching file and executing tests whenever any file changes
     autoWatch: true,
 
+    customLaunchers: customLaunchers,
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome'],
+    browsers: ['Chrome_insecure'],
 
 
     // Continuous Integration mode
