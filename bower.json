@@ -39,5 +39,8 @@
     "scribe-plugin-toolbar": "0.1.0",
     "almond": "0.2.9",
     "jquery": "1.11.1"
+  },
+  "resolutions": {
+    "jquery": "1.11.1"
   }
 }
