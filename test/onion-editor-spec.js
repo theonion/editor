@@ -13,7 +13,7 @@ define([
       jasmine.getFixtures().fixturesPath = '/base/test/fixtures';
       loadFixtures('onion-editor.html');
       editor = new OnionEditor(document.getElementById('editor'), {
-        inlineObjects: '/public/inline-config.json', 
+        inlineObjects: '/base/public/inline-config.json', 
         multiline:true, 
         placeholder: {
           text: '<p>WRITE HERE, COWBOY</p>',
