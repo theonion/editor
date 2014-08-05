@@ -71,7 +71,9 @@ define([
 
         while (node) {
           if (node.nodeName === 'A') {
-            node.setAttribute('href', fixLink(node.getAttribute('href')));
+            if (node.hasAttribute('href')) {
+              node.setAttribute('href', fixLink(node.getAttribute('href')));
+            }
           }
           else if (node.children.length > 0) {
             traverse(node);

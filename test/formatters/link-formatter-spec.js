@@ -31,6 +31,11 @@ define(['scribe', 'formatters/link-formatter'], function(Scribe, LinkFormatter) 
       ).toBe('<p><a href="/tv/">Testing</a></p>');
     });
 
+    it('handles a tags with no href', function () {
+      scribe.use(new LinkFormatter({domain: 'example.com'}));
+      var body = '<p><a>Some heading or something</a></p>';
+      expect(scribe._htmlFormatterFactory.format(body)).toEqual(body);
+    });
   });
 
 });
