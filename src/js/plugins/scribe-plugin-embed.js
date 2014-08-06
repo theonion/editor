@@ -9,7 +9,7 @@ define('scribe-plugin-embed',[],function () {
       var $bodyInput = $(".embed-body", $modal),
           $captionInput = $(".embed-caption", $modal),
           $embedBtn = $(".set-embed-button", $modal),
-          $error = $(".embed-error", $modal);
+          $error = $(".embed-error", $modal),
           $sizeInput = $("[name=size]", $modal);
 
       $modal.on("hide.bs.modal", function() {
