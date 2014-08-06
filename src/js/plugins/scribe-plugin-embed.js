@@ -10,9 +10,7 @@ define('scribe-plugin-embed',[],function () {
           $captionInput = $(".embed-caption", $modal),
           $embedBtn = $(".set-embed-button", $modal),
           $error = $(".embed-error", $modal);
-
-
-
+          $sizeInput = $("[name=size]", $modal);
 
       $modal.on("hide.bs.modal", function() {
         $embedBtn.unbind("click");
@@ -30,19 +28,19 @@ define('scribe-plugin-embed',[],function () {
         $("[value=" + sizeCropPair + "]", $modal).attr("checked", true);
         $modal.modal("show");
         $embedBtn.click(function () {
-          var embed_body = $bodyInput.val();
-          if (embed_body.trim() === "") {
+          var embedBody = $bodyInput.val();
+          if (embedBody.trim() === "") {
              $error.show();
           }
           else {
             $error.hide();
-            callback(block,
-              {code: embed_body,
+            callback(block, {
+              code: embedBody,
               caption: $captionInput.val(),
-              escaped_code: escape(embed_body),
+              escaped_code: escape(embedBody),
               size: getSize(),
               crop: getCrop()
-            })
+            });
             $modal.modal("hide");
 
           }
@@ -56,30 +54,39 @@ define('scribe-plugin-embed',[],function () {
         $modal.modal("show");
 
         $embedBtn.click(function () {
-          var embed_body = $bodyInput.val();
+          var embedBody = $bodyInput.val();
 
-          if (embed_body.trim() === "") {
+          if (embedBody.trim() === "") {
              $error.show();
           }
           else {
             $error.hide();
-            callback(
-              {code: embed_body,
+            callback({
+              code: embedBody,
               caption: $captionInput.val(),
-              escaped_code: escape(embed_body),
+              escaped_code: escape(embedBody),
               size: getSize(),
               crop: getCrop()
-            })
+            });
             $modal.modal("hide");
           }
         });
       }
+
       function getSize() {
-        return $("[name=size]:checked", $modal).val().split("-")[0];
+        var value = 'original';
+        if ($sizeInput.length > 0) {
+          $sizeInput.val().split("-")[0]; 
+        }
+        return value;
       }
 
       function getCrop() {
-        return $("[name=size]:checked", $modal).val().split("-")[1];
+        var value = 'original';
+        if ($sizeInput.length > 0) {
+          $sizeInput.val().split("-")[1]; 
+        }
+        return value;
       }
 
     };
