@@ -10622,7 +10622,7 @@ define('link-formatter',[
         if (
             url.substr(0, 7) !== "http://" &&
             url.substr(0, 8) !== "https://" &&
-            url.substr(0, 6) !== "mailto:" &&
+            url.substr(0, 7) !== "mailto:" &&
             url.substr(0, 1) !== "/" 
             ) {
             // check for email, but default to http

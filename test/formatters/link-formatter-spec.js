@@ -36,6 +36,12 @@ define(['scribe', 'formatters/link-formatter'], function(Scribe, LinkFormatter) 
       var body = '<p><a>Some heading or something</a></p>';
       expect(scribe._htmlFormatterFactory.format(body)).toEqual(body);
     });
+
+    it('handles mailto: links', function () {
+      scribe.use(new LinkFormatter({domain: 'example.com'}));
+      var body = '<p><a href="mailto:webtech@theonion.com">Send us an email</a></p>';
+      expect(scribe._htmlFormatterFactory.format(body)).toEqual(body);
+    });
   });
 
 });
