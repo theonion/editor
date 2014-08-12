@@ -38,8 +38,10 @@ require.config({
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
     'scribe-plugin-embed': './plugins/scribe-plugin-embed',
     'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder',
+    'scribe-plugin-no-inline-br': './formatters/scribe-plugin-no-inline-br',
+    'our-ensure-selectable-containers': './formatters/our-ensure-selectable-containers',
+    'enforce-p-elements': './formatters/enforce-p-elements',
     'link-formatter': './formatters/link-formatter',
-
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 

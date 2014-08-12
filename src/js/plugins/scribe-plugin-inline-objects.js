@@ -187,11 +187,10 @@ define([],function () {
             var caption = prompt('Caption',
               $('.caption', activeElement).html()
             );
-            if (caption) {
-              scribe.updateContents(function() {
-                $('.caption', activeElement).html(caption);
-              });
-            }
+            caption = caption || '';
+            scribe.updateContents(function() {
+              $('.caption', activeElement).html(caption);
+            });
           },
           //TODO: size/crop isn't working right after you hit the 'HUGE' size in images
           inline_size: function() {
