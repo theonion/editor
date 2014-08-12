@@ -69,6 +69,28 @@ define('onion-editor',[
       scribe.use(scribePluginPlaceholder(options.placeholder));
     }
 
+    // For now, we need to patch some scribe commands, just in case.
+    scribe.commandPatches.bold.execute = function (value) {
+      if (this.selection === undefined) {
+        document.execCommand(this.commandName, false, value || null);
+      } else {
+        scribe.transactionManager.run(function () {
+          document.execCommand(this.commandName, false, value || null);
+        }.bind(this));
+      }
+    };
+    var italicCommand = new scribe.api.CommandPatch('italic');
+    italicCommand.execute = function (value) {
+      if (this.selection === undefined) {
+        document.execCommand(this.commandName, false, value || null);
+      } else {
+        scribe.transactionManager.run(function () {
+          document.execCommand(this.commandName, false, value || null);
+        }.bind(this));
+      }
+    };
+    scribe.commandPatches['italic'] = italicCommand;
+
     var keyCommands = {};
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
@@ -88,24 +110,24 @@ define('onion-editor',[
 
     // Bold
     if (options.formatting.indexOf('bold') !== -1) {
-      // keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
+      keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
       tags.b = {};
     }
 
     // Italics
     if (options.formatting.indexOf('italic') !== -1) {
-      // keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
+      keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
       tags.i = {};
       tags.em = {};
     }
 
     // Strike
     if (options.formatting.indexOf('strike') !== -1) {
-      // keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
+      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
       tags.s = {};
     }
 
-    //Remove formatting... 
+    // Remove formatting... 
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
 
     // Links
