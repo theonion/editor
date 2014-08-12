@@ -17,7 +17,10 @@ define('onion-editor',[
   'scribe-plugin-onion-video',
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
-  'link-formatter'
+  'link-formatter',
+  // scribe core
+  'our-ensure-selectable-containers',
+  'enforce-p-elements'
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
@@ -37,7 +40,10 @@ define('onion-editor',[
   scribePluginOnionVideo,
   scribePluginHr,
   scribePluginPlaceholder,
-  linkFormatter
+  linkFormatter,
+  // scribe core
+  ourEnsureSelectableContainers,
+  enforcePElements
 ) {
 
   'use strict';
@@ -64,6 +70,20 @@ define('onion-editor',[
     options = $.extend(defaults, options);
 
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
+
+    /* if a node running through the sanitizer passes this test, it won't get sanitized true */
+    function skipSanitization(node) {
+      return ($(node).is('div.inline'));
+    };
+    // HACK: we reset the default htmlFormatters 'normalize' because
+    // they don't quite work with what we're doing and there's
+    // apparently no other way to override/remove the offending ones.
+    scribe._htmlFormatterFactory.formatters['normalize'] = [];
+    if (scribe.allowsBlockElements()) {
+      scribe.use(enforcePElements());
+      scribe.use(ourEnsureSelectableContainers({skipElement: skipSanitization}));
+    }
+    // ENDHACK
 
     if (options.placeholder) {
       scribe.use(scribePluginPlaceholder(options.placeholder));
@@ -108,11 +128,7 @@ define('onion-editor',[
     var ctrlKey = function (event) { return event.metaKey || event.ctrlKey; };
 
     // Allowable Tags
-    var tags = {}, 
-        /* if a node running throught the sanitizer passes this test, it won't get santized true */
-        skipSanitization = function(node) {
-          return ($(node).is('div.inline'));
-        };
+    var tags = {};
     
     // Multiline
     if (options.multiline) {
