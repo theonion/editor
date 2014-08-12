@@ -10721,7 +10721,7 @@ define('onion-editor',[
       domain: 'avclub.com'
     },
     video: {
-      videoEmbedUrl: "http://example.com?videoid=",
+      videoEmbedUrl: 'http://example.com?videoid=',
       insertDialog: function() {  },
       editDialog: function() {  }
     },
@@ -10729,7 +10729,7 @@ define('onion-editor',[
       insertDialog: function() {  },
       editDialog: function() {  }
     }
-  }
+  };
 
   function OnionEditor(element, options) {
 
@@ -10748,7 +10748,7 @@ define('onion-editor',[
     var tags = {}, 
         /* if a node running throught the sanitizer passes this test, it won't get santized true */
         skipSanitization = function(node) {
-          return ($(node).is("div.inline"));
+          return ($(node).is('div.inline'));
         };
     
     // Multiline
@@ -10760,20 +10760,20 @@ define('onion-editor',[
 
     // Bold
     if (options.formatting.indexOf('bold') !== -1) {
-      keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
+      // keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
       tags.b = {};
     }
 
     // Italics
     if (options.formatting.indexOf('italic') !== -1) {
-      keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
+      // keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
       tags.i = {};
       tags.em = {};
     }
 
     // Strike
     if (options.formatting.indexOf('strike') !== -1) {
-      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
+      // keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
       tags.s = {};
     }
 
@@ -10787,7 +10787,7 @@ define('onion-editor',[
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
-      tags.a = { href:true, target:true }
+      tags.a = { href:true, target:true };
     }
 
     // Lists
@@ -10861,7 +10861,7 @@ define('onion-editor',[
       // Default is to skipFormatters. Only place this needs to be set to false is when updating links. 
       // We want formatters to run on links. Embeds & other shit seem to get sanitized 
       // despite there being safegaurds for that.
-      if (typeof skipFormatters == "undefined") {
+      if (typeof skipFormatters === 'undefined') {
         skipFormatters = true;
       }
       scribe._skipFormatters = skipFormatters;
@@ -10869,14 +10869,14 @@ define('onion-editor',[
       setTimeout(function() {        
         scribe.el.focus();
         setTimeout(function() {
-          scribe.transactionManager.run(fn)
+          scribe.transactionManager.run(fn);
           window.scrollTo(0, scrollY);
 
           // This should notify any changes that happen outside of typing 
           scribe.trigger('content-changed');
         }, 20);
       }, 20);
-    }
+    };
     
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
@@ -10890,31 +10890,31 @@ define('onion-editor',[
     }
 
     // a little hacky to prevent deletion of images and other inline elements via the backspace key. 
-    scribe.el.addEventListener("keydown", function(event) {
+    scribe.el.addEventListener('keydown', function(event) {
       if (event.keyCode === 8) {
         // is the previous immediate child of editor an inline item?
         var sel = new scribe.api.Selection();
-        var prev = $(sel.selection.anchorNode).closest(".editor>*").prev();
-        if (prev.hasClass("inline") 
+        var prev = $(sel.selection.anchorNode).closest('.editor>*').prev();
+        if (prev.hasClass('inline') 
           && sel.selection.anchorOffset === 0 
           && sel.selection.isCollapsed) {
           event.preventDefault();
         }
       }
-    })
+    });
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
     this.setChangeHandler = function(func) {
       scribe.on('content-changed', func); 
-    }
+    };
 
     this.setContent = function(content) {
       if (!content) {
-          content = "<p><br></p>";
+          content = '<p><br></p>';
       }
       scribe.setContent(content);
-    }
+    };
 
     this.getContent = function() {
       //todo: if multiline is false, only return contents of the paragraph
@@ -10923,7 +10923,7 @@ define('onion-editor',[
 
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
       return contents;
-    }
+    };
 
     this.scribe = scribe;
     return this;
