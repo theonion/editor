@@ -23,6 +23,11 @@
     return blockElementNames.indexOf(node.nodeName) !== -1;
   }
 
+  var inlineElementNames = ['A', 'B', 'DEL', 'I', 'U'];
+  function nodeIsInlineElement(node) {
+    return inlineElementNames.indexOf(node.nodeName) !== -1;
+  }
+
   HTMLJanitor.prototype.clean = function (html) {
     var sandbox = document.createElement('div');
     sandbox.innerHTML = html;
@@ -78,7 +83,7 @@
         break;
       }
 
-      var isInlineElement = nodeName === 'b';
+      var isInlineElement = nodeIsInlineElement(node);
       var containsBlockElement;
       if (isInlineElement) {
         containsBlockElement = Array.prototype.some.call(node.childNodes, isBlockElement);
