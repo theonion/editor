@@ -129,6 +129,13 @@ define([
       '<blockquote><p>Quin etiam ipsi voluptarii deverticula quaerunt et virtutes habent in ore totos dies voluptatemque primo dumtaxat expeti dicunt, deinde consuetudine quasi alteram quandam naturam effici, qua inpulsi multa faciant nullam quaerentes voluptatem.</p></blockquote>',
       '<blockquote><p>Quin etiam ipsi voluptarii deverticula quaerunt et virtutes habent in ore totos dies voluptatemque primo dumtaxat expeti dicunt, deinde consuetudine quasi alteram quandam naturam effici, qua inpulsi multa faciant nullam quaerentes voluptatem.</p></blockquote>'
     ));
+
+    // nbsps
+
+    it('removes all these horrible nbsps', testInput(
+      '<p>Like many children who grew up in the early ’90s,&nbsp;<b>Robin Williams was a constant in my life.</b>&nbsp;Movies like&nbsp;<i>Hook, Mrs. Doubtfire, Jumanji</i><i>&nbsp;<br></i>and&nbsp;<i>The Birdcage</i><i>&nbsp;<br></i>(an odd childhood favorite of mine; I had progressive parents) were in constant rotation on TV or VHS. Williams’ voice work in&nbsp;<i>Aladdin</i></p>',
+      '<p>Like many children who grew up in the early ’90s, <b>Robin Williams was a constant in my life.</b> Movies like <i>Hook, Mrs. Doubtfire, Jumanji</i> and <i>The Birdcage</i> (an odd childhood favorite of mine; I had progressive parents) were in constant rotation on TV or VHS. Williams’ voice work in <i>Aladdin</i></p>'
+    ));
   
   });
 });

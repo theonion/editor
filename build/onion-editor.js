@@ -10179,10 +10179,11 @@ define('scribe-plugin-inline-objects',[],function () {
             var caption = prompt('Caption',
               $('.caption', activeElement).html()
             );
-            caption = caption || '';
-            scribe.updateContents(function() {
-              $('.caption', activeElement).html(caption);
-            });
+            if (caption || caption === '') {
+              scribe.updateContents(function() {
+                $('.caption', activeElement).html(caption);
+              });
+            }
           },
           //TODO: size/crop isn't working right after you hit the 'HUGE' size in images
           inline_size: function() {
@@ -10732,6 +10733,26 @@ define('link-formatter',[
 
 });
 
+define('remove-nbsp',[],function () {
+
+  /**
+   * Chrome:
+   */
+
+  
+
+  return function () {
+    return function (scribe) {
+      var nbspCharRegExp = /(&nbsp;)+/g;
+
+      // TODO: should we be doing this on paste?
+      scribe.registerHTMLFormatter('normalize', function (html) {
+        return html.replace(nbspCharRegExp, ' ');
+      });
+    };
+  };
+
+});
 define('our-ensure-selectable-containers',[
     'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
@@ -10944,6 +10965,7 @@ define('onion-editor',[
   'scribe-plugin-placeholder',
   'scribe-plugin-no-inline-br',
   'link-formatter',
+  'remove-nbsp',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -10968,6 +10990,7 @@ define('onion-editor',[
   scribePluginPlaceholder,
   noInlineBr,
   linkFormatter,
+  removeNbsp,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -11218,6 +11241,7 @@ define('onion-editor',[
     });
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
+    scribe.use(removeNbsp());
 
     this.setChangeHandler = function(func) {
       scribe.on('content-changed', func); 

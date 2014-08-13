@@ -42,6 +42,7 @@ require.config({
     'our-ensure-selectable-containers': './formatters/our-ensure-selectable-containers',
     'enforce-p-elements': './formatters/enforce-p-elements',
     'link-formatter': './formatters/link-formatter',
+    'remove-nbsp': './formatters/remove-nbsp',
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 

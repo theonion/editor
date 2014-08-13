@@ -19,6 +19,7 @@ define('onion-editor',[
   'scribe-plugin-placeholder',
   'scribe-plugin-no-inline-br',
   'link-formatter',
+  'remove-nbsp',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -43,6 +44,7 @@ define('onion-editor',[
   scribePluginPlaceholder,
   noInlineBr,
   linkFormatter,
+  removeNbsp,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -293,6 +295,7 @@ define('onion-editor',[
     });
 
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
+    scribe.use(removeNbsp());
 
     this.setChangeHandler = function(func) {
       scribe.on('content-changed', func); 
