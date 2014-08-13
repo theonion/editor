@@ -19,7 +19,11 @@ require.config({
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
     'scribe-plugin-embed': './plugins/scribe-plugin-embed',
     'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder',
-    'link-formatter': './formatters/link-formatter'
+    'scribe-plugin-no-inline-br': './formatters/scribe-plugin-no-inline-br',
+    'our-ensure-selectable-containers': './formatters/our-ensure-selectable-containers',
+    'enforce-p-elements': './formatters/enforce-p-elements',
+    'link-formatter': './formatters/link-formatter',
+    'remove-nbsp': './formatters/remove-nbsp'
   },
   name: "../../bower_components/almond/almond",
   wrap: {
