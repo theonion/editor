@@ -187,7 +187,7 @@ define([],function () {
             var caption = prompt('Caption',
               $('.caption', activeElement).html()
             );
-            if (caption) {
+            if (caption || caption === '') {
               scribe.updateContents(function() {
                 $('.caption', activeElement).html(caption);
               });
