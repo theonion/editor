@@ -18,6 +18,7 @@ define('onion-editor',[
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
   'link-formatter',
+  'strip-newlines',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -41,6 +42,7 @@ define('onion-editor',[
   scribePluginHr,
   scribePluginPlaceholder,
   linkFormatter,
+  stripNewlines,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -66,7 +68,7 @@ define('onion-editor',[
   };
 
   function OnionEditor(element, options) {
-
+    element.style.whiteSpace = 'pre-wrap';
     options = $.extend(defaults, options);
 
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
@@ -221,7 +223,7 @@ define('onion-editor',[
       tags: tags,
       skipSanitization: skipSanitization
     }));
-
+    scribe.use(stripNewlines());
 
     // Word count 
     

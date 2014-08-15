@@ -10675,6 +10675,20 @@ define('link-formatter',[
 
 });
 
+define('strip-newlines',[],function () {
+
+  
+
+  return function () {
+    return function (scribe) {
+      scribe.registerHTMLFormatter('normalize', function (html) {
+        return html.replace(/\n/g, ' ');
+      });
+    };
+  };
+
+});
+
 define('our-ensure-selectable-containers',[
     'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
@@ -10724,7 +10738,7 @@ define('our-ensure-selectable-containers',[
         if (isEmpty(node) &&
           node.textContent.trim() === '' &&
           !contains(html5VoidElements, node.nodeName) &&
-          !nodeIsInlineElement(node)) {
+          element.isBlockElement(node)) {
           node.appendChild(document.createElement('br'));
         } else if (node.children.length > 0) {
           if (!config.skipElement || !(config.skipElement && config.skipElement(node))) {
@@ -10886,6 +10900,7 @@ define('onion-editor',[
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
   'link-formatter',
+  'strip-newlines',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -10909,6 +10924,7 @@ define('onion-editor',[
   scribePluginHr,
   scribePluginPlaceholder,
   linkFormatter,
+  stripNewlines,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -10934,7 +10950,7 @@ define('onion-editor',[
   };
 
   function OnionEditor(element, options) {
-
+    element.style.whiteSpace = 'pre-wrap';
     options = $.extend(defaults, options);
 
     var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
@@ -11089,7 +11105,7 @@ define('onion-editor',[
       tags: tags,
       skipSanitization: skipSanitization
     }));
-
+    scribe.use(stripNewlines());
 
     // Word count 
     

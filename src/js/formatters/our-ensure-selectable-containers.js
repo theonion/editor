@@ -47,7 +47,7 @@ define([
         if (isEmpty(node) &&
           node.textContent.trim() === '' &&
           !contains(html5VoidElements, node.nodeName) &&
-          !nodeIsInlineElement(node)) {
+          element.isBlockElement(node)) {
           node.appendChild(document.createElement('br'));
         } else if (node.children.length > 0) {
           if (!config.skipElement || !(config.skipElement && config.skipElement(node))) {
