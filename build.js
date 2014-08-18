@@ -1,7 +1,7 @@
 require.config({
   baseUrl: "./src/js/",
   paths: {
-    'scribe': '../../bower_components/scribe/scribe',
+    'scribe': '../../bower_components/scribe/build/scribe',
     'scribe-plugin-blockquote-command': '../../bower_components/scribe-plugin-blockquote-command/scribe-plugin-blockquote-command',
     'scribe-plugin-curly-quotes': '../../bower_components/scribe-plugin-curly-quotes/scribe-plugin-curly-quotes',
     'scribe-plugin-formatter-plain-text-convert-new-lines-to-html': '../../bower_components/scribe-plugin-formatter-plain-text-convert-new-lines-to-html/scribe-plugin-formatter-plain-text-convert-new-lines-to-html',

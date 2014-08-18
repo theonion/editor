@@ -1,6 +1,6 @@
 {
   "name": "onion-editor",
-  "version": "0.2.20",
+  "version": "0.2.21",
   "homepage": "https://github.com/theonion/editor",
   "authors": [
     "Mike Wnuk <mwnuk@theonion.com>"
@@ -26,7 +26,7 @@
   "devDependencies": {
     "jasmine-jquery": "~2.0.5",
     "requirejs": "~2.1.9",
-    "scribe": "0.1.17",
+    "scribe": "theonion/scribe#4a5668aba890a4d9398c8472a0783282ca1aa9c5",
     "scribe-plugin-blockquote-command": "0.1.0",
     "scribe-plugin-curly-quotes": "0.1.2",
     "scribe-plugin-formatter-plain-text-convert-new-lines-to-html": "0.1.1",

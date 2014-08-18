@@ -2940,8 +2940,9 @@ define('plugins/core/events',[
           event.preventDefault();
 
           if (contains(event.clipboardData.types, 'text/html')) {
-
-            scribe.insertHTML(event.clipboardData.getData('text/html'));
+            var html = event.clipboardData.getData('text/html');
+            html = scribe._htmlFormatterFactory.formatPaste(html);
+            scribe.insertHTML(html);
           } else {
             scribe.insertPlainText(event.clipboardData.getData('text/plain'));
           }
@@ -2987,6 +2988,7 @@ define('plugins/core/events',[
              */
             scribe.el.focus();
 
+            data = scribe._htmlFormatterFactory.formatPaste(data);
             scribe.insertHTML(data);
           }, 1);
         }
@@ -3255,8 +3257,7 @@ define('plugins/core/formatters/html/ensure-selectable-containers',[
         // whitespace, and is not self-closing
         if (isEmpty(node) &&
           node.textContent.trim() === '' &&
-          !contains(html5VoidElements, node.nodeName))
-        {
+          !contains(html5VoidElements, node.nodeName)) {
           node.appendChild(document.createElement('br'));
         } else if (node.children.length > 0) {
           traverse(node);
@@ -4955,6 +4956,7 @@ define('scribe',[
       sanitize: [],
       // Normalize content to ensure it is ready for interaction
       normalize: [],
+      paste: [],
       export: []
     };
   }
@@ -4971,6 +4973,12 @@ define('scribe',[
     }, html);
 
     return formatted;
+  };
+
+  HTMLFormatterFactory.prototype.formatPaste = function (html) {
+    return this.formatters.paste.reduce(function (formattedData, formatter) {
+      return formatter(formattedData);
+    }, html);
   };
 
   HTMLFormatterFactory.prototype.formatForExport = function (html) {
@@ -10681,7 +10689,7 @@ define('strip-newlines',[],function () {
 
   return function () {
     return function (scribe) {
-      scribe.registerHTMLFormatter('normalize', function (html) {
+      scribe.registerHTMLFormatter('paste', function (html) {
         return html.replace(/\n/g, ' ');
       });
     };

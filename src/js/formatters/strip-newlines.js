@@ -4,7 +4,7 @@ define(function () {
 
   return function () {
     return function (scribe) {
-      scribe.registerHTMLFormatter('normalize', function (html) {
+      scribe.registerHTMLFormatter('paste', function (html) {
         return html.replace(/\n/g, ' ');
       });
     };

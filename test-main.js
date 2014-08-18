@@ -19,7 +19,7 @@ require.config({
 
   paths: {
     'bower': '../../bower_components/',
-    'scribe': '../../bower_components/scribe/scribe',
+    'scribe': '../../bower_components/scribe/build/scribe',
     'jquery': '../../bower_components/jquery/dist/jquery',
     'scribe-plugin-blockquote-command': '../../bower_components/scribe-plugin-blockquote-command/scribe-plugin-blockquote-command',
     'scribe-plugin-curly-quotes': '../../bower_components/scribe-plugin-curly-quotes/scribe-plugin-curly-quotes',

@@ -44,7 +44,7 @@ module.exports = function(config) {
       'test-main.js',
 
       'node_modules/es6-promise/dist/promise-1.0.0.js',
-      'bower_components/scribe/scribe.js',
+      'bower_components/scribe/build/scribe.js',
       'bower_components/jquery/dist/jquery.js',
       'bower_components/jasmine-jquery/lib/jasmine-jquery.js',
 
