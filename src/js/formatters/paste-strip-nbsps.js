@@ -7,6 +7,9 @@ define(function () {
       scribe.registerHTMLFormatter('paste', function (html) {
         return html.replace(/&nbsp;/g, ' ');
       });
+      scribe.registerHTMLFormatter('normalize', function (html) {
+        return html.replace(/&nbsp;/g, ' ');
+      });
     };
   };
 
