@@ -52,7 +52,7 @@
       }
 
 
-      // Do not santiize blocks that match 
+      // Do not sanitize blocks that match 
       if (this.config.skipSanitization(node)) {
         return;
       }

@@ -41,6 +41,7 @@ require.config({
     'our-ensure-selectable-containers': './formatters/our-ensure-selectable-containers',
     'enforce-p-elements': './formatters/enforce-p-elements',
     'link-formatter': './formatters/link-formatter',
+    'only-trailing-brs': './formatters/only-trailing-brs',
     'paste-strip-newlines': './formatters/paste-strip-newlines',
     'paste-strip-nbsps': './formatters/paste-strip-nbsps',
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'

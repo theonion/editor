@@ -21,7 +21,14 @@
     <div>WORDCOUNT <span class="wordcount"></span></div>
     <div id="content-wrapper" class="container">
       <div class="editor-wrapper">
-        <div class="editorPlaceholder" style="display: block;"></div>
+        <div id="line-editorPlaceholder" style="display: block;"></div>
+        <div id="line-editor" class="editor scribe"></div>
+      </div>
+      
+      <hr>
+
+      <div class="editor-wrapper">
+        <div id="editorPlaceholder" class="editorPlaceholder" style="display: block;"></div>
         <div id="editor" class="editor scribe"></div>
         <div class="document-tools toolbar fixed">
           <div class="toolbar-contents">
@@ -149,7 +156,7 @@
         multiline:true, 
         placeholder: {
           text: "<p>WRITE HERE, COWBOY</p>",
-          container: document.getElementsByClassName('editorPlaceholder')[0]
+          container: document.getElementById('editorPlaceholder')
         },
         statsContainer: ".wordcount",
         link: {
@@ -161,6 +168,17 @@
       });
       editor.setChangeHandler(function() {  });
       editor.setContent($("#content").html());
+
+      var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
+        multiline: false,
+        placeholder: {
+          text: "<p>WRITE HERE, COWBOY</p>",
+          container: document.getElementById('line-editorPlaceholder')
+        }
+      });
+      lineEditor.setChangeHandler(function () {
+        //console.log(lineEditor.getContent());
+      });
     </script>
   </body>
 </html>

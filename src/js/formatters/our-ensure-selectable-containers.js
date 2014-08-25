@@ -22,7 +22,7 @@ define([
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
-  var inlineElementNames = ['A', 'B', 'DEL', 'I', 'U'];
+  var inlineElementNames = ['A', 'B', 'DEL', 'EM', 'STRONG', 'I', 'U'];
   function nodeIsInlineElement(node) {
     return inlineElementNames.indexOf(node.nodeName) !== -1;
   }

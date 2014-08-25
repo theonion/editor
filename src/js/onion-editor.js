@@ -18,6 +18,7 @@ define('onion-editor',[
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
   'link-formatter',
+  'only-trailing-brs',
   'paste-strip-newlines',
   'paste-strip-nbsps',
   // scribe core
@@ -43,6 +44,7 @@ define('onion-editor',[
   scribePluginHr,
   scribePluginPlaceholder,
   linkFormatter,
+  onlyTrailingBrs,
   pasteStripNewlines,
   pasteStripNbsps,
   // scribe core
@@ -139,6 +141,9 @@ define('onion-editor',[
       tags.p = {};
       tags.br = {};
       tags.hr = {};
+    } else {
+      tags.br = {};
+      scribe.use(onlyTrailingBrs());
     }
 
     // Bold

@@ -3,7 +3,7 @@ define([
   'scribe',
   'jquery',
   'onion-editor',
-  'jasmine-jquery'], function(Scribe, jquery, OnionEditor, jasmineJquery) {
+  'jasmine-jquery'], function (Scribe, jquery, OnionEditor, jasmineJquery) {
 
   describe('Onion Editor', function () {
 

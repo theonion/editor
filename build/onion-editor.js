@@ -6960,7 +6960,7 @@ define('scribe-plugin-link-ui',[],function () {
       }
 
 
-      // Do not santiize blocks that match 
+      // Do not sanitize blocks that match 
       if (this.config.skipSanitization(node)) {
         return;
       }
@@ -10689,6 +10689,25 @@ define('link-formatter',[
 
 });
 
+define('only-trailing-brs',[],function () {
+
+  
+
+  // For single-line mode: Firefox needs a BR at the end to work.
+  // However, we don't want multiple BRs since this is a single-line input.
+  // So I'm whitelisting BR in the "sanitizer" plugin and adding this guy.
+  // This will mess up "inline" objects which rely on BR, of which we
+  // currently have none so it's not a big deal.
+  return function () {
+    return function (scribe) {
+      scribe.registerHTMLFormatter('normalize', function (html) {
+        return html.replace(/<br>(.)/g, ' $1');
+      });
+    };
+  };
+
+});
+
 define('paste-strip-newlines',[],function () {
 
   
@@ -10744,7 +10763,7 @@ define('our-ensure-selectable-containers',[
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
-  var inlineElementNames = ['A', 'B', 'DEL', 'I', 'U'];
+  var inlineElementNames = ['A', 'B', 'DEL', 'EM', 'STRONG', 'I', 'U'];
   function nodeIsInlineElement(node) {
     return inlineElementNames.indexOf(node.nodeName) !== -1;
   }
@@ -10931,6 +10950,7 @@ define('onion-editor',[
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
   'link-formatter',
+  'only-trailing-brs',
   'paste-strip-newlines',
   'paste-strip-nbsps',
   // scribe core
@@ -10956,6 +10976,7 @@ define('onion-editor',[
   scribePluginHr,
   scribePluginPlaceholder,
   linkFormatter,
+  onlyTrailingBrs,
   pasteStripNewlines,
   pasteStripNbsps,
   // scribe core
@@ -11052,6 +11073,9 @@ define('onion-editor',[
       tags.p = {};
       tags.br = {};
       tags.hr = {};
+    } else {
+      tags.br = {};
+      scribe.use(onlyTrailingBrs());
     }
 
     // Bold
