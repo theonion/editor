@@ -41,14 +41,14 @@ define([
     // inline-brs and empty inline element integration tests
 
     it('removes br', testInput(
-      '<br>', ' '
+      '<br>', ''
     ));
     it('removes brs', testInput(
-      'This is a horrible feature<br>stuff<br>', 'This is a horrible feature stuff '
+      'This is a horrible feature<br>stuff<br>', 'This is a horrible featurestuff'
     ));
     it('it removes inline brs', testInput(
       'Text and such<br/>Text and such',
-      'Text and such Text and such'
+      'Text and suchText and such'
     ));
 
   });
