@@ -11074,8 +11074,8 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
     } else {
-      tags.br = {};
-      scribe.use(onlyTrailingBrs());
+      // tags.br = {};
+      // scribe.use(onlyTrailingBrs());
     }
 
     // Bold
