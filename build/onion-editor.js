@@ -2931,12 +2931,19 @@ define('plugins/core/events',[
        * I also don't like how it has the authority to perform `event.preventDefault`.
        */
 
+      function agentIsSafari() {
+        var ua = navigator.userAgent;
+        return ua.search('Safari') >= 0 && ua.search('Chrome') < 0;
+      }
+
       scribe.el.addEventListener('paste', function handlePaste(event) {
         /**
          * Browsers without the Clipboard API (specifically `ClipboardEvent.clipboardData`)
-         * will execute the second branch here.
+         * and Safari will execute the second branch here.
          */
-        if (event.clipboardData) {
+        if (event.clipboardData
+          && (contains(event.clipboardData.types, 'text/html') || !agentIsSafari())
+        ) {
           event.preventDefault();
 
           if (contains(event.clipboardData.types, 'text/html')) {
@@ -11074,8 +11081,8 @@ define('onion-editor',[
       tags.br = {};
       tags.hr = {};
     } else {
-      tags.br = {};
-      scribe.use(onlyTrailingBrs());
+      // tags.br = {};
+      // scribe.use(onlyTrailingBrs());
     }
 
     // Bold
