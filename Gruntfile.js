@@ -41,14 +41,36 @@ module.exports = function(grunt) {
       unit: {
         configFile: 'karma.conf.js'
       }
+    },
+    connect: {
+      options: {
+        base: [
+          'public',
+          'build'
+        ],
+        port: 0,
+        hostname: '127.0.0.1',
+        livereload: true,
+        keepalive: true
+      },
+      livereload: {
+        options: {
+          open: true
+        }
+      }
     }
   });
   // Load external tasks
   grunt.loadNpmTasks('grunt-contrib-uglify');
-
   grunt.loadNpmTasks('grunt-contrib-less');
+  grunt.loadNpmTasks('grunt-contrib-connect');
   grunt.loadNpmTasks('grunt-contrib-requirejs');
   grunt.loadNpmTasks('grunt-contrib-watch');
   grunt.loadNpmTasks('grunt-karma');
   grunt.registerTask('default', ['requirejs', 'less', 'uglify']);
+
+
+  grunt.registerTask('serve', ['requirejs', 'less', 'uglify', 'connect:livereload']);
+
+  
 };
