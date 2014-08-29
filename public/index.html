@@ -6,9 +6,9 @@
       <link href="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/css/bootstrap.min.css" rel="stylesheet">
       <link href="//cdnjs.cloudflare.com/ajax/libs/font-awesome/4.0.3/css/font-awesome.min.css" rel="stylesheet">
 
-      <link href='../build/editor-main.css' rel='stylesheet' type='text/css'></link>
+      <link href='editor-main.css' rel='stylesheet' type='text/css'></link>
       
-      <link href='../build/inline.css' rel='stylesheet' type='text/css'></link>
+      <link href='inline.css' rel='stylesheet' type='text/css'></link>
       <style>
         #content-body .editor {
             min-height: 600px;
@@ -149,10 +149,10 @@
     <script src="//maxcdn.bootstrapcdn.com/bootstrap/3.2.0/js/bootstrap.min.js"></script>
 
 
-    <script src="../build/onion-editor.js"></script>
+    <script src="onion-editor.js"></script>
     <script>
       var editor = new OnionEditor(document.getElementById("editor"), {
-        inlineObjects: "/public/inline-config.json", 
+        inlineObjects: "inline-config.json", 
         multiline:true, 
         placeholder: {
           text: "<p>WRITE HERE, COWBOY</p>",
