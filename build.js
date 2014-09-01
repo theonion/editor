@@ -24,7 +24,8 @@ require.config({
     'link-formatter': './formatters/link-formatter',
     'only-trailing-brs': './formatters/only-trailing-brs',
     'paste-strip-newlines': './formatters/paste-strip-newlines',
-    'paste-strip-nbsps': './formatters/paste-strip-nbsps'
+    'paste-strip-nbsps': './formatters/paste-strip-nbsps',
+    'paste-from-word': './formatters/paste-from-word'
   },
   name: "../../bower_components/almond/almond",
   wrap: {

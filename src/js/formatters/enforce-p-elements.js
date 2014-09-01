@@ -55,6 +55,9 @@ define([
     });
 
     consecutiveInlineElementsAndTextNodes.forEach(function (nodes) {
+      if (nodes.length === 1 && nodes[0].nodeType === 3) {
+        return;
+      }
       var pElement = document.createElement('p');
       nodes[0].parentNode.insertBefore(pElement, nodes[0]);
       nodes.forEach(function (node) {

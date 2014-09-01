@@ -44,6 +44,7 @@ require.config({
     'only-trailing-brs': './formatters/only-trailing-brs',
     'paste-strip-newlines': './formatters/paste-strip-newlines',
     'paste-strip-nbsps': './formatters/paste-strip-nbsps',
+    'paste-from-word': './formatters/paste-from-word',
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 
