@@ -57,7 +57,7 @@ module.exports = function(grunt) {
           'build'
         ],
         port: 51175,
-        hostname: '127.0.0.1',
+        hostname: '0.0.0.0',
         livereload: true,
         keepalive: true
       },

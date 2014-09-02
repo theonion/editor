@@ -40,16 +40,6 @@ define(['scribe-common/src/element'], function (scribeElement) {
             }
           }
 
-          // SPANs can GET FUCKED
-          if (node.nodeName === 'SPAN') {
-            scribeElement.unwrap(parentNode, node);
-          }
-
-          // There seem to be a bunch of empty p tags, that cause all kinds of trouble.
-          if (node.nodeName === 'P' && node.textContent.trim() === '') {
-            parentNode.removeChild(node); // Kill these empty p tagz
-          }
-
           node = nextNode;
         }
       }
@@ -70,12 +60,10 @@ define(['scribe-common/src/element'], function (scribeElement) {
         // Now let's use this thing as a doc.
         var bin = document.createElement('div');
         bin.innerHTML = html;
-        console.log(bin);
 
         traverse(bin);
 
         // In the end, we really only care about the body.
-        console.log(bin.innerHTML);
         return bin.innerHTML;
       });
     };

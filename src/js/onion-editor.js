@@ -22,6 +22,7 @@ define('onion-editor',[
   'paste-strip-newlines',
   'paste-strip-nbsps',
   'paste-from-word',
+  'paste-sanitize',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -49,6 +50,7 @@ define('onion-editor',[
   pasteStripNewlines,
   pasteStripNbsps,
   pasteFromWord,
+  pasteSanitize,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -233,6 +235,7 @@ define('onion-editor',[
       skipSanitization: skipSanitization
     }));
     scribe.use(pasteFromWord());
+    scribe.use(pasteSanitize());
     scribe.use(pasteStripNewlines());
     scribe.use(pasteStripNbsps());
     // Word count 

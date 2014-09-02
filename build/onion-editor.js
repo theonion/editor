@@ -2996,7 +2996,6 @@ define('plugins/core/events',[
             scribe.el.focus();
 
             data = scribe._htmlFormatterFactory.formatPaste(data);
-            console.log(data);
             scribe.insertHTML(data);
           }, 1);
         }
@@ -10786,16 +10785,6 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
             }
           }
 
-          // SPANs can GET FUCKED
-          if (node.nodeName === 'SPAN') {
-            scribeElement.unwrap(parentNode, node);
-          }
-
-          // There seem to be a bunch of empty p tags, that cause all kinds of trouble.
-          if (node.nodeName === 'P' && node.textContent.trim() === '') {
-            parentNode.removeChild(node); // Kill these empty p tagz
-          }
-
           node = nextNode;
         }
       }
@@ -10805,6 +10794,8 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
           // We only want to fuck with word docs. Word docs are crazy.
           return html;
         }
+
+        console.log(html);
 
         // Word comments like conditional comments etc
         html = html.replace(/<!--[\s\S]+?-->/gi, '');
@@ -10816,18 +10807,76 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
         // Now let's use this thing as a doc.
         var bin = document.createElement('div');
         bin.innerHTML = html;
-        console.log(bin);
 
         traverse(bin);
 
         // In the end, we really only care about the body.
-        console.log(bin.innerHTML);
         return bin.innerHTML;
       });
     };
   };
 
 });
+define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) {
+
+  
+
+  return function () {
+    return function (scribe) {
+
+      function traverse(parentNode) {
+        var node = parentNode.firstElementChild;
+        
+        while (node) {
+          var nextNode = node.nextElementSibling;
+
+          if (node.children.length > 0) {
+            traverse(node);
+          }
+
+          if (node.hasAttribute('style')) {
+            node.removeAttribute('style');
+          }
+
+          // There seem to be a bunch of empty p tags, that cause all kinds of trouble.
+          if (node.nodeName === 'P' && node.textContent.trim() === '') {
+            parentNode.removeChild(node); // Kill these empty p tagz
+          }
+
+          // FUCK YO SPANS
+          if (node.nodeName === 'SPAN') {
+            scribeElement.unwrap(parentNode, node);
+          }
+
+          node = nextNode;
+        }
+      }
+
+      scribe.registerHTMLFormatter('paste', function (html) {
+
+        var bin = document.createElement('div');
+        bin.innerHTML = html;
+        console.log(html);
+
+        var childNodes = [].slice.call(bin.childNodes);
+        childNodes.forEach(function(childNode) {
+          if (childNode.nodeType === 3 && childNode.textContent.trim() === '') {
+            // Kill all empty spaces between tags.
+            bin.removeChild(childNode);
+          }
+        });
+
+        traverse(bin);
+
+        console.log(bin.innerHTML);
+
+        return bin.innerHTML;
+      });
+    };
+  };
+
+});
+
 define('our-ensure-selectable-containers',[
     'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
@@ -10963,9 +11012,6 @@ define('enforce-p-elements',[
     });
 
     consecutiveInlineElementsAndTextNodes.forEach(function (nodes) {
-      if (nodes.length === 1 && nodes[0].nodeType === 3) {
-        return;
-      }
       var pElement = document.createElement('p');
       nodes[0].parentNode.insertBefore(pElement, nodes[0]);
       nodes.forEach(function (node) {
@@ -11046,6 +11092,7 @@ define('onion-editor',[
   'paste-strip-newlines',
   'paste-strip-nbsps',
   'paste-from-word',
+  'paste-sanitize',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -11073,6 +11120,7 @@ define('onion-editor',[
   pasteStripNewlines,
   pasteStripNbsps,
   pasteFromWord,
+  pasteSanitize,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -11257,6 +11305,7 @@ define('onion-editor',[
       skipSanitization: skipSanitization
     }));
     scribe.use(pasteFromWord());
+    scribe.use(pasteSanitize());
     scribe.use(pasteStripNewlines());
     scribe.use(pasteStripNbsps());
     // Word count 
