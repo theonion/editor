@@ -26,7 +26,7 @@
   "devDependencies": {
     "jasmine-jquery": "~2.0.5",
     "requirejs": "~2.1.9",
-    "scribe": "theonion/scribe#df52ee94c9a7f1bbf6fcbe056621f29fcd241d9f",
+    "scribe": "theonion/scribe#9d877148c694b7d7a20fc10dfd57c74b9600c8ce",
     "scribe-plugin-blockquote-command": "0.1.0",
     "scribe-plugin-curly-quotes": "0.1.2",
     "scribe-plugin-formatter-plain-text-convert-new-lines-to-html": "0.1.1",

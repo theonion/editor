@@ -100,7 +100,8 @@ define('onion-editor',[
     }
 
     // For now, we need to patch some scribe commands, just in case.
-    scribe.commandPatches.bold.execute = function (value) {
+    var boldCommand = new scribe.api.CommandPatch('bold');
+    boldCommand.execute = function (value) {
       if (this.selection === undefined) {
         document.execCommand(this.commandName, false, value || null);
       } else {
@@ -109,6 +110,8 @@ define('onion-editor',[
         }.bind(this));
       }
     };
+    scribe.commandPatches['bold'] = boldCommand;
+
     var italicCommand = new scribe.api.CommandPatch('italic');
     italicCommand.execute = function (value) {
       if (this.selection === undefined) {
