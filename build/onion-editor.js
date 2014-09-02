@@ -3176,7 +3176,6 @@ define('plugins/core/formatters/html/enforce-p-elements',[
       nodes.forEach(function (node) {
         pElement.appendChild(node);
       });
-      console.log('wrapping');
     });
 
     parentNode._isWrapped = true;
@@ -3535,14 +3534,14 @@ define('plugins/core/patches/commands/bold',[],function () {
        * Chrome: Executing the bold command inside a heading corrupts the markup.
        * Disabling for now.
        */
-      // boldCommand.queryEnabled = function () {
-      //   var selection = new scribe.api.Selection();
-      //   var headingNode = selection.getContaining(function (node) {
-      //     return (/^(H[1-6])$/).test(node.nodeName);
-      //   });
+      boldCommand.queryEnabled = function () {
+        var selection = new scribe.api.Selection();
+        var headingNode = selection.getContaining(function (node) {
+          return (/^(H[1-6])$/).test(node.nodeName);
+        });
 
-      //   return scribe.api.CommandPatch.prototype.queryEnabled.apply(this, arguments);
-      // };
+        return scribe.api.CommandPatch.prototype.queryEnabled.apply(this, arguments) && ! headingNode;
+      };
 
       // TODO: We can't use STRONGs because this would mean we have to
       // re-implement the `queryState` command, which would be difficult.
@@ -4789,7 +4788,7 @@ define('scribe',[
       // TODO: replace this by initial formatter application?
       this.use(setRootPElement());
       // Warning: enforcePElements must come before ensureSelectableContainers
-      // this.use(enforcePElements());
+      this.use(enforcePElements());
       this.use(ensureSelectableContainers());
     } else {
       // Commands assume block elements are allowed, so we have to set the
@@ -4990,11 +4989,9 @@ define('scribe',[
   };
 
   HTMLFormatterFactory.prototype.formatPaste = function (html) {
-    var formatted = this.formatters.paste.reduce(function (formattedData, formatter) {
+    return this.formatters.paste.reduce(function (formattedData, formatter) {
       return formatter(formattedData);
     }, html);
-
-    return formatted;
   };
 
   HTMLFormatterFactory.prototype.formatForExport = function (html) {
@@ -10795,8 +10792,6 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
           return html;
         }
 
-        console.log(html);
-
         // Word comments like conditional comments etc
         html = html.replace(/<!--[\s\S]+?-->/gi, '');
 
@@ -10856,7 +10851,6 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
 
         var bin = document.createElement('div');
         bin.innerHTML = html;
-        console.log(html);
 
         var childNodes = [].slice.call(bin.childNodes);
         childNodes.forEach(function(childNode) {
@@ -10867,9 +10861,6 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
         });
 
         traverse(bin);
-
-        console.log(bin.innerHTML);
-
         return bin.innerHTML;
       });
     };
