@@ -20,13 +20,7 @@
   <body>  
     <div>WORDCOUNT <span class="wordcount"></span></div>
     <div id="content-wrapper" class="container">
-      <div class="editor-wrapper">
-        <div id="line-editorPlaceholder" style="display: block;"></div>
-        <div id="line-editor" class="editor scribe"></div>
-      </div>
       
-      <hr>
-
       <div class="editor-wrapper">
         <div id="editorPlaceholder" class="editorPlaceholder" style="display: block;"></div>
         <div id="editor" class="editor scribe"></div>
@@ -167,7 +161,7 @@
         }
       });
       editor.setChangeHandler(function() {  });
-      editor.setContent($("#content").html());
+      // editor.setContent($("#content").html());
 
       var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
         multiline: false,

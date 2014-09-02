@@ -14,6 +14,14 @@ module.exports = function(grunt) {
       scripts: {
         files: ['src/js/*.js', 'src/js/*/*.js', 'src/less/*.less','src/less/*/*.less'],
         tasks: ['requirejs', 'less', 'uglify'],
+      },
+      livereload: {
+        options: {
+          livereload: '<%= connect.options.livereload %>'
+        },
+        files: [
+          'public/*',
+          'build/*'        ]
       }
     },
     less: {
@@ -48,8 +56,8 @@ module.exports = function(grunt) {
           'public',
           'build'
         ],
-        port: 0,
-        hostname: '127.0.0.1',
+        port: 51175,
+        hostname: '0.0.0.0',
         livereload: true,
         keepalive: true
       },

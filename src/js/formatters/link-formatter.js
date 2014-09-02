@@ -63,12 +63,6 @@ define([
       function traverse(parentNode) {
         var node = parentNode.firstElementChild;
 
-        function isEmpty(node) {
-          return node.children.length === 0
-            || (node.children.length === 1
-                && element.isSelectionMarkerNode(node.children[0]));
-        }
-
         while (node) {
           if (node.nodeName === 'A') {
             if (node.hasAttribute('href')) {
