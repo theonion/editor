@@ -58,3 +58,9 @@ Patched version of Scribe's santize plugin that ignores the contents of DIVs
 
 *link-formatter*
 Makes sure hrefs relative to a configured domain. Formatting happens on paste & when entered via the link ui.
+
+
+# NOTEZ:
+
+ - ctrl+enter does a soft return on safari, while all other browsers use shift-return. WEIRD.
+ - The AV Club css has a different margin-top for h4 tags than it does for p tags, so that's making it look like "extra space" is inserted when the make something an "h2"
