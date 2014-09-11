@@ -114,6 +114,7 @@ define([],function () {
         });
 
         scribe.el.parentNode.addEventListener('mouseleave', function (event) {
+          hideToolbar();
           $('.embed-tools', editorEl).removeClass('active');
         });
 
