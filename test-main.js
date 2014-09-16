@@ -46,6 +46,7 @@ require.config({
     'paste-strip-nbsps': './formatters/paste-strip-nbsps',
     'paste-from-word': './formatters/paste-from-word',
     'paste-sanitize': './formatters/paste-sanitize',
+    'remove-a-styles': './formatters/remove-a-styles',
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 

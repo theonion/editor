@@ -26,7 +26,8 @@ require.config({
     'paste-strip-newlines': './formatters/paste-strip-newlines',
     'paste-strip-nbsps': './formatters/paste-strip-nbsps',
     'paste-sanitize': './formatters/paste-sanitize',
-    'paste-from-word': './formatters/paste-from-word'
+    'paste-from-word': './formatters/paste-from-word',
+    'remove-a-styles': './formatters/remove-a-styles'
   },
   name: "../../bower_components/almond/almond",
   wrap: {
