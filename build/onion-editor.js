@@ -10869,6 +10869,40 @@ define('remove-a-styles',['scribe-common/src/element'], function (scribeElement)
 
 });
 
+define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeElement) {
+
+  
+
+  return function () {
+    return function (scribe) {
+
+      function traverse(parentNode) {
+        var node = parentNode.firstElementChild;
+
+        while (node) {
+          if (node.nodeName === 'B' && (/^(H[1-6])$/).test(parentNode.nodeName)) {
+            scribeElement.unwrap(parentNode, node);
+          }
+          else if (node.children.length > 0) {
+            traverse(node);
+          }
+          node = node.nextElementSibling;
+        }
+      }
+
+      scribe.registerHTMLFormatter('sanitize', function (html) {
+
+        var bin = document.createElement('div');
+        bin.innerHTML = html;
+
+        traverse(bin);
+        return bin.innerHTML;
+      });
+    };
+  };
+
+});
+
 define('our-ensure-selectable-containers',[
     'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
@@ -11086,6 +11120,7 @@ define('onion-editor',[
   'paste-from-word',
   'paste-sanitize',
   'remove-a-styles',
+  'strip-bold-in-headings',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -11115,6 +11150,7 @@ define('onion-editor',[
   pasteFromWord,
   pasteSanitize,
   removeAStyles,
+  stripBoldInHeadings,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -11292,7 +11328,6 @@ define('onion-editor',[
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
-      scribe.use(removeAStyles());
       tags.a = { href:true, target:true };
     }
 
@@ -11336,6 +11371,8 @@ define('onion-editor',[
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
       scribe.use(scribePluginOnionVideo(options.video));
+      scribe.use(removeAStyles());
+      scribe.use(stripBoldInHeadings());
     }
 
     scribe.use(scribePluginSanitizer({

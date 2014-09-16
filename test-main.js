@@ -47,6 +47,7 @@ require.config({
     'paste-from-word': './formatters/paste-from-word',
     'paste-sanitize': './formatters/paste-sanitize',
     'remove-a-styles': './formatters/remove-a-styles',
+    'strip-bold-in-headings': './formatters/strip-bold-in-headings',
     'jasmine-jquery': '../../bower_components/jasmine-jquery/lib/jasmine-jquery'
   },
 

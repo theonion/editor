@@ -27,7 +27,8 @@ require.config({
     'paste-strip-nbsps': './formatters/paste-strip-nbsps',
     'paste-sanitize': './formatters/paste-sanitize',
     'paste-from-word': './formatters/paste-from-word',
-    'remove-a-styles': './formatters/remove-a-styles'
+    'remove-a-styles': './formatters/remove-a-styles',
+    'strip-bold-in-headings': './formatters/strip-bold-in-headings'
   },
   name: "../../bower_components/almond/almond",
   wrap: {
