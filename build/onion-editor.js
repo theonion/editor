@@ -10945,14 +10945,12 @@ define('scribe-plugin-anchor',[],function () {
         	targetNode = targetNode.parentNode;
         }
 
-        console.log(targetNode);
 
       	scribe.transactionManager.run(function () {
         	if (targetNode.id) {
         		targetNode.id = null;
         	} else {
         		targetNode.id = getSlug(targetNode.textContent);
-        		console.log(targetNode.id)
         	}
       	}.bind(this));
       };
