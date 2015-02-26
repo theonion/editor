@@ -19,6 +19,7 @@ require.config({
     'scribe-plugin-youtube': './plugins/scribe-plugin-youtube',
     'scribe-plugin-embed': './plugins/scribe-plugin-embed',
     'scribe-plugin-placeholder': './plugins/scribe-plugin-placeholder',
+    'scribe-plugin-anchor': './plugins/scribe-plugin-anchor',
     'our-ensure-selectable-containers': './formatters/our-ensure-selectable-containers',
     'enforce-p-elements': './formatters/enforce-p-elements',
     'link-formatter': './formatters/link-formatter',

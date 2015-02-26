@@ -35,6 +35,7 @@
             <button class="hiddenbydefault" data-command-name="insertOrderedList"><span class="fa fa-list-ol"></span><span class="btn-label">Numbered List</span></button>
             <button class="hiddenbydefault" data-command-name="insertUnorderedList"><span class="fa fa-list-ul"></span><span class="btn-label">Bullet List</span></button>
             <button class="hiddenbydefault" data-command-name="strikeThrough"><span class="fa fa-strikethrough"></span><span class="btn-label">Strikethrough</span></button>
+            <button class="hiddenbydefault" data-command-name="toggleAnchor"><span class="fa fa-anchor"></span><span class="btn-label">Anchor</span></button>
             <button class="hiddenbydefault" data-command-name="removeFormat"><span class="fa fa-times"></span><span class="btn-label">Remove Formatting</span></button>
           </div>
         </div>
@@ -162,16 +163,16 @@
       editor.setChangeHandler(function() {  });
       editor.setContent($("#content").html());
 
-      // var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
-      //   multiline: false,
-      //   placeholder: {
-      //     text: "<p>WRITE HERE, COWBOY</p>",
-      //     container: document.getElementById('line-editorPlaceholder')
-      //   }
-      // });
-      // lineEditor.setChangeHandler(function () {
-      //   //console.log(lineEditor.getContent());
-      // });
+      var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
+        multiline: false,
+        placeholder: {
+          text: "<p>WRITE HERE, COWBOY</p>",
+          container: document.getElementById('line-editorPlaceholder')
+        }
+      });
+      lineEditor.setChangeHandler(function () {
+        //console.log(lineEditor.getContent());
+      });
     </script>
   </body>
 </html>

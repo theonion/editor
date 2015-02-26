@@ -25,6 +25,7 @@ define('onion-editor',[
   'paste-sanitize',
   'remove-a-styles',
   'strip-bold-in-headings',
+  'scribe-plugin-anchor',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -55,6 +56,7 @@ define('onion-editor',[
   pasteSanitize,
   removeAStyles,
   stripBoldInHeadings,
+  scribePluginAnchor,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -274,6 +276,7 @@ define('onion-editor',[
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
+      scribe.use(scribePluginAnchor());
       scribe.use(scribePluginOnionVideo(options.video));
       scribe.use(removeAStyles());
       scribe.use(stripBoldInHeadings());

@@ -9915,13 +9915,13 @@ define('scribe-plugin-toolbar',[],function () {
 
   return function (toolbarNode) {
     return function (scribe) {
-      var buttons = toolbarNode.querySelectorAll('button');
+      var buttons = toolbarNode.querySelectorAll('[data-command-name]');
 
       Array.prototype.forEach.call(buttons, function (button) {
-        // Look for a predefined command, otherwise define one now.
-        var command = scribe.getCommand(button.dataset.commandName);
-
         button.addEventListener('click', function () {
+          // Look for a predefined command.
+          var command = scribe.getCommand(button.dataset.commandName);
+
           /**
            * Focus will have been taken away from the Scribe instance when
            * clicking on a button (Chrome will return the focus automatically
@@ -9930,7 +9930,7 @@ define('scribe-plugin-toolbar',[],function () {
            * the command, because it might rely on selection data.
            */
           scribe.el.focus();
-          command.execute();
+          command.execute(button.dataset.commandValue);
           /**
            * Chrome has a bit of magic to re-focus the `contenteditable` when a
            * command is executed.
@@ -9942,27 +9942,31 @@ define('scribe-plugin-toolbar',[],function () {
         // Unfortunately, there is no `selectionchange` event.
         scribe.el.addEventListener('keyup', updateUi);
         scribe.el.addEventListener('mouseup', updateUi);
+
+        scribe.el.addEventListener('focus', updateUi);
+        scribe.el.addEventListener('blur', updateUi);
+
         // We also want to update the UI whenever the content changes. This
         // could be when one of the toolbar buttons is actioned.
-        // TODO: The `input` event does not trigger when we manipulate the content
-        // ourselves. Maybe commands should fire events when they are activated.
         scribe.on('content-changed', updateUi);
 
         function updateUi() {
+          // Look for a predefined command.
+          var command = scribe.getCommand(button.dataset.commandName);
+
           var selection = new scribe.api.Selection();
 
-          if (selection.range) {
-            if (command.queryEnabled()) {
-              button.removeAttribute('disabled');
+          // TODO: Do we need to check for the selection?
+          if (selection.range && command.queryState(button.dataset.commandValue)) {
+            button.classList.add('active');
+          } else {
+            button.classList.remove('active');
+          }
 
-              if (command.queryState()) {
-                button.classList.add('active');
-              } else {
-                button.classList.remove('active');
-              }
-            } else {
-              button.setAttribute('disabled', 'disabled');
-            }
+          if (selection.range && command.queryEnabled()) {
+            button.removeAttribute('disabled');
+          } else {
+            button.setAttribute('disabled', 'disabled');
           }
         }
       });
@@ -9970,6 +9974,7 @@ define('scribe-plugin-toolbar',[],function () {
   };
 
 });
+
 
 //# sourceMappingURL=scribe-plugin-toolbar.js.map;
 
@@ -10903,6 +10908,59 @@ define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeE
 
 });
 
+define('scribe-plugin-anchor',[],function () {
+  return function (config) {
+    return function (scribe) {
+      var anchorCommand = new scribe.api.Command('anchor');
+
+      function getSlug(text) {
+      	return text.toString().toLowerCase()
+    			.replace(/\s+/g, '-')           // Replace spaces with -
+    			.replace(/[^\w\-]+/g, '')       // Remove all non-word chars
+    			.replace(/\-\-+/g, '-')
+    			.trim();
+      }
+
+      anchorCommand.queryEnabled = function () {
+         return true;
+      }
+
+      anchorCommand.queryState = function (value) {
+      	var selection = new scribe.api.Selection();
+
+	      return !! selection.getContaining(function (node) {
+	      	if (node.nodeType === 3) {
+	      		node = node.parentNode;
+	      	}
+	      	return node.id;
+	      }.bind(this));
+      };
+
+      anchorCommand.execute = function () {
+        var selection = new scribe.api.Selection();
+        var targetNode = selection.getContaining(function(node){
+        	return true;
+        });
+        while (targetNode.nodeType === 3) {
+        	targetNode = targetNode.parentNode;
+        }
+
+        console.log(targetNode);
+
+      	scribe.transactionManager.run(function () {
+        	if (targetNode.id) {
+        		targetNode.id = null;
+        	} else {
+        		targetNode.id = getSlug(targetNode.textContent);
+        		console.log(targetNode.id)
+        	}
+      	}.bind(this));
+      };
+
+      scribe.commands.toggleAnchor = anchorCommand;
+    };
+  }
+});
 define('our-ensure-selectable-containers',[
     'scribe-common/src/element',
     'lodash-amd/modern/collections/contains'
@@ -11121,6 +11179,7 @@ define('onion-editor',[
   'paste-sanitize',
   'remove-a-styles',
   'strip-bold-in-headings',
+  'scribe-plugin-anchor',
   // scribe core
   'our-ensure-selectable-containers',
   'enforce-p-elements'
@@ -11151,6 +11210,7 @@ define('onion-editor',[
   pasteSanitize,
   removeAStyles,
   stripBoldInHeadings,
+  scribePluginAnchor,
   // scribe core
   ourEnsureSelectableContainers,
   enforcePElements
@@ -11370,6 +11430,7 @@ define('onion-editor',[
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
       scribe.use(scribePluginHr());
+      scribe.use(scribePluginAnchor());
       scribe.use(scribePluginOnionVideo(options.video));
       scribe.use(removeAStyles());
       scribe.use(stripBoldInHeadings());
