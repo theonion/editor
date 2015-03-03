@@ -10931,28 +10931,22 @@ define('scribe-plugin-anchor',[],function () {
 
       anchorCommand.queryState = function (value) {
       	var selection = new scribe.api.Selection();
-
-	      return !! selection.getContaining(function (node) {
-          if (node === undefined) {
-            return null;
-          }
-
-	      	if (node.nodeType === 3) {
-	      		node = node.parentNode;
-	      	}
-	      	return node.id;
-	      }.bind(this));
+        var targetNode = selection.getContaining(function(node){
+          return node.nodeType !== 3;
+        });
+        if (targetNode === undefined) {
+          return false;
+        }
+        return !! targetNode.id
       };
 
       anchorCommand.execute = function () {
         var selection = new scribe.api.Selection();
+        console.log(selection);
         var targetNode = selection.getContaining(function(node){
-        	return true;
+        	return node.nodeType !== 3;
         });
-        while (targetNode.nodeType === 3) {
-        	targetNode = targetNode.parentNode;
-        }
-
+        console.log(targetNode);
 
       	scribe.transactionManager.run(function () {
         	if (targetNode.id) {
