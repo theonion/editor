@@ -12,13 +12,21 @@ define('scribe-plugin-anchor',[],function () {
       }
 
       anchorCommand.queryEnabled = function () {
-         return true;
+        var selection = new scribe.api.Selection();
+        var targetNode = selection.getContaining(function(node){
+          return true;
+        });
+        return targetNode !== undefined;
       }
 
       anchorCommand.queryState = function (value) {
       	var selection = new scribe.api.Selection();
 
 	      return !! selection.getContaining(function (node) {
+          if (node === undefined) {
+            return null;
+          }
+
 	      	if (node.nodeType === 3) {
 	      		node = node.parentNode;
 	      	}
@@ -38,7 +46,7 @@ define('scribe-plugin-anchor',[],function () {
 
       	scribe.transactionManager.run(function () {
         	if (targetNode.id) {
-        		targetNode.id = null;
+            targetNode.removeAttribute('id');
         	} else {
         		targetNode.id = getSlug(targetNode.textContent);
         	}
