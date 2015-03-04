@@ -11345,7 +11345,7 @@ define('onion-editor',[
     
     // Multiline
     if (options.multiline) {
-      tags.p = {};
+      tags.p = {'id': true};
       tags.br = {};
       tags.hr = {};
     } else {
@@ -11356,26 +11356,26 @@ define('onion-editor',[
     // Bold
     if (options.formatting.indexOf('bold') !== -1) {
       keyCommands.bold = function (event) { return event.metaKey && event.keyCode === 66; }; // b
-      tags.b = {};
+      tags.b = {'id': true};
     }
 
     // Italics
     if (options.formatting.indexOf('italic') !== -1) {
       keyCommands.italic = function (event) { return event.metaKey && event.keyCode === 73; }; // i
-      tags.i = {};
-      tags.em = {};
+      tags.i = {'id': true};
+      tags.em = {'id': true};
     }
 
     // Strike
     if (options.formatting.indexOf('strike') !== -1) {
       keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
-      tags.s = {};
+      tags.s = {'id': true};
     }
 
     // Underline 
     if (options.formatting.indexOf('underline') !== -1) {
       keyCommands.underline = function (event) { return event.metaKey && event.keyCode === 85; }; // u
-      tags.u = {};
+      tags.u = {'id': true};
     }
 
     // Remove formatting... 
@@ -11388,7 +11388,7 @@ define('onion-editor',[
       scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
-      tags.a = { href:true, target:true };
+      tags.a = { href:true, target:true, id:true};
     }
 
     // Lists
@@ -11397,16 +11397,16 @@ define('onion-editor',[
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
       
       scribe.use(scribePluginSmartLists());
-      tags.ol = {};
-      tags.ul = {};
-      tags.li = {};
+      tags.ol = {id:true};
+      tags.ul = {id:true};
+      tags.li = {id:true};
     }
 
     //Blockquotes
     if (options.multiline && options.formatting.indexOf('blockquote') !== -1) {
       keyCommands.blockquote = function (event) { return event.altKey && event.shiftKey && event.keyCode === 87; }; // w
       scribe.use(scribePluginBlockquoteCommand());
-      tags.blockquote = {};
+      tags.blockquote = {id:true};
     }
 
     // Headings
@@ -11415,8 +11415,8 @@ define('onion-editor',[
       keyCommands.h4 = function (event) { return ctrlKey(event) && event.keyCode === 51; }; // 2
       scribe.use(scribePluginHeadingCommand(3));
       scribe.use(scribePluginHeadingCommand(4));
-      tags.h3 = {};
-      tags.h4 = {};
+      tags.h3 = {id:true};
+      tags.h4 = {id:true};
     }
 
 

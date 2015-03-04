@@ -152,6 +152,7 @@
           text: "<p>WRITE HERE, COWBOY</p>",
           container: document.getElementById('editorPlaceholder')
         },
+        formatting: ['link', 'bold', 'italic', 'blockquote', 'heading', 'list', 'strike', 'underline'],
         statsContainer: ".wordcount",
         link: {
           domain: 'avclub.com',
@@ -163,16 +164,16 @@
       editor.setChangeHandler(function() {  });
       editor.setContent($("#content").html());
 
-      var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
-        multiline: false,
-        placeholder: {
-          text: "<p>WRITE HERE, COWBOY</p>",
-          container: document.getElementById('line-editorPlaceholder')
-        }
-      });
-      lineEditor.setChangeHandler(function () {
-        //console.log(lineEditor.getContent());
-      });
+      // var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
+      //   multiline: false,
+      //   placeholder: {
+      //     text: "<p>WRITE HERE, COWBOY</p>",
+      //     container: document.getElementById('line-editorPlaceholder')
+      //   }
+      // });
+      // lineEditor.setChangeHandler(function () {
+      //   //console.log(lineEditor.getContent());
+      // });
     </script>
   </body>
 </html>
