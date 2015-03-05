@@ -161,7 +161,9 @@
           }
         }
       });
-      editor.setChangeHandler(function() {  });
+      editor.setChangeHandler(function() {
+        console.log('change');
+      });
       editor.setContent($("#content").html());
 
       // var lineEditor = new OnionEditor(document.getElementById('line-editor'), {
