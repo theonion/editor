@@ -6,7 +6,11 @@
     "Mike Wnuk <mwnuk@theonion.com>"
   ],
   "description": "It's an HTML editor, now powered by the Guardian's Scribe.",
-  "main": "build/onion-editor.js",
+  "main": [
+    "build/editor-main.css",
+    "build/inline.css",
+    "build/onion-editor.js"
+  ],
   "keywords": [
     "editor"
   ],
