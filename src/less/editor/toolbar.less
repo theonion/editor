@@ -79,7 +79,7 @@
 
 
 .toolbar button.active {
-    display:block;
+    display:inline-block;
     background-color: #ddd;
 }
 
@@ -93,7 +93,6 @@
     color:#f1f1f1;
 }
 
-
 .toolbar .btn-label {
     display:none;
 }
@@ -105,7 +104,15 @@
     line-height: 16px;
 }
 
+.toolbar.link-tools .toggle-filter {
+  background: rgb(200, 200, 200);
+  display: inline-block;
+  margin: 9px 5px; 
+}
 
+.toolbar.link-tools .toggle-filter.active {
+  background: rgb(150, 150, 150);
+}
 
 .document-tools>.toolbar-contents {
     top: 100px;

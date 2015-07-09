@@ -161,6 +161,14 @@ div[data-picture] img {
   font-size: 11px;
   text-transform: uppercase;
 }
+.toolbar.link-tools .toggle-filter {
+  background: rgb(200, 200, 200);
+  display: inline-block;
+  margin: 9px 5px;
+}
+.toolbar.link-tools .toggle-filter.active {
+  background: rgb(150, 150, 150);
+}
 .link-tools input {
   padding: 8px;
   margin-top: 4px;
@@ -355,7 +363,7 @@ body {
   background-color: #ccc;
 }
 .toolbar button:hover.active {
-  display: block;
+  display: inline-block;
   background-color: #333;
   color: #f1f1f1;
 }
