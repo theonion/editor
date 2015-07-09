@@ -6752,9 +6752,10 @@ define('scribe-plugin-link-ui',[],function () {
           $input = $('.link-tools input', editorEl),
           placeHolder = '#replaceme';
       var $results = $('.search-results', $linkTools);
+      var $filters = $('.filters', $linkTools);
 
       // this provides a way to externally udpate the results element. 
-      var searchHandler = config.searchHandler || function(term, resultsElement) { };
+      var searchHandler = config.searchHandler || function(term, resultsElement, filtersElement) { };
 
       linkPromptCommand.nodeName = 'A';
 
@@ -6774,6 +6775,13 @@ define('scribe-plugin-link-ui',[],function () {
       });
 
       $('.ok', $linkTools).click(confirmInput);
+
+      $filters.click(function(e) {
+        var buttonElement = $(e.target).closest('button');
+        if (buttonElement.length === 1) {
+            buttonElement.toggleClass('active');
+        }
+      });
 
       $results.click(function(e) {
         var linkElement = $(e.target).closest('a');
@@ -6809,7 +6817,7 @@ define('scribe-plugin-link-ui',[],function () {
         var v = $input.val();
         if (isSearchTerm(v)) {
           clearTimeout(searchTimeout);
-          searchTimeout = setTimeout(searchHandler, 200, v, $results);
+          searchTimeout = setTimeout(searchHandler, 200, v, $results, $filters);
           $results.show();
         }
         else {
