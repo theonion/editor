@@ -90,7 +90,7 @@
 .inline.size-small {
     width: 304px;
     float:right;
-    margin-right: -200px;   
+    margin-right: -200px;
     margin-left: 15px
 }
 
@@ -145,7 +145,22 @@ div.embed {
         > div { height:auto }
         > div > * { position:relative; width: 100%; } }
 
-    & > div { width: 100%; position:relative; } }
+  & > div {
+    width: 100%; position:relative;
+  }
+
+  &.embed-instagram > div {
+    padding-bottom: 100px;
+
+    > div.unrendered {
+      text-align: center;
+
+      > i {
+        padding-right: 5px;
+      }
+    }
+  }
+}
 
 
 hr {
@@ -155,4 +170,3 @@ hr {
 .hr.inline {
   border:0px;
 }
-

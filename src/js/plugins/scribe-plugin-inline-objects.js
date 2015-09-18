@@ -82,12 +82,15 @@ define([],function () {
           scribe.trigger('inline:insert:' + objectType, [
             function(values) {
               scribe.updateContents(function() {
-                var html = render(
+                var $newEl = $(render(
                     templates[objectType].template,
                     $.extend(templates[objectType].defaults, values)
-                );
-                $(elementToPlaceNear)[beforeOrAfter](html);
-                $('.inline', editorEl).attr('contenteditable', 'false');
+                ));
+
+                $(elementToPlaceNear)[beforeOrAfter]($newEl);
+                $('.inline', editorEl).attr('contenteditable', false);
+
+                scribe.trigger('inline:insert:' + objectType + ':done', [$newEl]);
               });
             }
           ]);
@@ -255,12 +258,15 @@ define([],function () {
                 activeElement,
                 function(element, values) {
                   var type = $(element).attr('data-type');
+
                   scribe.updateContents(function() {
                     element.outerHTML =
                       render(
                         templates[type].template,
                         $.extend(templates[type].defaults, values)
                       );
+
+                    scribe.trigger('inline:edit:' + type + ':done', [$(activeElement)]);
                   });
                 }
               ]
