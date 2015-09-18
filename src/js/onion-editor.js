@@ -14,6 +14,7 @@ define('onion-editor',[
   'scribe-plugin-betty-cropper',
   'scribe-plugin-youtube',
   'scribe-plugin-embed',
+  'scribe-plugin-embed-instagram',
   'scribe-plugin-onion-video',
   'scribe-plugin-hr',
   'scribe-plugin-placeholder',
@@ -45,6 +46,7 @@ define('onion-editor',[
   scribePluginBettyCropper,
   scribePluginYoutube,
   scribePluginEmbed,
+  scribePluginEmbedInstagram,
   scribePluginOnionVideo,
   scribePluginHr,
   scribePluginPlaceholder,
@@ -84,8 +86,8 @@ define('onion-editor',[
   function OnionEditor(element, options) {
     options = $.extend(defaults, options);
     $('.inline', element).attr('contenteditable', 'false');
-  
-    var scribe = new Scribe(element, { allowBlockElements: options.multiline });      
+
+    var scribe = new Scribe(element, { allowBlockElements: options.multiline });
 
     /* if a node running through the sanitizer passes this test, it won't get sanitized true */
     function skipSanitization(node) {
@@ -169,7 +171,7 @@ define('onion-editor',[
       }
     };
     scribe.commandPatches['italic'] = italicCommand;
-    
+
     var underlineCommand = new scribe.api.CommandPatch('underline');
     underlineCommand.execute = function (value) {
       if (this.selection === undefined) {
@@ -188,7 +190,7 @@ define('onion-editor',[
 
     // Allowable Tags
     var tags = {};
-    
+
     // Multiline
     if (options.multiline) {
       tags.p = {'id': true};
@@ -218,13 +220,13 @@ define('onion-editor',[
       tags.s = {'id': true};
     }
 
-    // Underline 
+    // Underline
     if (options.formatting.indexOf('underline') !== -1) {
       keyCommands.underline = function (event) { return event.metaKey && event.keyCode === 85; }; // u
       tags.u = {'id': true};
     }
 
-    // Remove formatting... 
+    // Remove formatting...
     keyCommands.removeFormat = function (event) { return event.altKey && event.shiftKey && event.keyCode === 65; }; // a
 
     // Links
@@ -241,7 +243,7 @@ define('onion-editor',[
     if (options.multiline && options.formatting.indexOf('list') !== -1) {
       keyCommands.insertUnorderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 66; }; // b
       keyCommands.insertOrderedList = function (event) { return event.altKey && event.shiftKey && event.keyCode === 78; }; // n
-      
+
       scribe.use(scribePluginSmartLists());
       tags.ol = {id:true};
       tags.ul = {id:true};
@@ -269,12 +271,13 @@ define('onion-editor',[
     // Inline Objects
     if (options.multiline && options.inlineObjects) {
       scribe.use(scribePluginInlineObjects(options.inlineObjects));
-      
+
       // Maybe make optionally load these similar to formatting. For now, it's an all or nothing.
 
       scribe.use(scribePluginBettyCropper(options.image));
       scribe.use(scribePluginYoutube());
       scribe.use(scribePluginEmbed());
+      scribe.use(scribePluginEmbedInstagram());
       scribe.use(scribePluginHr());
       scribe.use(scribePluginAnchor());
       scribe.use(scribePluginOnionVideo(options.video));
@@ -290,8 +293,8 @@ define('onion-editor',[
     scribe.use(pasteSanitize());
     scribe.use(pasteStripNewlines());
     scribe.use(pasteStripNbsps());
-    // Word count 
-    
+    // Word count
+
     if (options.statsContainer) {
       setInterval(function () {
         $(options.statsContainer).html(
@@ -301,35 +304,35 @@ define('onion-editor',[
     }
 
 
-    /* This is necessary for a few dumb reasons. Scribe's transaction manager doesn't work when there 
+    /* This is necessary for a few dumb reasons. Scribe's transaction manager doesn't work when there
       ins't a selection inside of the editor. This means any changes made when the editor ins't in focus,
-      like adding an image, stuff breaks. This works around that particular issue. 
+      like adding an image, stuff breaks. This works around that particular issue.
 
       I'm not really sure the right way to fix this or how to avoid this problem.
 
-      The scroll stuff is a consequence of this. 
+      The scroll stuff is a consequence of this.
     */
     scribe.updateContents = function(fn, skipFormatters) {
-      // Default is to skipFormatters. Only place this needs to be set to false is when updating links. 
-      // We want formatters to run on links. Embeds & other shit seem to get sanitized 
+      // Default is to skipFormatters. Only place this needs to be set to false is when updating links.
+      // We want formatters to run on links. Embeds & other shit seem to get sanitized
       // despite there being safegaurds for that.
       if (typeof skipFormatters === 'undefined') {
         skipFormatters = true;
       }
       scribe._skipFormatters = skipFormatters;
       var scrollY = window.scrollY;
-      setTimeout(function() {        
+      setTimeout(function() {
         scribe.el.focus();
         setTimeout(function() {
           scribe.transactionManager.run(fn);
           window.scrollTo(0, scrollY);
 
-          // This should notify any changes that happen outside of typing 
+          // This should notify any changes that happen outside of typing
           scribe.trigger('content-changed');
         }, 20);
       }, 20);
     };
-    
+
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
@@ -341,14 +344,14 @@ define('onion-editor',[
       $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
 
-    // a little hacky to prevent deletion of images and other inline elements via the backspace key. 
+    // a little hacky to prevent deletion of images and other inline elements via the backspace key.
     scribe.el.addEventListener('keydown', function(event) {
       if (event.keyCode === 8) {
         // is the previous immediate child of editor an inline item?
         var sel = new scribe.api.Selection();
         var prev = $(sel.selection.anchorNode).closest('.editor>*').prev();
-        if (prev.hasClass('inline') 
-          && sel.selection.anchorOffset === 0 
+        if (prev.hasClass('inline')
+          && sel.selection.anchorOffset === 0
           && sel.selection.isCollapsed) {
           event.preventDefault();
         }
@@ -358,7 +361,7 @@ define('onion-editor',[
     scribe.use(scribePluginFormatterPlainTextConvertNewLinesToHtml());
 
     this.setChangeHandler = function(func) {
-      scribe.on('content-changed', func); 
+      scribe.on('content-changed', func);
     };
 
     this.setContent = function(content) {
@@ -379,7 +382,7 @@ define('onion-editor',[
 
     this.scribe = scribe;
     return this;
-  } 
+  }
 
   return OnionEditor;
 
