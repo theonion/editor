@@ -54,7 +54,8 @@ module.exports = function(grunt) {
       options: {
         base: [
           'public',
-          'build'
+          'build',
+          'bower_components'
         ],
         port: 51175,
         hostname: '0.0.0.0',
@@ -80,5 +81,5 @@ module.exports = function(grunt) {
 
   grunt.registerTask('serve', ['requirejs', 'less', 'uglify', 'connect:livereload']);
 
-  
+
 };

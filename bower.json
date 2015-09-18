@@ -26,6 +26,8 @@
     "src"
   ],
   "dependencies": {
+    "bulbs-public-embed-instagram": "https://github.com/theonion/bulbs-public-embed-instagram.git#~0.0.4",
+    "jquery": "~2.1.4"
   },
   "devDependencies": {
     "jasmine-jquery": "~2.0.5",
@@ -45,6 +47,6 @@
     "jquery": "1.11.1"
   },
   "resolutions": {
-    "jquery": "1.11.1"
+    "jquery": "~2.1.4"
   }
 }
