@@ -6752,10 +6752,9 @@ define('scribe-plugin-link-ui',[],function () {
           $input = $('.link-tools input', editorEl),
           placeHolder = '#replaceme';
       var $results = $('.search-results', $linkTools);
-      var $filters = $('.filters', $linkTools);
 
       // this provides a way to externally udpate the results element. 
-      var searchHandler = config.searchHandler || function(term, resultsElement, filtersElement) { };
+      var searchHandler = config.searchHandler || function(term, resultsElement) { };
 
       linkPromptCommand.nodeName = 'A';
 
@@ -6775,13 +6774,6 @@ define('scribe-plugin-link-ui',[],function () {
       });
 
       $('.ok', $linkTools).click(confirmInput);
-
-      $filters.click(function(e) {
-        var buttonElement = $(e.target).closest('button');
-        if (buttonElement.length === 1) {
-            buttonElement.toggleClass('active');
-        }
-      });
 
       $results.click(function(e) {
         var linkElement = $(e.target).closest('a');
@@ -6817,7 +6809,7 @@ define('scribe-plugin-link-ui',[],function () {
         var v = $input.val();
         if (isSearchTerm(v)) {
           clearTimeout(searchTimeout);
-          searchTimeout = setTimeout(searchHandler, 200, v, $results, $filters);
+          searchTimeout = setTimeout(searchHandler, 200, v, $results);
           $results.show();
         }
         else {
@@ -10689,7 +10681,7 @@ define('link-formatter',[
    * http://www.avclub.com/some-article ==> /some-article
    */
 
-  
+  'use strict';
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
 
@@ -10766,7 +10758,7 @@ define('link-formatter',[
 
 define('only-trailing-brs',[],function () {
 
-  
+  'use strict';
 
   // For single-line mode: Firefox needs a BR at the end to work.
   // However, we don't want multiple BRs since this is a single-line input.
@@ -10785,7 +10777,7 @@ define('only-trailing-brs',[],function () {
 
 define('paste-strip-newlines',[],function () {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10799,7 +10791,7 @@ define('paste-strip-newlines',[],function () {
 
 define('paste-strip-nbsps',[],function () {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10816,7 +10808,7 @@ define('paste-strip-nbsps',[],function () {
 
 define('paste-from-word',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10888,7 +10880,7 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
 });
 define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10944,7 +10936,7 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
 
 define('remove-a-styles',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10978,7 +10970,7 @@ define('remove-a-styles',['scribe-common/src/element'], function (scribeElement)
 
 define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -11083,7 +11075,7 @@ define('our-ensure-selectable-containers',[
    * the config.
    */
 
-  
+  'use strict';
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
@@ -11164,7 +11156,7 @@ define('enforce-p-elements',[
    * that we do not end up in a pristine state.
    */
 
-  
+  'use strict';
 
   /**
    * Wrap consecutive inline elements and text nodes in a P element.
@@ -11320,7 +11312,7 @@ define('onion-editor',[
   enforcePElements
 ) {
 
-  
+  'use strict';
 
   var defaults = {
     multiline: true,
