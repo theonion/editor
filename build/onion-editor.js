@@ -10681,7 +10681,7 @@ define('link-formatter',[
    * http://www.avclub.com/some-article ==> /some-article
    */
 
-  
+  'use strict';
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
 
@@ -10758,7 +10758,7 @@ define('link-formatter',[
 
 define('only-trailing-brs',[],function () {
 
-  
+  'use strict';
 
   // For single-line mode: Firefox needs a BR at the end to work.
   // However, we don't want multiple BRs since this is a single-line input.
@@ -10777,7 +10777,7 @@ define('only-trailing-brs',[],function () {
 
 define('paste-strip-newlines',[],function () {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10791,7 +10791,7 @@ define('paste-strip-newlines',[],function () {
 
 define('paste-strip-nbsps',[],function () {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10808,7 +10808,7 @@ define('paste-strip-nbsps',[],function () {
 
 define('paste-from-word',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10880,7 +10880,7 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
 });
 define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10936,7 +10936,7 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
 
 define('remove-a-styles',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -10970,7 +10970,7 @@ define('remove-a-styles',['scribe-common/src/element'], function (scribeElement)
 
 define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeElement) {
 
-  
+  'use strict';
 
   return function () {
     return function (scribe) {
@@ -11075,7 +11075,7 @@ define('our-ensure-selectable-containers',[
    * the config.
    */
 
-  
+  'use strict';
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
@@ -11156,7 +11156,7 @@ define('enforce-p-elements',[
    * that we do not end up in a pristine state.
    */
 
-  
+  'use strict';
 
   /**
    * Wrap consecutive inline elements and text nodes in a P element.
@@ -11312,7 +11312,7 @@ define('onion-editor',[
   enforcePElements
 ) {
 
-  
+  'use strict';
 
   var defaults = {
     multiline: true,
@@ -11464,8 +11464,8 @@ define('onion-editor',[
 
     // Strike
     if (options.formatting.indexOf('strike') !== -1) {
-      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
-      tags.s = {'id': true};
+      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // strike
+      tags.strike = {'id': true};
     }
 
     // Underline
