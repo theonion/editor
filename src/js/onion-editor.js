@@ -1,3 +1,4 @@
+alert('strike');
 define('onion-editor',[
   'scribe',
   'scribe-plugin-blockquote-command',
@@ -68,7 +69,8 @@ define('onion-editor',[
 
   var defaults = {
     multiline: true,
-    formatting: ['link', 'bold', 'italic', 'blockquote', 'heading', 'list', 'underline'],
+    // MPARENT WAS HERE
+    formatting: ['link', 'bold', 'italic', 'strike', 'blockquote', 'heading', 'list', 'underline'],
     link: {
       domain: 'avclub.com'
     },
@@ -171,6 +173,19 @@ define('onion-editor',[
       }
     };
     scribe.commandPatches['italic'] = italicCommand;
+
+    var strikeCommand = new scribe.api.CommandPatch('strike');
+    strikeCommand.execute = function (value) {
+      if (this.selection === undefined) {
+        document.execCommand(this.commandName, false, value || null);
+      } else {
+        scribe.transactionManager.run(function () {
+          document.execCommand(this.commandName, false, value || null);
+        }.bind(this));
+      }
+    };
+    scribe.commandPatches['strike'] = strikeCommand;
+    alert('strike');
 
     var underlineCommand = new scribe.api.CommandPatch('underline');
     underlineCommand.execute = function (value) {
