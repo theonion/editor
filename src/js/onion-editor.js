@@ -1,4 +1,3 @@
-alert('strike');
 define('onion-editor',[
   'scribe',
   'scribe-plugin-blockquote-command',
@@ -185,7 +184,6 @@ define('onion-editor',[
       }
     };
     scribe.commandPatches['strike'] = strikeCommand;
-    alert('strike');
 
     var underlineCommand = new scribe.api.CommandPatch('underline');
     underlineCommand.execute = function (value) {
@@ -231,8 +229,8 @@ define('onion-editor',[
 
     // Strike
     if (options.formatting.indexOf('strike') !== -1) {
-      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // s
-      tags.s = {'id': true};
+      keyCommands.strikeThrough = function (event) { return event.altKey && event.shiftKey && event.keyCode === 83; }; // strike
+      tags.strike = {'id': true};
     }
 
     // Underline
