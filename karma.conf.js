@@ -120,11 +120,12 @@ module.exports = function(config) {
     config.browsers = Object.keys(customLaunchers);
     config.singleRun = true;
     config.reporters.push('saucelabs');
-  } else {
-    //config.preprocessors = {
-    //  'src/js/onion-editor.js': 'coverage',
-    //  'src/js/*/*.js': 'coverage'
-    //};
-    //config.reporters.push('coverage');
+  }
+  else {
+    config.preprocessors = {
+      'src/js/onion-editor.js': 'coverage',
+      'src/js/*/*.js': 'coverage'
+    };
+    config.reporters.push('coverage');
   }
 };
