@@ -31,6 +31,7 @@ module.exports = function(config) {
       'karma-jasmine',
       'karma-chrome-launcher',
       'karma-safari-launcher',
+      'karma-firefox-launcher',
       'karma-requirejs',
       'karma-sauce-launcher'
     ],
@@ -97,7 +98,7 @@ module.exports = function(config) {
 
     // start these browsers
     // available browser launchers: https://npmjs.org/browse/keyword/karma-launcher
-    browsers: ['Chrome', 'Safari'],
+    browsers: ['Chrome', 'Safari', 'Firefox'],
 
 
     // Continuous Integration mode
@@ -119,7 +120,8 @@ module.exports = function(config) {
     config.browsers = Object.keys(customLaunchers);
     config.singleRun = true;
     config.reporters.push('saucelabs');
-  } else {
+  }
+  else {
     config.preprocessors = {
       'src/js/onion-editor.js': 'coverage',
       'src/js/*/*.js': 'coverage'

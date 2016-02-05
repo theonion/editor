@@ -29,7 +29,8 @@ define('onion-editor',[
   'scribe-plugin-anchor',
   // scribe core
   'our-ensure-selectable-containers',
-  'enforce-p-elements'
+  'enforce-p-elements',
+  'filter-for-export',
 ], function (
   Scribe,
   scribePluginBlockquoteCommand,
