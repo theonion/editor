@@ -31,7 +31,7 @@ require.config({
     'paste-from-word': './formatters/paste-from-word',
     'remove-a-styles': './formatters/remove-a-styles',
     'strip-bold-in-headings': './formatters/strip-bold-in-headings',
-    'filter-for-export': ',/formatters/filter-for-export'
+    'filter-for-export': './formatters/filter-for-export'
   },
   name: "../../bower_components/almond/almond",
   wrap: {
