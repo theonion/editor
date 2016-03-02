@@ -11342,7 +11342,8 @@ define('onion-editor',[
   scribePluginAnchor,
   // scribe core
   ourEnsureSelectableContainers,
-  enforcePElements
+  enforcePElements,
+  filterForExport
 ) {
 
   'use strict';
@@ -11583,6 +11584,9 @@ define('onion-editor',[
         );
       }, 3000);
     }
+
+    // Per-Element Export Filtering
+    scribe.use(filterForExport());
 
 
     /* This is necessary for a few dumb reasons. Scribe's transaction manager doesn't work when there
