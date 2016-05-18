@@ -1,0 +1,482 @@
+/* embed modal */
+.embed-modal textarea {
+  width: 100%;
+  max-width: 100%;
+  font-family: courier, fixed;
+  font-size: 14px;
+  padding: 5px;
+  background-color: #F1F1F1;
+}
+.embed-modal .embed-caption {
+  width: 100%;
+}
+.embed-modal textarea {
+  height: 200px;
+  resize: vertical;
+}
+/* embed toolbar */
+.embed-tools {
+  visibility: hidden;
+  height: 100%;
+  position: absolute;
+  margin: 12px 0;
+  padding: 0px 0px;
+  width: 100%;
+  opacity: 0;
+  transition: opacity 0.1s ease-in-out visibility 0.1s;
+  transition-delay: 1s;
+}
+.embed-tools.active {
+  visibility: visible;
+  display: block;
+  opacity: 1;
+  transition-delay: 0s;
+}
+.embed-tools .embed-button span.fa {
+  color: #333;
+}
+.embed-tools .embed-button span.btn-label {
+  font-size: 12px;
+}
+.embed-tools button {
+  width: 100%;
+  display: block;
+}
+.embed-tools.active .embed-button:hover {
+  transition: opacity .2 linear;
+  opacity: 1;
+}
+.embed-tools .embed-button {
+  display: block;
+  opacity: .5;
+}
+.embed-tools.embed-underlay {
+  border-top: 1px #111 solid;
+  border-bottom: 1px #111 solid;
+  background-color: red;
+  z-index: 10;
+  width: auto;
+}
+.embed-tools.embed-overlay {
+  z-index: 300;
+  width: 100px;
+}
+.embed-tools .embed-button {
+  right: -20px;
+  width: 30px;
+  line-height: 24px;
+  border: 1px #ccc solid;
+  font-size: 16px;
+  border-radius: 15px;
+  background-color: #eee;
+}
+.embed-tools .insert-above {
+  top: -24px;
+  position: absolute;
+  right: 0px;
+}
+.embed-tools .insert-below {
+  bottom: -24px;
+  position: absolute;
+  right: 0px;
+}
+.embed-fly-out {
+  width: auto;
+  height: auto;
+  position: absolute;
+  top: 200px;
+  z-index: 400;
+  border: 1px #ccc solid;
+  background-color: #ddd;
+  padding: 5px;
+  left: 100px;
+  text-align: center;
+}
+.embed-fly-out button:hover {
+  background-color: #333;
+  color: #fff;
+}
+.embed-fly-out button {
+  float: left;
+  border: 1px #ddd solid;
+  width: 80px;
+  height: 80px;
+  background-color: #eee;
+  margin: 3px;
+}
+.embed-fly-out button span.fa {
+  font-size: 24px;
+  display: block;
+}
+.embed-fly-out button span.btn-label {
+  font-size: 12px;
+}
+
+div[data-picture] img {
+  display: block;
+  width: 100%;
+}
+div[data-picture] {
+  overflow: hidden;
+  width: auto;
+  max-width: 100%;
+}
+div[data-picture] > div {
+  position: relative;
+  padding-bottom: 56.25%;
+  /* default is 16x9 */
+  height: 0;
+  overflow: hidden;
+}
+div[data-picture] img {
+  position: absolute;
+  top: 0;
+  left: 0;
+  height: 100%;
+}
+
+.link-tools {
+  padding: 4px;
+  position: fixed;
+  z-index: 100;
+  top: 20px;
+  right: 20px;
+  width: auto;
+  display: none;
+  border-radius: 4px;
+  white-space: nowrap;
+  width: 400px;
+  background-color: #ddd;
+  border: 1px #ccc solid;
+}
+.link-tools .link-view-dialog {
+  width: auto;
+}
+.link-tools .link-edit-dialog {
+  width: 410px;
+}
+.toolbar.link-tools button {
+  display: inline-block;
+  width: auto;
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.link-tools input {
+  padding: 8px;
+  margin-top: 4px;
+  width: 280px;
+  border-radius: 4px;
+  background-color: #f1f1f1;
+  border: 1px #ddd solid;
+}
+.link-search-results ul {
+  margin-bottom: 0px;
+}
+
+* {
+  margin: 0px;
+  padding: 0px;
+}
+a {
+  cursor: pointer;
+}
+input,
+textarea,
+button,
+.editor:focus {
+  outline: none;
+}
+::selection {
+  background-color: #FEFEBA;
+}
+body {
+  font-family: Helvetica, Arial, sans-serif;
+  background-color: #eee;
+}
+.editor-wrapper {
+  margin: 0px auto;
+  position: relative;
+}
+.editorPlaceholder,
+.editor {
+  position: relative;
+  z-index: 20;
+  width: auto;
+  margin: 0px;
+  padding: 30px 100px;
+}
+.editorPlaceholder {
+  z-index: 10;
+  position: absolute;
+}
+.editorPlaceholder p,
+.editor blockquote,
+.editor ul,
+.editor ol,
+.editor p,
+.editor > div {
+  min-height: 24px;
+  margin: 24px 0;
+}
+.editor blockquote {
+  clear: both;
+  padding: 0 30px;
+  border-left: 5px solid #ddd;
+}
+.editor ul,
+.editor ol {
+  clear: both;
+  padding-left: 45px;
+  padding-right: 45px;
+}
+.editor li {
+  margin-bottom: 4px;
+}
+.editor h3 {
+  margin-top: 16px;
+  margin-bottom: 12px;
+  font-size: 32px;
+  font-weight: normal;
+}
+.editor h4 {
+  margin-top: 16px;
+  font-size: 24px;
+  font-weight: normal;
+}
+#content-wrapper {
+  margin-top: 100px;
+  margin: 20px auto 0;
+  border: 1px #ddd solid;
+}
+#content-wrapper.container {
+  max-width: 820px;
+  min-width: 400px;
+  width: auto;
+  padding: 0px;
+}
+.label {
+  opacity: .7;
+}
+/* status bar */
+#statusbar {
+  display: none;
+  position: fixed;
+  bottom: 0;
+  right: 0;
+  width: 100px;
+  height: 40px;
+  background-color: #ddd;
+  border-top: 1px #ccc solid;
+  border-left: 1px #ccc solid;
+  border-top-left-radius: 4px;
+  padding: 4px;
+  font-size: 12px;
+  color: #333;
+}
+#statusbar button {
+  display: inline-block;
+  width: auto;
+  text-align: center;
+}
+
+/* Menus + Buttons */
+.document-tools,
+embed-tools {
+  font-family: Helvetica, Arial, sans-serif;
+}
+.inline-active .inline-tools.toolbar {
+  display: block;
+}
+.toolbar button {
+  background-clip: padding-box;
+  background-color: transparent;
+  border-radius: 2px;
+  border: 1px transparent solid;
+  color: #4A4A4A;
+  cursor: pointer;
+  display: block;
+  font-size: 14px;
+  height: auto;
+  line-height: 25px;
+  padding: 4px 8px;
+  text-align: left;
+  width: auto;
+}
+.toolbar button [class^="icon-"],
+.toolbar button [class*=" icon-"] {
+  display: inline-block;
+  text-align: center;
+  width: 15px;
+}
+.toolbar button.text {
+  font-size: 11px;
+  padding: 0 4px;
+  width: auto;
+}
+.toolbar button.active {
+  background-color: #ddd;
+  display: block;
+}
+.toolbar .hiddenbydefault {
+  display: none;
+}
+.toolbar .btn-label {
+  display: none;
+}
+.toolbar .link-tools .toggle-filter {
+  background: #c8c8c8;
+  display: inline-block;
+  margin: 9px 5px;
+}
+.toolbar .link-tools .toggle-filter.active {
+  background: #969696;
+}
+.toolbar:hover {
+  background-color: #ccc;
+}
+.toolbar:hover .hiddenbydefault {
+  display: block;
+}
+.toolbar:hover .btn-label {
+  display: inline;
+  font-size: 12px;
+  line-height: 16px;
+  margin-left: 10px;
+}
+.toolbar:hover.active {
+  background-color: #333;
+  color: #f1f1f1;
+  display: block;
+}
+.toolbar-contents {
+  -khtml-user-select: none;
+  -moz-user-select: moz-none;
+  -ms-user-select: none;
+  -webkit-touch-callout: none;
+  -webkit-user-select: none;
+  background-color: #EEEEEE;
+  border-radius: 4px;
+  border: 1px #DADADA solid;
+  font-size: 12px;
+  padding: 4px 4px;
+  position: absolute;
+  user-select: none;
+  white-space: nowrap;
+  width: auto;
+}
+.heading-icon {
+  font-family: Georgia;
+  font-size: 15px;
+  text-align: center;
+  width: 20px;
+}
+.heading-icon sub {
+  bottom: 0px;
+}
+.document-tools {
+  z-index: 1;
+}
+.document-tools .toolbar-contents {
+  display: block;
+  left: 50%;
+  margin-left: -480px;
+  opacity: 1;
+  position: fixed;
+  text-align: center;
+  top: 100px;
+}
+.document-tools .toolbar-contents .primary {
+  background-color: #EEEEEE;
+  color: #4A4A4A;
+  float: right;
+  font-size: 14px;
+  position: relative;
+  z-index: 100;
+}
+/* Inline Tools */
+.inline-tools {
+  display: none;
+  position: absolute;
+  z-index: 100;
+  /* Customize toolbar for various object types */
+  /* size and crop are handled inside of the embed modal, for simplictiy */
+}
+.inline-tools button {
+  display: inline-block;
+  width: auto;
+}
+.inline-tools span.inline-attribute {
+  font-size: 11px;
+  text-transform: uppercase;
+}
+.inline-tools .edit {
+  background-color: #333;
+  border-radius: 4px;
+  bottom: 10px;
+  color: white;
+  left: 10px;
+  position: absolute;
+}
+.inline-tools .edit button:hover {
+  background-color: #444;
+}
+.inline-tools .remove {
+  background-color: #930900;
+  border-radius: 4px;
+  bottom: 10px;
+  position: absolute;
+  right: 10px;
+}
+.inline-tools .remove button:hover {
+  background-color: #C70A00;
+}
+.inline-tools .edit button,
+.inline-tools .remove button {
+  color: white;
+}
+.inline-tools .toolbar-contents {
+  left: 50%;
+  margin-left: -96px;
+  margin-top: 20px;
+}
+.inline-tools [data-type="hr"] .edit,
+.inline-tools [data-type="hr"] .size,
+.inline-tools [data-type="hr"] .crop {
+  display: none;
+}
+.inline-tools [data-type="embed"] .size,
+.inline-tools [data-type="embed"] .crop {
+  display: none;
+}
+span.highlight {
+  background-color: #EC7000;
+}
+.find-replace-dialog {
+  background-color: #EEEEEE;
+  border-radius: 4px;
+  border: 1px #DADADA solid;
+  box-shadow: 1px 3px 5px 0px rgba(50, 50, 50, 0.3);
+  height: 56px;
+  left: 50%;
+  margin-left: -410px;
+  margin: 0 auto;
+  padding: 10px 20px;
+  position: fixed;
+  top: 0px;
+  width: 820px;
+  z-index: 10000;
+}
+.find-replace-dialog > .btn {
+  margin-top: -3px;
+}
+.find-replace-dialog input {
+  font-size: 14px;
+  padding: 3px;
+  width: 200px;
+}
+.editor span.searchResult {
+  background-color: #FFBB03;
+}
+.editor [contenteditable=false] span.searchResult {
+  background-color: transparent;
+}
