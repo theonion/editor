@@ -4064,10 +4064,6 @@ define('api/command-patch',[],function () {
     };
 
     CommandPatch.prototype.queryState = function () {
-      // Hack for firefox, which does not like this.
-      if (this.commandName === 'insertOrderedList' || this.commandName == 'insertUnorderedList') {
-        return false;
-      }
       return document.queryCommandState(this.commandName);
     };
 
@@ -5035,8 +5031,6 @@ define('scribe-plugin-blockquote-command',[],function () {
 //# sourceMappingURL=scribe-plugin-blockquote-command.js.map;
 define('scribe-plugin-curly-quotes',[],function () {
 
-  
-
   return function () {
 
     var keys = {
@@ -5182,6 +5176,7 @@ define('scribe-plugin-curly-quotes',[],function () {
 
       // Apply a function on all text nodes in a container, mutating in place
       function mapTextNodes(container, func) {
+console.log(container)
         var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         var node = walker.firstChild();
         if (node) {
@@ -5198,7 +5193,8 @@ define('scribe-plugin-curly-quotes',[],function () {
 
 });
 
-//# sourceMappingURL=scribe-plugin-curly-quotes.js.map;
+//# sourceMappingURL=scribe-plugin-curly-quotes.js.map
+;
 define('scribe-plugin-formatter-plain-text-convert-new-lines-to-html',[],function () {
 
   
@@ -9919,13 +9915,13 @@ define('scribe-plugin-toolbar',[],function () {
 
   return function (toolbarNode) {
     return function (scribe) {
-      var buttons = toolbarNode.querySelectorAll('[data-command-name]');
+      var buttons = toolbarNode.querySelectorAll('button');
 
       Array.prototype.forEach.call(buttons, function (button) {
-        button.addEventListener('click', function () {
-          // Look for a predefined command.
-          var command = scribe.getCommand(button.dataset.commandName);
+        // Look for a predefined command, otherwise define one now.
+        var command = scribe.getCommand(button.dataset.commandName);
 
+        button.addEventListener('click', function () {
           /**
            * Focus will have been taken away from the Scribe instance when
            * clicking on a button (Chrome will return the focus automatically
@@ -9934,7 +9930,7 @@ define('scribe-plugin-toolbar',[],function () {
            * the command, because it might rely on selection data.
            */
           scribe.el.focus();
-          command.execute(button.dataset.commandValue);
+          command.execute();
           /**
            * Chrome has a bit of magic to re-focus the `contenteditable` when a
            * command is executed.
@@ -9946,31 +9942,27 @@ define('scribe-plugin-toolbar',[],function () {
         // Unfortunately, there is no `selectionchange` event.
         scribe.el.addEventListener('keyup', updateUi);
         scribe.el.addEventListener('mouseup', updateUi);
-
-        scribe.el.addEventListener('focus', updateUi);
-        scribe.el.addEventListener('blur', updateUi);
-
         // We also want to update the UI whenever the content changes. This
         // could be when one of the toolbar buttons is actioned.
+        // TODO: The `input` event does not trigger when we manipulate the content
+        // ourselves. Maybe commands should fire events when they are activated.
         scribe.on('content-changed', updateUi);
 
         function updateUi() {
-          // Look for a predefined command.
-          var command = scribe.getCommand(button.dataset.commandName);
-
           var selection = new scribe.api.Selection();
 
-          // TODO: Do we need to check for the selection?
-          if (selection.range && command.queryState(button.dataset.commandValue)) {
-            button.classList.add('active');
-          } else {
-            button.classList.remove('active');
-          }
+          if (selection.range) {
+            if (command.queryEnabled()) {
+              button.removeAttribute('disabled');
 
-          if (selection.range && command.queryEnabled()) {
-            button.removeAttribute('disabled');
-          } else {
-            button.setAttribute('disabled', 'disabled');
+              if (command.queryState()) {
+                button.classList.add('active');
+              } else {
+                button.classList.remove('active');
+              }
+            } else {
+              button.setAttribute('disabled', 'disabled');
+            }
           }
         }
       });
@@ -9978,7 +9970,6 @@ define('scribe-plugin-toolbar',[],function () {
   };
 
 });
-
 
 //# sourceMappingURL=scribe-plugin-toolbar.js.map;
 
@@ -10681,7 +10672,7 @@ define('link-formatter',[
    * http://www.avclub.com/some-article ==> /some-article
    */
 
-  'use strict';
+  
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
 
@@ -10758,7 +10749,7 @@ define('link-formatter',[
 
 define('only-trailing-brs',[],function () {
 
-  'use strict';
+  
 
   // For single-line mode: Firefox needs a BR at the end to work.
   // However, we don't want multiple BRs since this is a single-line input.
@@ -10777,7 +10768,7 @@ define('only-trailing-brs',[],function () {
 
 define('paste-strip-newlines',[],function () {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10791,7 +10782,7 @@ define('paste-strip-newlines',[],function () {
 
 define('paste-strip-nbsps',[],function () {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10808,7 +10799,7 @@ define('paste-strip-nbsps',[],function () {
 
 define('paste-from-word',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10880,7 +10871,7 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
 });
 define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10936,7 +10927,7 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
 
 define('remove-a-styles',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10970,7 +10961,7 @@ define('remove-a-styles',['scribe-common/src/element'], function (scribeElement)
 
 define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -11075,7 +11066,7 @@ define('our-ensure-selectable-containers',[
    * the config.
    */
 
-  'use strict';
+  
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
@@ -11156,7 +11147,7 @@ define('enforce-p-elements',[
    * that we do not end up in a pristine state.
    */
 
-  'use strict';
+  
 
   /**
    * Wrap consecutive inline elements and text nodes in a P element.
@@ -11346,7 +11337,7 @@ define('onion-editor',[
   filterForExport
 ) {
 
-  'use strict';
+  
 
   var defaults = {
     multiline: true,
@@ -11515,7 +11506,7 @@ define('onion-editor',[
     if (options.multiline && options.formatting.indexOf('link') !== -1) {
       keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
-      scribe.use(scribePluginIntelligentUnlinkCommand());
+      scribe(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
       tags.a = { href:true, target:true, id:true};
@@ -11621,11 +11612,9 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
-    if (options.multiline) {
+    if (!options.deferToolbarSetup && (options.multiline || options.singleLineUseToolbar)) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
-    }
-    else {
+    } else {
       $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
 
@@ -11663,6 +11652,10 @@ define('onion-editor',[
 
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
       return contents;
+    };
+
+    this.setupToolbar = function (element, options) {
+      scribe.use(scribePluginToolbar(element, options));
     };
 
     this.scribe = scribe;

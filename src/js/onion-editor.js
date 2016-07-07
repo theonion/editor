@@ -235,7 +235,7 @@ define('onion-editor',[
     if (options.multiline && options.formatting.indexOf('link') !== -1) {
       keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
-      scribe.use(scribePluginIntelligentUnlinkCommand());
+      scribe(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
       tags.a = { href:true, target:true, id:true};
@@ -341,11 +341,9 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
-    if (options.multiline) {
+    if (!options.deferToolbarSetup && (options.multiline || options.singleLineUseToolbar)) {
       scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
-    }
-    else {
+    } else {
       $('.document-tools .toolbar-contents', element.parentNode).hide();
     }
 
@@ -383,6 +381,10 @@ define('onion-editor',[
 
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
       return contents;
+    };
+
+    this.setupToolbar = function (element, options) {
+      scribe.use(scribePluginToolbar(element, options));
     };
 
     this.scribe = scribe;
