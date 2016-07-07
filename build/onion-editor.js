@@ -4064,6 +4064,10 @@ define('api/command-patch',[],function () {
     };
 
     CommandPatch.prototype.queryState = function () {
+      // Hack for firefox, which does not like this.
+      if (this.commandName === 'insertOrderedList' || this.commandName == 'insertUnorderedList') {
+        return false;
+      }
       return document.queryCommandState(this.commandName);
     };
 
@@ -9915,13 +9919,13 @@ define('scribe-plugin-toolbar',[],function () {
 
   return function (toolbarNode) {
     return function (scribe) {
-      var buttons = toolbarNode.querySelectorAll('button');
+      var buttons = toolbarNode.querySelectorAll('[data-command-name]');
 
       Array.prototype.forEach.call(buttons, function (button) {
-        // Look for a predefined command, otherwise define one now.
-        var command = scribe.getCommand(button.dataset.commandName);
-
         button.addEventListener('click', function () {
+          // Look for a predefined command.
+          var command = scribe.getCommand(button.dataset.commandName);
+
           /**
            * Focus will have been taken away from the Scribe instance when
            * clicking on a button (Chrome will return the focus automatically
@@ -9930,7 +9934,7 @@ define('scribe-plugin-toolbar',[],function () {
            * the command, because it might rely on selection data.
            */
           scribe.el.focus();
-          command.execute();
+          command.execute(button.dataset.commandValue);
           /**
            * Chrome has a bit of magic to re-focus the `contenteditable` when a
            * command is executed.
@@ -9942,27 +9946,31 @@ define('scribe-plugin-toolbar',[],function () {
         // Unfortunately, there is no `selectionchange` event.
         scribe.el.addEventListener('keyup', updateUi);
         scribe.el.addEventListener('mouseup', updateUi);
+
+        scribe.el.addEventListener('focus', updateUi);
+        scribe.el.addEventListener('blur', updateUi);
+
         // We also want to update the UI whenever the content changes. This
         // could be when one of the toolbar buttons is actioned.
-        // TODO: The `input` event does not trigger when we manipulate the content
-        // ourselves. Maybe commands should fire events when they are activated.
         scribe.on('content-changed', updateUi);
 
         function updateUi() {
+          // Look for a predefined command.
+          var command = scribe.getCommand(button.dataset.commandName);
+
           var selection = new scribe.api.Selection();
 
-          if (selection.range) {
-            if (command.queryEnabled()) {
-              button.removeAttribute('disabled');
+          // TODO: Do we need to check for the selection?
+          if (selection.range && command.queryState(button.dataset.commandValue)) {
+            button.classList.add('active');
+          } else {
+            button.classList.remove('active');
+          }
 
-              if (command.queryState()) {
-                button.classList.add('active');
-              } else {
-                button.classList.remove('active');
-              }
-            } else {
-              button.setAttribute('disabled', 'disabled');
-            }
+          if (selection.range && command.queryEnabled()) {
+            button.removeAttribute('disabled');
+          } else {
+            button.setAttribute('disabled', 'disabled');
           }
         }
       });
@@ -9970,6 +9978,7 @@ define('scribe-plugin-toolbar',[],function () {
   };
 
 });
+
 
 //# sourceMappingURL=scribe-plugin-toolbar.js.map;
 
