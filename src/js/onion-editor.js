@@ -341,10 +341,21 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    if (!options.deferToolbarSetup && (options.multiline || options.singleLineUseToolbar)) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
+    // garbage toolbar setup
+    if (options.multiline || options.singleLineUseToolbar) {
+      var toolbarSelector = '.document-tools .toolbar-contents';
+      var $toolbar = $(scribe.el.parentNode).find(toolbarSelector);
+
+      scribe.use(scribePluginToolbar($toolbar[0], options));
+
+      $toolbar.hide();
+      $(scribe.el)
+        .on('focus', function () {
+          $toolbar.show();
+          $(toolbarSelector).not($toolbar).hide();
+        });
     } else {
-      $('.document-tools .toolbar-contents', element.parentNode).hide();
+      $(element.parentNode).find('.document-tools .toolbar-contents').hide();
     }
 
     // a little hacky to prevent deletion of images and other inline elements via the backspace key.
@@ -383,9 +394,7 @@ define('onion-editor',[
       return contents;
     };
 
-    this.setupToolbar = function (element, options) {
-      scribe.use(scribePluginToolbar(element, options));
-    };
+    this.setupToolbar = setupToolbar;
 
     this.scribe = scribe;
     return this;
