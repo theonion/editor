@@ -235,7 +235,7 @@ define('onion-editor',[
     if (options.multiline && options.formatting.indexOf('link') !== -1) {
       keyCommands.linkUI = function (event) { return event.metaKey && ! event.shiftKey && event.keyCode === 75; }; // k
       keyCommands.unlink = function (event) { return event.metaKey && event.shiftKey && event.keyCode === 75; }; // k,
-      scribe(scribePluginIntelligentUnlinkCommand());
+      scribe.use(scribePluginIntelligentUnlinkCommand());
       scribe.use(scribePluginLinkUI(options.link));
       scribe.use(linkFormatter(options.link));
       tags.a = { href:true, target:true, id:true};
