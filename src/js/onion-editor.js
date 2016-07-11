@@ -394,8 +394,6 @@ define('onion-editor',[
       return contents;
     };
 
-    this.setupToolbar = setupToolbar;
-
     this.scribe = scribe;
     return this;
   }
