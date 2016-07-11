@@ -11622,7 +11622,7 @@ define('onion-editor',[
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
     // garbage toolbar setup
-    if (options.multiline || options.singleLineUseToolbar) {
+    if (options.multiline) {
       var toolbarSelector = '.document-tools .toolbar-contents';
       var $toolbar = $(scribe.el.parentNode).find(toolbarSelector);
 
@@ -11673,8 +11673,6 @@ define('onion-editor',[
       // Allow any plugins to clean up markup. Main use case is for embed plugin, atm.
       return contents;
     };
-
-    this.setupToolbar = setupToolbar;
 
     this.scribe = scribe;
     return this;
