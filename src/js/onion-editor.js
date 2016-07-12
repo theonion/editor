@@ -341,7 +341,10 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    // garbage toolbar setup
+    //  TODO: toolbar setup to allow mutliple toolbars on the page, scribe version
+    //  we're using (theonion/scribe#649a8af55c36ad2536a66a99d4abab57e418ba33,
+    //  scribe-plugin-toolbar#0.2.0) doesn't have support for toolbar sharing or
+    //  mutiple toolbars
     if (options.multiline) {
       var toolbarSelector = '.document-tools .toolbar-contents';
       var $toolbar = $(scribe.el.parentNode).find(toolbarSelector);
