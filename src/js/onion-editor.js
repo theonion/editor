@@ -341,12 +341,24 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
+    //  TODO: toolbar setup to allow mutliple toolbars on the page, scribe version
+    //  we're using (theonion/scribe#649a8af55c36ad2536a66a99d4abab57e418ba33,
+    //  scribe-plugin-toolbar#0.2.0) doesn't have support for toolbar sharing or
+    //  mutiple toolbars
     if (options.multiline) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
-    }
-    else {
-      $('.document-tools .toolbar-contents', element.parentNode).hide();
+      var toolbarSelector = '.document-tools .toolbar-contents';
+      var $toolbar = $(scribe.el.parentNode).find(toolbarSelector);
+
+      scribe.use(scribePluginToolbar($toolbar[0], options));
+
+      $toolbar.hide();
+      $(scribe.el)
+        .on('focus', function () {
+          $toolbar.show();
+          $(toolbarSelector).not($toolbar).hide();
+        });
+    } else {
+      $(element.parentNode).find('.document-tools .toolbar-contents').hide();
     }
 
     // a little hacky to prevent deletion of images and other inline elements via the backspace key.

@@ -5035,8 +5035,6 @@ define('scribe-plugin-blockquote-command',[],function () {
 //# sourceMappingURL=scribe-plugin-blockquote-command.js.map;
 define('scribe-plugin-curly-quotes',[],function () {
 
-  
-
   return function () {
 
     var keys = {
@@ -5182,6 +5180,7 @@ define('scribe-plugin-curly-quotes',[],function () {
 
       // Apply a function on all text nodes in a container, mutating in place
       function mapTextNodes(container, func) {
+console.log(container)
         var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         var node = walker.firstChild();
         if (node) {
@@ -5198,7 +5197,8 @@ define('scribe-plugin-curly-quotes',[],function () {
 
 });
 
-//# sourceMappingURL=scribe-plugin-curly-quotes.js.map;
+//# sourceMappingURL=scribe-plugin-curly-quotes.js.map
+;
 define('scribe-plugin-formatter-plain-text-convert-new-lines-to-html',[],function () {
 
   
@@ -10681,7 +10681,7 @@ define('link-formatter',[
    * http://www.avclub.com/some-article ==> /some-article
    */
 
-  'use strict';
+  
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
 
@@ -10758,7 +10758,7 @@ define('link-formatter',[
 
 define('only-trailing-brs',[],function () {
 
-  'use strict';
+  
 
   // For single-line mode: Firefox needs a BR at the end to work.
   // However, we don't want multiple BRs since this is a single-line input.
@@ -10777,7 +10777,7 @@ define('only-trailing-brs',[],function () {
 
 define('paste-strip-newlines',[],function () {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10791,7 +10791,7 @@ define('paste-strip-newlines',[],function () {
 
 define('paste-strip-nbsps',[],function () {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10808,7 +10808,7 @@ define('paste-strip-nbsps',[],function () {
 
 define('paste-from-word',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10880,7 +10880,7 @@ define('paste-from-word',['scribe-common/src/element'], function (scribeElement)
 });
 define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10936,7 +10936,7 @@ define('paste-sanitize',['scribe-common/src/element'], function (scribeElement) 
 
 define('remove-a-styles',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -10970,7 +10970,7 @@ define('remove-a-styles',['scribe-common/src/element'], function (scribeElement)
 
 define('strip-bold-in-headings',['scribe-common/src/element'], function (scribeElement) {
 
-  'use strict';
+  
 
   return function () {
     return function (scribe) {
@@ -11075,7 +11075,7 @@ define('our-ensure-selectable-containers',[
    * the config.
    */
 
-  'use strict';
+  
 
   // http://www.w3.org/TR/html-markup/syntax.html#syntax-elements
   var html5VoidElements = ['AREA', 'BASE', 'BR', 'COL', 'COMMAND', 'EMBED', 'HR', 'IMG', 'INPUT', 'KEYGEN', 'LINK', 'META', 'PARAM', 'SOURCE', 'TRACK', 'WBR'];
@@ -11156,7 +11156,7 @@ define('enforce-p-elements',[
    * that we do not end up in a pristine state.
    */
 
-  'use strict';
+  
 
   /**
    * Wrap consecutive inline elements and text nodes in a P element.
@@ -11346,7 +11346,7 @@ define('onion-editor',[
   filterForExport
 ) {
 
-  'use strict';
+  
 
   var defaults = {
     multiline: true,
@@ -11621,12 +11621,24 @@ define('onion-editor',[
     scribe.use(scribePluginCurlyQuotes());
     scribe.use(scribePluginKeyboardShortcuts(Object.freeze(keyCommands)));
 
-    //TODO: kill this existing toolbar & replace w/ Medium style selection toolbar
+    //  TODO: toolbar setup to allow mutliple toolbars on the page, scribe version
+    //  we're using (theonion/scribe#649a8af55c36ad2536a66a99d4abab57e418ba33,
+    //  scribe-plugin-toolbar#0.2.0) doesn't have support for toolbar sharing or
+    //  mutiple toolbars
     if (options.multiline) {
-      scribe.use(scribePluginToolbar($('.document-tools .toolbar-contents', element.parentNode)[0]));
-    }
-    else {
-      $('.document-tools .toolbar-contents', element.parentNode).hide();
+      var toolbarSelector = '.document-tools .toolbar-contents';
+      var $toolbar = $(scribe.el.parentNode).find(toolbarSelector);
+
+      scribe.use(scribePluginToolbar($toolbar[0], options));
+
+      $toolbar.hide();
+      $(scribe.el)
+        .on('focus', function () {
+          $toolbar.show();
+          $(toolbarSelector).not($toolbar).hide();
+        });
+    } else {
+      $(element.parentNode).find('.document-tools .toolbar-contents').hide();
     }
 
     // a little hacky to prevent deletion of images and other inline elements via the backspace key.
