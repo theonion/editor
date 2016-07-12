@@ -1,3 +1,7 @@
+# 1.0.2
+
+Added support for multiple editors/toolbars on a page.
+
 # 0.2.46
 
 Adds a filter-for-export filter:
@@ -30,4 +34,3 @@ And the exported html will look like this:
 
 In this way a custom element my render demonstrative content inside the editor,
 but not have that content saved to our database.
-
