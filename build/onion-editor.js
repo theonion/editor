@@ -5035,6 +5035,8 @@ define('scribe-plugin-blockquote-command',[],function () {
 //# sourceMappingURL=scribe-plugin-blockquote-command.js.map;
 define('scribe-plugin-curly-quotes',[],function () {
 
+  
+
   return function () {
 
     var keys = {
@@ -5180,7 +5182,6 @@ define('scribe-plugin-curly-quotes',[],function () {
 
       // Apply a function on all text nodes in a container, mutating in place
       function mapTextNodes(container, func) {
-console.log(container)
         var walker = document.createTreeWalker(container, NodeFilter.SHOW_TEXT);
         var node = walker.firstChild();
         if (node) {
@@ -5197,8 +5198,7 @@ console.log(container)
 
 });
 
-//# sourceMappingURL=scribe-plugin-curly-quotes.js.map
-;
+//# sourceMappingURL=scribe-plugin-curly-quotes.js.map;
 define('scribe-plugin-formatter-plain-text-convert-new-lines-to-html',[],function () {
 
   
