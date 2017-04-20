@@ -224,8 +224,6 @@ define([],function () {
 
                 setTimeout(function() {
                   showToolbar();
-                  var newTop = $(activeElement).offset().top;
-                  window.scrollBy(0, newTop - top);
                 }, 0);
               });
             }
